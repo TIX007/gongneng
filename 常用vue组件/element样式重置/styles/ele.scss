@@ -1,0 +1,9 @@
+/* element styles */
+.el-menu--popup {
+  .el-menu-item {
+    color: rgba(255, 255, 255, .75);
+    &:hover {
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+}
