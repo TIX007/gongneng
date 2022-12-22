@@ -2017,3 +2017,54 @@ methods:{
 </script>
 ```
 
+### element table左右 fixed同时固定列，列表错位情况修复及监听表格滚动条事件
+
+样式
+
+```scss
+// 调整横向滚动条出现错位情况
+.table-fixed {
+	.el-table__fixed {
+		top: -10px;
+		.el-table__fixed-header-wrapper {
+			top: 10px; 
+			z-index: 10;
+		}
+	}
+	.el-table__fixed-right {
+		top: -10px;
+		.el-table__fixed-header-wrapper {
+			top: 10px;
+			z-index: 10;
+		}
+	}
+}
+```
+
+要写在获取表格数据后
+
+```js
+let _self = this
+// 注意 this 指向 方法内部this 指向的是该节点 而不是vue实例
+const selectWrapper = document.querySelector('.el-table__body-wrapper')
+			// 监听滚动事件
+			selectWrapper.addEventListener('scroll', function() {
+				let sign = 0
+				const scrollDistance = this.scrollHeight - this.scrollTop - this.clientHeight
+				// 滚动到底部返回true
+				_self.isBottom = scrollDistance <= sign;
+			})
+```
+
+class类
+
+```html
+<el-table v-loading="loading"
+		:class="isBottom ? 'table-fixed' : ''" 
+        ref="muTable" 
+        :data="markList"
+         @selection-change="handleSelectionChange">
+        ...
+</table>
+```
+
