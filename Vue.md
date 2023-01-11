@@ -2068,3 +2068,23 @@ class类
 </table>
 ```
 
+## 计算距离下次生日还有多少天
+
+注意这里借助 [moment](https://link.juejin.cn?target=http%3A%2F%2Fmomentjs.cn%2F) 实现
+
+```ts
+    getBirthdayFun(){
+       // 首先要获取到今年的生日
+      let birthdayTime = moment().format('YYYY-') + '12-19'
+      // 通过时间戳  去判断当前的时间戳是否大于今年生日的时间戳 
+      if (moment().unix() >= moment(birthdayTime).unix()) {
+        // 如果大于的话，那么就在今年的生日上再添加一年，已达到获取下次生日的时间
+        birthdayTime = moment(birthdayTime).add(1, 'y').format('YYYY-MM-DD')
+      }
+      // 这个直接通过计算 （下次生日的时间戳 - 当前日期的时间戳) / (60 * 60 * 24) 最后求出来的就是 XX 天
+      return parseInt(
+        (moment(birthdayTime).unix() - moment().unix()) / (60 * 60 * 24)
+      )
+    }
+```
+
