@@ -129,3 +129,13 @@ BiRel(SystemAA, SystemE, "Uses")
 Rel(SystemAA, SystemC, "Sends e-mails", "SMTP")
 Rel(SystemC, customerA, "Sends e-mails to")
 ```
+
+### 单选
+
+* [x] v1.0 基于 vue2.6+，支持所有主流的浏览器，实现表格的一切实用的功能
+
+### 跳转
+
+[`tableList`](JS.md)
+
+  | [E](JS.md)
