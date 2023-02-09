@@ -68,3 +68,20 @@ this.form.setFieldsValue({ title: data.title, type: data.type, address: data.add
 </script>
 ```
 
+**在app中加**
+
+```js
+// 组件文件引入中文语言包
+import zhCN from 'antd/es/locale/zh_CN'; 
+// 进行国际化配置
+import { ConfigProvider } from 'antd';
+
+...
+
+{/* 用ConfigProvider组件将组件包裹起来即可*/}
+<ConfigProvider locale={ zhCN }>
+...
+</ConfigProvider>
+
+```
+

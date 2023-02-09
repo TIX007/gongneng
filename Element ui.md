@@ -209,3 +209,103 @@ flexColumnWidth(str, tableData, flag = "max") {
 
 ```
 
+### 日期时间选择器校验
+
+```js
+rules: {
+	dateRange: [
+          {
+            type: 'array',
+            required: true,
+            message: '请选择日期区间',
+            fields: {
+              // tpye类型试情况而定,所以如果返回的是date就改成date,如果返回的是string就改成string
+              0: { type: 'date', required: true, message: '请选择开始日期' },
+              1: { type: 'date', required: true, message: '请选择结束日期' },
+            },
+          },
+        ],
+ }
+
+```
+
+### 表格懒加载
+
+```html
+<el-table
+      ref="tableRef"
+      v-if="refreshTable"
+      v-loading="loading"
+      style="width: 100%"
+      :data="relatedPartyList"
+      row-key="relationBizId"
+      lazy
+      :load="getChildrens"
+      @selection-change="handleSelectionChange"
+      :fit="true"
+      :default-expand-all="isExpandAll"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      border
+    >
+```
+
+//存储节点
+
+   `maps: new Map()`,
+
+```js
+//树表格懒加载方法（根据一级列表查n级）
+    getChildrens(tree, treeNode, resolve) {
+      this.queryParamsTree.entityBizId = tree.entityBizId;
+      this.queryParamsTree.bizId = tree.bizId;
+      this.queryParamsTree.relationBizId = tree.relationBizId;
+      listSubItem(this.queryParamsTree).then((res) => {
+        // console.log(res,'shu');
+        // console.log(resolve(res.list),'resolve');
+        resolve(res.list);
+      });
+      this.maps.set(tree.id, {
+        tree,
+        treeNode,
+        resolve,
+      }); //把查询到的节点信息储存到map中
+    },
+```
+
+### 解决el-tree或树形列表懒加载数据改变后不能实时刷新问题
+
+封装一个refreshLoadTree方法，每次增删改查操作后都调用一下，以此达到实时刷新目的
+
+```js
+refreshLoadTree(lazyTreeNodeMap, maps, parentId) {
+      if (maps.get(parentId)) {
+        const { tree, treeNode, resolve } = maps.get(parentId)
+        this.$set(lazyTreeNodeMap, parentId, [])
+        if (tree) { // 重新执行父节点加载子级操作
+          this.getChildrens(tree, treeNode, resolve)
+          if (tree.parentId) { // 若存在爷爷结点，则执行爷爷节点加载子级操作，防止最后一个子节点被删除后父节点不显示删除按钮
+            const a = maps.get(tree.parentId)
+            this.getChildrens(a.tree, a.treeNode, a.resolve)
+          }
+        }
+      }
+    }
+```
+
+这里传入的三个参数分别是：组件懒加载数据的节点，data return的map，以及**被操作的节点的\**父节点\****
+
+```js
+this.refreshLoadTree(this.$refs.table.store.states.lazyTreeNodeMap, this.maps, this.temp.parentId)
+```
+
+**方法调用时首先从map中取出刚刚加载过子级的节点的数据，再用this.$set清空对应父节点的数据，实现了视图的实时刷新，再通过取出的数据重新加载父节点数据。**
+
+记得对组件加上命名
+
+```html
+<el-table
+      ref="table"
+    >
+```
+
+[(35条消息) 解决el-tree或树形列表懒加载数据改变后不能实时刷新问题_明天赚到五百万的博客-CSDN博客_删除tree数据后刷新不及时](https://blog.csdn.net/m0_58191077/article/details/121426275)

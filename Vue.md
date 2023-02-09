@@ -2068,7 +2068,7 @@ class类
 </table>
 ```
 
-## 计算距离下次生日还有多少天
+### 计算距离下次生日还有多少天
 
 注意这里借助 [moment](https://link.juejin.cn?target=http%3A%2F%2Fmomentjs.cn%2F) 实现
 
@@ -2086,5 +2086,51 @@ class类
         (moment(birthdayTime).unix() - moment().unix()) / (60 * 60 * 24)
       )
     }
+```
+
+### 不同项目嵌套（iframe的使用）
+
+```html
+<iframe id="iframe" :src="iframeSrc" style="height: calc(100% - 50px)" width="100%" frameborder="0"></iframe>
+```
+
+###### **获取iframe里面的内容**
+
+iframe.contentWindow, 获取iframe的window对象
+iframe.contentDocument, 获取iframe的document对象
+
+```js
+const _iframe = document.getElementById('iframe').contentWindow
+```
+
+###### CDM跨域
+
+如果你设置的iframe的域名和你top window的域名完全不同，可以使用CDM(cross document messaging)进行跨域消息的传递。
+
+**发送消息**: 使用postmessage方法 
+
+postMessage(message, targetOrigin)
+
+message: 传递给iframe的内容, 通常是string,最好不要传object对象，需要传对象时，使用JSON.stringfy转换。
+
+targetOrigin: 接受你传递消息的域名，可以设置绝对路径，也可以设置""或者"/"。 表示任意域名都行，"/"表示只能传递给同域域名。
+
+```js
+_iframe.postMessage(JSON.stringify(_obj), '*')
+```
+
+**接受消息**: 监听message事件
+
+当targetOrigin接受到message消息之后,会触发message事件。 message提供的event对象上有3个重要的属性，data,origin,source.
+
+```js
+window.addEventListener('message', function (event) {
+      console.log(event)
+      if (event.origin === window.callBackUrl.iframeSrc) {
+        _this.childData = event.data
+        console.log(event.data)
+        _this.saveForm()
+      }
+    })
 ```
 
