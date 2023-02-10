@@ -272,6 +272,68 @@ rules: {
     },
 ```
 
+### el-table-tree树形时固定表头滚动底部表格错位问题
+
+先写出调整错位的css
+
+```scss
+// 调整横向滚动条错位问题
+.table-fixed{
+    .el-table__fixed {
+        top: -7px;
+        .el-table__fixed-header-wrapper {
+            top: 10px;
+            z-index: 10;
+        }
+    }
+    .el-table__fixed-right {
+        top: -7px;
+        .el-table__fixed-header-wrapper {
+            top: 10px;
+            z-index: 10;
+        }
+    }
+}
+```
+
+根据监听滚动条的位置来动态添加*table-fixed*的样式
+
+设置*isBottom*来判断滚动条是否在底部
+
+```vue
+<template>
+	<el-table
+		:class="isBottom ? 'table-fixed' : '' " >
+    </el-table>
+</template>
+
+<script>
+    export default {
+        data(){
+            return{
+                isBottom:undefined;
+            }
+        },
+        // 表格滚动事件
+        scrollBars(){
+            let _self = this;
+            // 注意 this 指向  方法内部this指向的是该节点 而不是vue实例
+            const selectWrapper = document.querySelector('.el-table__body-wrapper');
+            // 监视滚动事件
+            selectWrapper.addEventListener('scroll',function () {
+                let sign = 0;
+                const scrollDistance = this.scrollHeight - this.scrollTop - this.clientHeight;
+                // 滚动到底部返回true
+                _self.isBottom = scrollDistance <= sign;
+            })
+        }
+    }
+</script>
+	
+```
+
+
+
 ### 解决el-tree或树形列表懒加载数据改变后不能实时刷新问题
 
 封装一个refreshLoadTree方法，每次增删改查操作后都调用一下，以此达到实时刷新目的
