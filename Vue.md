@@ -2134,3 +2134,73 @@ window.addEventListener('message', function (event) {
     })
 ```
 
+### 判断是否为手机端
+
+方法
+
+```js
+_isMobile() {
+      let flag = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i)
+      return flag;
+    },
+```
+
+调用
+
+```js
+if (this._isMobile()) {
+      alert("手机端");
+    } else {
+      alert("pc端");
+    }
+```
+
+### 使用VUE监听网页关闭并执行退出操作
+
+先在mounted()中创建页面关闭的监听
+
+```js
+window.addEventListener("beforeunload", (e) => this.beforeunloadHandler(e));
+window.addEventListener("unload", (e) => this.unloadHandler(e));
+```
+
+第一个监听的是页面关闭之前，对应的方法可以写做
+
+```js
+// 页面关闭之前，触发提示框
+    beforeunloadHandler(e) {
+      if (e) {
+        e = e || window.event;
+        console.log(e);
+        if (e) {
+          e.returnValue = "关闭提示";
+        }
+        return "关闭提示";
+      }
+    },
+
+```
+
+第二个监听的是页面关闭的时候，这里面可以调用退出登录的方法
+
+```js
+// 页面关闭
+    async unloadHandler(e) {
+      // 退出登录
+      await this.handleGoLog();
+    },
+
+```
+
+最后记得在destroyed()中，注销监听
+
+```js
+destroyed() {
+    window.removeEventListener("beforeunload", (e) =>
+      this.beforeunloadHandler(e)
+    );
+    window.removeEventListener("unload", (e) => this.unloadHandler(e));
+  },
+
+```
+
