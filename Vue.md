@@ -2204,3 +2204,36 @@ destroyed() {
 
 ```
 
+### Vue.config.js 的基本内容
+
+如果使用了某些长期不会改变的库，像 element-ui ，打包完成有 600 多 KB ，包含在默认 vendor 中显然不合适，每次用户都要加载这么大的文件体验不好，所以要单独打包：
+
+
+
+```js
+config.optimization.splitChunks({
+               chunks: 'all',
+       cacheGroups: {
+               // cacheGroups 下可以可以配置多个组，每个组根据 test 设置条件，符合 test 条件的模块
+          commons: {
+                         name: 'chunk-commons',
+            test: resolve('src/components'),
+             minChunks: 3, //  被至少用三次以上打包分离
+                          priority: 5, // 优先级
+                          reuseExistingChunk: true // 表示是否使用已有的 chunk，如果为 true 则表示如果当前的 chunk 包含的模块已经被抽取出去了，那么将不会重新生成新的。
+          },
+                     node_vendors: {
+                          name: 'chunk-libs',
+            chunks: 'initial', // 只打包初始时依赖的第三方
+                          test: /[\\/]node_modules[\\/]/,
+            priority: 10
+          },
+                    vantUI: {
+                         name: 'chunk-vantUI', // 单独将 vantUI 拆包
+                         priority: 20, // 数字大权重到，满足多个 cacheGroups 的条件时候分到权重高的
+                         test: /[\\/]node_modules[\\/]_?vant(.*)/
+          }
+              }
+      })
+```
+
