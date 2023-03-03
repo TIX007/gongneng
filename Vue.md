@@ -2237,3 +2237,39 @@ config.optimization.splitChunks({
       })
 ```
 
+### 兼容安卓的文件流下载方式
+
+```js
+downloadFile() {
+  axios({
+    url: 'your_server_url',
+    method: 'GET',
+    responseType: 'blob',
+  }).then(response => {
+    const reader = new FileReader();
+    reader.readAsDataURL(response.data);
+    reader.onload = () => {
+      const url = reader.result;
+      if (navigator.userAgent.indexOf('Android') > -1) {
+        // 如果用户使用安卓设备，则将数据URI转换为Blob对象并下载文件
+        const downloader = document.createElement('a');
+        downloader.href = window.URL.createObjectURL(new Blob([response.data]));
+        downloader.download = 'filename.extension';
+        downloader.style.display = 'none';
+        document.body.appendChild(downloader);
+        downloader.click();
+        document.body.removeChild(downloader);
+      } else {
+        // 对于其他设备，创建Blob URL并下载文件
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'filename.extension');
+        document.body.appendChild(link);
+        link.click();
+      }
+    };
+  });
+}
+
+```
+

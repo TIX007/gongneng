@@ -440,67 +440,89 @@ export {renderSize, convertEnum, copy, convertDict}
 ```js
 // 通用下载方法
 export function download(url, params, filename) {
-  // downloadLoadingInstance = Loading.service({ text: "正在下载数据，请稍候", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
   return service.post(url, params, {
     transformRequest: [(params) => { return tansParams(params) }],
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     responseType: 'blob'
-  }).then(async (data) => {
-    console.log(data, 'data');
-    console.log(data.headers["content-disposition"], 'headers["content-disposition"]');
-    let disposition = data.headers["content-disposition"]
-    console.log(disposition.split('.')[1], 'disposition.split]');
+  }).then(response => {
+    const reader = new FileReader();
+    reader.readAsDataURL(response.data);
+    let disposition = response.headers["content-disposition"]
     let suffix = disposition.split('.')[1]
     let fileTypeMime = ''
     switch (suffix) {
-      case 'doc': fileTypeMime = 'application/msword;charset=utf-8'; break;
-      case 'docx': fileTypeMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8'; break;
-      case 'jpg': case 'jpeg': fileTypeMime = 'image/jpeg;charset=utf-8;charset=utf-8'; break;
-      case 'svg': fileTypeMime = 'image/svg+xml;charset=utf-8'; break;
-      case 'txt': fileTypeMime = 'text/plain;charset=utf-8'; break;
-      case 'pdf': fileTypeMime = 'application/pdf;charset=utf-8'; break;
-      case 'ppt': fileTypeMime = 'application/vnd.ms-powerpoint;charset=utf-8'; break;
-      case 'pptx': fileTypeMime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation;charset=utf-8'; break;
-      case 'xls': fileTypeMime = 'application/vnd.ms-excel;charset=utf-8'; break;
-      case 'xlsx': fileTypeMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8'; break;
-      case 'zip': fileTypeMime = 'application/zip;charset=utf-8'; break;
-      case '7z': fileTypeMime = 'application/x-7z-compressed;charset=utf-8'; break;
+      case 'doc':
+        fileTypeMime = 'application/msword;charset=utf-8';
+        break;
+      case 'docx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8';
+        break;
+      case 'jpg':
+      case 'jpeg':
+        fileTypeMime = 'image/jpeg;charset=utf-8;charset=utf-8';
+        break;
+      case 'svg':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case 'txt':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case 'pdf':
+        fileTypeMime = 'application/pdf;charset=utf-8';
+        break;
+      case 'ppt':
+        fileTypeMime = 'application/vnd.ms-powerpoint;charset=utf-8';
+        break;
+      case 'pptx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation;charset=utf-8';
+        break;
+      case 'xls':
+        fileTypeMime = 'application/vnd.ms-excel;charset=utf-8';
+        break;
+      case 'xlsx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8';
+        break;
+      case 'zip':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case '7z':
+        showToast("暂不支持该类型文件下载");
+        return;
     }
-    console.log(fileTypeMime, 'fileTypeMime');
-    const isLogin = await blobValidate(data.data);
-    console.log(isLogin, 'isLogin');
-    if (isLogin) {
-      // const blob = new Blob([data.data])
-      // const blob = new Blob([data.data], { type: 'dataapplication/json;charset=utf-8' })
-      const blob = new Blob([data.data], { type: fileTypeMime })
-      console.log(blob, 'dataapplication/json;charset=utf-8')
-      let blobUrl = window.URL.createObjectURL(blob)
-      // window.open(blobUrl)
-      var anchor = document.createElement("a");
-      if ('download' in anchor) {
-        anchor.style.visibility = "hidden";
-        anchor.href = blobUrl;
-        anchor.download = filename;
-        document.body.appendChild(anchor);
+    reader.onload = () => {
+      // const url = reader.result;
+      if (navigator.userAgent.indexOf('Android') > -1) {
+        const downloader = document.createElement('a');
+        const blob = new Blob([response.data], { type: fileTypeMime })
+        let blobUrl = window.URL.createObjectURL(blob)
+        // downloader.href = window.URL.createObjectURL(new Blob([response.data], { type: fileTypeMime }));
+        window.location.href = blobUrl
+        showToast(blobUrl);
+        // downloader.href = 'http://storage.xuetangx.com/public_assets/xuetangx/PDF/PlayerAPI_v1.0.6.pdf';
+        // downloader.download = filename;
+        // downloader.style.display = 'none';
+        // document.body.appendChild(downloader);
+        // downloader.click();
+        // document.body.removeChild(downloader);
+        downloads(blobUrl, filename)
+        showToast('安卓');
+      } else {
+        const blob = new Blob([response.data], { type: fileTypeMime })
+        let blobUrl = window.URL.createObjectURL(blob)
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        console.log(blobUrl);
+        // link.setAttribute('download', filename);
+        document.body.appendChild(link);
         var evt = document.createEvent("MouseEvents");
         evt.initEvent("click", true, true);
-        anchor.dispatchEvent(evt);
-        document.body.removeChild(anchor);
-      } else if (navigator.msSaveBlob) {
-        navigator.msSaveBlob(blob, filename);
-      } else {
-        location.href = blobUrl;
+        link.dispatchEvent(evt);
+        document.body.removeChild(link);
+        showToast('苹果');
       }
-    } else {
-      const resText = await data.data.text();
-      const rspObj = JSON.parse(resText);
-      const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default']
-      showToast(errMsg);
-    }
-  }).catch((r) => {
-    console.error(r)
-    showToast('下载文件出现错误，请联系管理员！');
-  })
+    };
+  });
 }
 ```
 
