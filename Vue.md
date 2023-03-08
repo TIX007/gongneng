@@ -2273,3 +2273,89 @@ downloadFile() {
 
 ```
 
+=======>						
+
+```js
+export function download(url, params, filename) {
+  return service.post(url, params, {
+    transformRequest: [(params) => { return tansParams(params) }],
+    headers: { 'Accept': 'text/htmlapplication/xhtml+xml.application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;=0.8application/signed-exchange;v=b3;g=0.9' },
+    responseType: 'blob'
+  }).then(response => {
+    const reader = new FileReader();
+    reader.readAsDataURL(response.data);
+    let disposition = response.headers["content-disposition"]
+    let suffix = disposition.split('.')[1]
+    let fileTypeMime = ''
+    switch (suffix) {
+      case 'doc':
+        fileTypeMime = 'application/msword;charset=utf-8';
+        break;
+      case 'docx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document;charset=utf-8';
+        break;
+      case 'jpg':
+      case 'jpeg':
+        fileTypeMime = 'image/jpeg;charset=utf-8;charset=utf-8';
+        break;
+      case 'svg':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case 'txt':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case 'pdf':
+        fileTypeMime = 'application/pdf;charset=utf-8';
+        break;
+      case 'ppt':
+        fileTypeMime = 'application/vnd.ms-powerpoint;charset=utf-8';
+        break;
+      case 'pptx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation;charset=utf-8';
+        break;
+      case 'xls':
+        fileTypeMime = 'application/vnd.ms-excel;charset=utf-8';
+        break;
+      case 'xlsx':
+        fileTypeMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8';
+        break;
+      case 'zip':
+        showToast("暂不支持该类型文件下载");
+        return;
+      case '7z':
+        showToast("暂不支持该类型文件下载");
+        return;
+    }
+    reader.onload = () => {
+      if (navigator.userAgent.indexOf('Android') > -1) {
+        const blob = new Blob([response.data], { type: fileTypeMime })
+        // const blob = new Blob([response.data])
+        let blobUrl = window.URL.createObjectURL(blob)
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        console.log(blobUrl);
+        document.body.appendChild(link);
+        var evt = document.createEvent("MouseEvents");
+        evt.initEvent("click", true, true);
+        link.dispatchEvent(evt);
+        document.body.removeChild(link);
+        // downloads(blobUrl, filename)
+      } else {
+        const blob = new Blob([response.data], { type: fileTypeMime })
+        let blobUrl = window.URL.createObjectURL(blob)
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        console.log(blobUrl);
+        document.body.appendChild(link);
+        var evt = document.createEvent("MouseEvents");
+        evt.initEvent("click", true, true);
+        link.dispatchEvent(evt);
+        document.body.removeChild(link);
+      }
+    };
+  });
+}
+```
+
