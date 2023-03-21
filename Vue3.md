@@ -16,6 +16,23 @@
                     :rules="[{ required: true, message: '请写入审批意见' }]" />
             </van-form>
         </van-cell-group>
+        <van-cell-group inset class="icon" style="margin-top:10px;">
+            <van-icon name="underway" color="#22C1EB " />
+            <span class="title">审批记录</span>
+        </van-cell-group>
+        <van-steps direction="vertical" :active-icon="state.recordLength == 0 ? 'success' : 'underway'"
+            :active="state.recordLength">
+            <!-- item.result 控制审批卡片的颜色 -->
+            <van-step v-for="item in state.recordList" :style="{ 'color': item.result == 1 ? 'black' : '' }">
+                <h3>【任务】{{ item.name }}</h3>
+                <p>审批人：{{ item.assigneeUser.nickName }}</p>
+                <!-- <p>创建时间：{{ item.createTime }}</p> -->
+                <p v-if="item.endTime">审批时间：{{ item.endTime }}</p>
+                <p v-if="item.comment">
+                    <van-tag :type="getTimelineItemType(item)">{{ item.comment }}</van-tag>
+                </p>
+            </van-step>
+        </van-steps>
         <van-row justify="space-around" style="margin-top:25px; padding: 10px; background-color:#FFFFFF;">
             <van-button plain type="danger" @click="noSubmit">审批否决</van-button>
             <van-button type="primary" @click="onSubmit">审批通过</van-button>
@@ -111,6 +128,37 @@ const onSubmit = (values) => {
     }
 };
 </script>
+
+<style scoped>
+.icon {
+    padding: .1875rem .1875rem;
+    background-color: #F6F6F6;
+}
+
+>>>.van-cell__title span{
+    width: 1.125rem;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.van-ellipsis {
+    padding-left: 2.60rem;
+    color: #1989fa;
+}
+
+.title {
+    font-family: PingFangSC-Medium, PingFang SC;
+    font-weight: 500;
+    color: #464646;
+    line-height: .4125rem;
+}
+
+.van-row--justify-space-around {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+</style>
 ```
 
 ### 反向代理
