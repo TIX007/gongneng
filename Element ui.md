@@ -371,3 +371,367 @@ this.refreshLoadTree(this.$refs.table.store.states.lazyTreeNodeMap, this.maps, t
 ```
 
 [(35条消息) 解决el-tree或树形列表懒加载数据改变后不能实时刷新问题_明天赚到五百万的博客-CSDN博客_删除tree数据后刷新不及时](https://blog.csdn.net/m0_58191077/article/details/121426275)
+
+### element的Tree组件二次封装（含右键菜单）
+
+**`Tree.vue`文件**
+
+```vue
+<template>
+  <div class="tree-container">
+    <!-- 点击node节点,才加载子节点的时候，需设置 :lazy="true" -->
+
+    <el-tree
+      class="_tree"
+      :data="treeList"
+      :props="defaultProps"
+      @node-expand="handleNodeExpand"
+      @node-click="handleNodeClick"
+      @node-contextmenu="handleRightClick"
+      :default-expanded-keys="expandedKeys"
+      :node-key="nodeKey"
+      :highlight-current="true"
+      ref="comnTree"
+      :style="
+        `max-height:${treeHeight}px;max-width:${treeWidth}px;overflow-x:auto;}`
+      "
+    >
+      <span slot-scope="{ node, data }">
+        <i :class="data.icon ? data.icon : 'el-icon-folder-opened'"></i>
+        <span class="tree_label">{{ node.label }}</span>
+        <span
+          class="tree_label"
+          v-if="data.total || data.total === 0"
+          title="数量"
+          >({{ data.total }})</span
+        >
+      </span>
+    </el-tree>
+
+    <el-popover
+      placement="right"
+      width="150"
+      trigger="manual"
+      v-model="Flag"
+      class="popover-intree"
+      id="contextMenu"
+      :style="`left:${clientX}px;top:${clientY}PX`"
+    >
+      <ul>
+        <li
+          v-for="item in contextMenu"
+          :key="item.id"
+          class="context-menu"
+          @click="handleClickMenu(item)"
+        >
+          {{ item.name }}
+        </li>
+      </ul>
+    </el-popover>
+  </div>
+</template>
+<script>
+import { getViewHeight } from "@/utils/getViewHeight.js";
+export default {
+  data() {
+    return {
+      clientX: "",
+      clientY: ""
+    };
+  },
+  props: {
+    treeList: {
+      type: Array
+    },
+    defaultProps: {
+      type: Object,
+      default() {
+        return {
+          children: "children",
+          label: "name"
+          // isLeaf: "leaf" //需要加叶子节点的页面
+        };
+      }
+    },
+    nodeKey: {
+      // 每个树节点用来作为唯一标识的属性，整棵树应该是唯一的
+      type: String,
+      default() {
+        return "menuId";
+      }
+    },
+    contextMenu: {
+      type: Array,
+      default() {
+        let menu = [
+          {
+            name: "添加",
+            value: "add"
+          },
+          {
+            name: "修改",
+            value: "edit"
+          },
+          {
+            name: "删除",
+            value: "del"
+          }
+        ]; //树的右键菜单
+        return menu;
+      }
+    },
+    rightFlag: {
+      type: Boolean,
+      default() {
+        return false;
+      }
+    },
+    treeHeight: {
+      type: Number,
+      default() {
+        return getViewHeight() - 200;
+      }
+    },
+    treeWidth: {
+      type: Number,
+      default() {
+        return 237;
+      }
+    },
+    expandedKeys: {
+      // 默认展开的树节点，ids
+      type: Array,
+      default() {
+        return [];
+      }
+    }
+  },
+  computed: {
+    Flag: {
+      get() {
+        return this.rightFlag;
+      },
+      set(val) {
+        this.$emit("updateTreeMenu", val);
+      }
+    }
+  },
+   mounted() {
+    // 监听，除了点击自己，点击其他地方将自身隐藏
+    window.addEventListener("click", this.handleClickDoc);
+  },
+  methods: {
+    handleNodeClick(data) {
+      this.$emit("updateTreeMenu", false); // 点击树节点的时候，将右键菜单隐藏。
+      this.$emit("handleNodeClick", data);
+    },
+    handleRightClick(event, obj, node, self) {
+      //  确定 右键菜单出现的位置
+      this.clientX = event.offsetX;
+      this.clientY = event.clientY; // 该高度需据自己的布局调整
+      this.setCurrTreeNode(obj[this.nodeKey]);
+      this.$emit("handleRightClick", obj);
+    },
+    handleClickMenu(item) {
+      this.$emit("handleClickTreeMenu", item);
+    },
+    handleNodeExpand(data, node, self) {
+      this.$emit("handleNodeExpand", data);
+    },
+    // 选中树节点的方法，修改的时候，id未变，子组件监听不到父组件传入的id变化时，可采取父组件主动获取子组件的该方法来实现修改后主动选择该树节点。
+    setCurrTreeNode(id) {
+      this.$refs["comnTree"].setCurrentKey(id);
+    },
+    handleClickDoc(e) {
+      const contextMenu = document.getElementById("contextMenu");
+      if (!contextMenu) return;
+      !contextMenu.contains(e.target) && this.$emit("updateTreeMenu", false);
+    }
+  },
+  beforeDestroy() {
+    window.removeEventListener("click", this.handleClickDoc);
+  }
+  }
+};
+</script>
+<style lang="scss">
+.tree-container {
+  position: relative;
+
+  ._tree {
+    color: #444;
+    padding-left: 6px;
+    overflow: auto;
+    //更改tree的默认图标颜色，图标是否为叶子节点都会出现
+    // span {
+    //   color: $icon_color;
+    // }
+    // .is-leaf {
+    //   color: transparent;
+    // }
+    .tree_label {
+      font-size: 14px;
+      letter-spacing: 1px;
+      margin-left: 5px;
+    }
+  }
+
+  .popover-intree {
+    position: absolute;
+    ul {
+      padding: 3px;
+    }
+    li {
+      list-style: none;
+    }
+  }
+  .context-menu {
+    letter-spacing: 1px;
+    color: #222;
+    cursor: pointer;
+    height: 30px;
+    line-height: 30px;
+    color: #000;
+    text-align: center;
+    &:hover {
+      border-radius: 2px;
+      background: #648fdb;
+      color: #fff;
+    }
+  }
+  .el-popover {
+    padding: 2px;
+    min-width: 20px;
+    border: 1px solid #ebeef5;
+    border-radius: 0;
+    box-shadow: 4px 4px 4px -4px rgb(121, 118, 118);
+  }
+  //重写tree的 active样式
+  .el-tree--highlight-current
+    .el-tree-node.is-current
+    > .el-tree-node__content {
+    background: $active_color;
+    color: #fff;
+  }
+  //重写tree样式，才可使横向 超出显示滚动条
+  .el-tree > .el-tree-node {
+    min-width: 100%;
+    display: inline-block;
+  }
+}
+</style>
+
+```
+
+###### 二、在组件中引入，并使用刚刚封装的Tree组件
+
+1. **`:treeList="treeList"`** 绑定树形菜单列表
+
+2. **`:contextMenu="contextMenu"`**  右键菜单
+
+3. **`:rightFlag="rightFlag"`** 是否显示右键菜单
+
+4. **`@handleNodeClick="handleNodeClick"`**  绑定树节点被单击，触发的函数；
+
+5. **`@handleRightClick="handleRightClick"`** 绑定右键单击树节点，触发的函数
+
+6. **`@handleClickTreeMenu="handleClickTreeMenu`"** 绑定 点击右键菜单，触发的函数
+
+7. **`@updateTreeMenu="updateTreeMenu"`** 绑定更改`rightFlag`时，触发的函数
+
+   
+
+   **test.vue文件**
+
+```vue
+<template>
+  <div>
+    <my-tree
+      :treeList="treeList"
+      :rightFlag="rightFlag"
+      :defaultProps="defaultProps"
+      :nodeKey="nodeKey"
+      @handleNodeClick="handleNodeClick"
+      @handleRightClick="handleRightClick"
+      @handleClickTreeMenu="handleClickTreeMenu"
+      @updateTreeMenu="updateTreeMenu"
+    ></my-tree>
+  </div>
+</template>
+<script>
+import myTree from "@/components/Tree.vue"; // 引入刚刚定义在src/components下的Tree.vue组件
+export default {
+  components: {
+    myTree
+  },
+  data() {
+    return {
+      treeList: [
+        // 一般来源于后台
+        {
+          mid: "1",
+          mName: "qqq",
+          subs: [
+            {
+              mid: "2",
+              mName: "aaaa"
+            }
+          ]
+        }
+      ],
+      rightFlag: false, //是否显示右键菜单
+      defaultProps: {
+        // 定义展示的属性，treeList中是subs和mName,
+        children: "subs",
+        label: "mName"
+      },
+      nodeKey: "mid" // 树的唯一标志，mid,也是treeList的每一条数据的唯一标志
+    };
+  },
+  methods: {
+    updateTreeMenu(val) {
+      this.rightFlag = val;
+    },
+    handleNodeClick(data) {
+      console.log("树节点被点击：", data);
+    },
+    handleRightClick(obj) {
+      this.rightFlag = true; //显示右键菜单
+      console.log("鼠标右键单击了该节点", obj);
+    },
+    handleClickTreeMenu(item) {
+      alert(item.name);
+      this.rightFlag = false;
+    }
+  }
+};
+</script>
+```
+
+###### 三、getViewHeight的内容如下：
+
+**`getViewHeight.js`** 获取当前视口高度
+
+```javascript
+export function getViewHeight() {
+  let winHeight = 0;
+  if (window.innerHeight) {
+    winHeight = window.innerHeight;
+  } else if (document.body && document.body.clientHeight) {
+    winHeight = document.body.clientHeight;
+  }else 
+  if (document.documentElement && document.documentElement.clientHeight) {
+    winHeight = document.documentElement.clientHeight;
+  }
+  return winHeight;
+}
+```
+
+
+
+### el-tree默认选中第一个
+
+```html
+<el-tree :data="data" :props="defaultProps" node-key="id" current-node-key="121233"  @node-click="handleNodeClick"></el-tree>
+```
+
