@@ -735,3 +735,40 @@ export function getViewHeight() {
 <el-tree :data="data" :props="defaultProps" node-key="id" current-node-key="121233"  @node-click="handleNodeClick"></el-tree>
 ```
 
+### el-date-pickere带星期几
+
+```vue
+<template>
+	<el-date-picker
+	      v-model="value"
+	      type="date"
+	      format="yyyy 年 MM 月 dd 日"
+	      placeholder="选择日期"
+	      @change="handleChange(value)" />
+	      {{ value1 }}
+</template>
+<script>
+
+export default {
+data() {
+    return {
+      timeValue: '',
+      value: '',
+      value1: '',
+      	}
+      },
+      methods: {
+    //监听点击日期对应周几
+    handleChange(value) {
+      if (!value) return
+      console.log(value);
+      const getWeek = value.getDay()
+      console.log(getWeek);
+      this.value1 = weekArr[getWeek]
+    },
+    }
+      
+}
+</script>
+```
+
