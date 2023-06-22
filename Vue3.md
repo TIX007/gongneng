@@ -179,3 +179,81 @@ server: {
   },
 ```
 
+### VSC报错
+
+```js
+Virtual script not found, may missing <script lang="ts"> / "allowJs": true / jsconfig.json. volar
+```
+
+**2、出现的原因是**：
+没有在配置中添加允许JS的配置（allowJs:true）
+
+**3、如何解决？**
+在tsconfig.js里面的compilerOptions对象下添加属性：
+“allowJs”: true,
+
+**文件tsconfig.js或者jsconfig.js**
+
+```js
+"compilerOptions": {
+    "allowJs": true,
+}
+```
+
+### 自定义组件 name
+
+Vue3 中的 setup 语法糖确实是个好东西，用起来很甜，是糖没错。但是随之而来的问题就是无法自定义组件 name，而我们在使用 keep-alive 的时候，往往是需要用到 name 的，因此我们就需要一个方案来解决这个问题。
+
+
+
+**方案一：写两个 script 标签**
+
+最简单的方法就是写两个script 标签，一个用 setup 语法，一个不用 setup 语法，代码如下：
+
+```html
+<script>
+    export default {
+        name: 'demo'
+    }
+</script>
+
+<script setup>
+    // do something...
+</script>
+```
+
+这种方法简单，但确实不够优雅，对于有强迫症的来说，大概率是接受不了~
+
+
+
+**方案二：通过插件**
+
+插件名称：vite-plugin-vue-setup-extend
+
+1、安装
+
+```bash
+npm i vite-plugin-vue-setup-extend -D
+```
+
+2、配置 ( vite.config.ts )
+
+```js
+import { defineConfig } from 'vite'
+import VueSetupExtend from 'vite-plugin-vue-setup-extend'
+export default defineConfig({
+  plugins: [ VueSetupExtend() ]
+})
+```
+
+3、使用
+
+```html
+<script lang="ts" setup name="demo">
+
+</script>
+```
+
+
+
+虽然说 Vue3 会根据文
