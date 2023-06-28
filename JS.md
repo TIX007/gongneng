@@ -437,6 +437,8 @@ export {renderSize, convertEnum, copy, convertDict}
 
 ### 文件流下载预览方法支持移动端
 
+> 注意移动端文件流下载时请求方式必须是get请求否则会出现安卓端在线预览乱码现象
+
 ```js
 // 通用下载方法
 export function download(url, params, filename) {

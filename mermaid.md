@@ -139,3 +139,7 @@ Rel(SystemC, customerA, "Sends e-mails to")
 [`tableList`](JS.md)
 
   | [E](JS.md)
+
+### 拼音
+
+<ruby>拼音<rt>pīn yīn</rt></ruby>
