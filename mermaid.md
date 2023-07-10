@@ -143,3 +143,42 @@ Rel(SystemC, customerA, "Sends e-mails to")
 ### 拼音
 
 <ruby>拼音<rt>pīn yīn</rt></ruby>
+
+### HTML表格
+
+<table>
+    <thead>
+        <tr>
+            <td bgcolor=#FFFFFF>
+                <b><font size = 5 >类别</font></b>
+            </td>
+            <td bgcolor=#FFFFFF>
+                <b><font size = 5 >辞书行</font></b>
+            </td>
+            <td bgcolor=#FFFFFF>
+                <b><font size = 5 >ます形</font></b>
+            </td>
+            <td bgcolor=#FFFFFF rowspan="2">
+                <b><font size = 5 >て形</font></b>
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td  rowspan="2"><font color=#FF33CC>~い</font ></td>
+            <td bgcolor=#00FF66><font color=#FF33CC>～く　ない</font ></td>
+            <td><font color=#FF33CC>～かった</font ></td>
+            <td><font color=#FF33CC>～くなかった</font ></td>
+        </tr>
+        <tr>
+            <td>
+                <ruby>暑<rt>あつ</rt></ruby>
+                <font color=#FF33CC>い</font >
+            </td>
+            <td colspan="2" bgcolor=#00FF66>
+                <ruby>暑<rt>あつ</rt></ruby>
+                <font color=#FF33CC>くない</font >
+            </td>
+        </tr>
+    </tbody>
+</table>
