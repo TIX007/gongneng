@@ -772,3 +772,23 @@ data() {
 </script>
 ```
 
+### el-table中的文本居中
+1、整个表格和内容居中的方式：
+header-cell-style设置头部居中；
+cell-style设置单元格内容居中
+```vue
+<el-table
+    :data="tableData"
+    :header-cell-style="{'text-align':'center'}"
+    :cell-style="{'text-align':'center'}"
+    style="width: 100%">
+</el-table>
+```
+
+2、单个表格的内容居中：
+只需要在el-table-column上加上align=‘center’
+```vue
+<el-table-column label="姓名" prop="realname" align="center">
+</el-table-column>
+```
+
