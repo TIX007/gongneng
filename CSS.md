@@ -271,3 +271,8 @@ filter: grayscale(100%);
 filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
 ```
 
+### 图带查
+
+```css
+background:linear-gradient(to top right,rgba(255,249,245,.55) 0,rgba(255,249,245,.55) calc(50% - 1px),#efefef 50%,rgba(255,249,245,.55) calc(50% + 1px),rgba(255,249,245,.55)),linear-gradient(to bottom right,rgba(255,249,245,.55) 0,rgba(255,249,245,.55) calc(50% - 1px),#efefef 50%,rgba(255,249,245,.55) calc(50% + 1px),rgba(255,249,245,.55))
+```
