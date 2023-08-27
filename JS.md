@@ -532,5 +532,6 @@ export function download(url, params, filename) {
 
 ```js
 download('/doc/download', { id: row.id }, row.fileName)
+window.location.href = "/app/doc/downloadApp?id="+ row.id
 ```
 
