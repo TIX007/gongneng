@@ -792,3 +792,21 @@ cell-style设置单元格内容居中
 </el-table-column>
 ```
 
+###表格单击确认
+```vue
+<template>
+ <el-table :data="redData" stripe border height="600" highlight-current-row @row-click="rowClick"">
+  <el-table-column type="index" label="序号" width="50" />
+  <el-table-column property="date" label="客户类型" width="150"></el-table-column>
+ </el-table>
+</template>
+<script>
+export default {
+ methods: {
+  rowClick(row) {
+      this.selectedData = row
+      console.log(row);
+    },
+ }
+</script>
+```
