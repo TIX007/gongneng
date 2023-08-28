@@ -792,7 +792,7 @@ cell-style设置单元格内容居中
 </el-table-column>
 ```
 
-###表格单击确认
+### 表格单击确认
 ```vue
 <template>
  <el-table :data="redData" stripe border height="600" highlight-current-row @row-click="rowClick"">
