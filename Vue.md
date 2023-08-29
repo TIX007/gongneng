@@ -2472,3 +2472,21 @@ export function download(url, params, filename) {
 </style>
 ```
 
+### watch方法使用
+1、在vue中watch用来监听数据的变化，一旦发生变化可以执行一些其他操作 
+2、watch就是当值第一次绑定的时候，是不会执行监听函数的，只有值诞生改变才会执行。如果需要在第一次绑定的时候也执行函数，则需要用到immediate属性，比如当父组件向子组件动态传值时，子组件props首次获取到父组件传来的No认知时，也需要执行函数          
+3、handler方法：immediate表示在watch中首次绑定的时候，是否执行handler，值为TRUE则表示在watch中声明的时候，就立即执行handler方法，值为false，则和一般使用watch一样，在数据发生变化时才执行
+4、deep，当需要监听一个对象的变化时，普通的watch方法无法监听带对象内部属性的变化，只有data中的数据才能够坚挺到变化，此时需要deep属性进行深度监听，设置deep：true，当对象的属性较多是，每个属性的变化都会执行handler
+```vue
+watch: {
+    'person.name': {
+        handler(newVal, oldVal) {
+            console.log(newVal, oldVal)
+        },
+        deep: true,
+        immediate: true
+    }
+}
+```
+
+
