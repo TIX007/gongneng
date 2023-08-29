@@ -1823,6 +1823,7 @@ export default {
 ```
 
 ### 前端实现换行/n和＜br/＞的转换
+ this.$notify要想换行需要设置`dangerouslyUseHTMLString: true,`
 
 ```js
 // \n转换成<br/>
