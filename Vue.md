@@ -1683,6 +1683,76 @@ mounted() {
   };
 </script>
 ```
+**通过组件的$emit、$on方法；**
+父
+```vue
+<template>
+
+    <div>
+
+        <Button @click="handleClick">点击调用子组件方法</Button>
+
+        <Child ref="child"/>
+
+    </div>
+
+</template>    
+
+ 
+
+<script>
+
+import Child from './child';
+
+ 
+
+export default {
+
+    methods: {
+
+        handleClick() {
+
+               this.$refs.child.$emit("childmethod")    //子组件$on中的名字
+
+        },
+
+    },
+
+}
+
+</script>
+```
+
+子
+```vue
+<template>
+
+    <div>我是子组件</div>
+
+</template>
+
+<script>
+
+export default {
+
+    mounted() {
+
+        this.$nextTick(function() {
+
+            this.$on('childmethods', function() {
+
+                console.log('我是子组件方法');
+
+            });
+
+        });
+
+     },
+
+};
+
+</script>
+```
 
 项目关闭tab页返回上级
 
