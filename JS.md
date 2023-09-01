@@ -538,32 +538,33 @@ window.location.href = "/app/doc/downloadApp?id="+ row.id
 ### 数组改为级联选择器
 
 ```js
-getTaxCode().then(res => {
-        this.restaurants = res.data
-        function deleteChildren(arr) {
-          let childs = arr
-          if (childs) {
-            for (let i = childs.length; i--; i > 0) {
-              if (childs[i].commodityName) {
-                childs[i].label = childs[i].commodityName
-                childs[i].value = childs[i].commodityName
-
-                delete childs[i].commodityName
-                deleteChildren(childs[i].childrenList)
-              }
-              if (childs[i].childrenList) {
-                if (childs[i].childrenList.length) {
-                  childs[i].children = childs[i].childrenList
-                  deleteChildren(childs[i].childrenList)
-                } else {
-                  delete childs[i].childrenList
-                }
-              }
-            }
-          }
-          return arr
+export function deleteChildren(arr) {
+  let childs = arr
+  if (childs) {
+    for (let i = childs.length; i--; i > 0) {
+      if (childs[i].commodityName) {
+        childs[i].label = childs[i].commodityCode
+        // '*' + childs[i].commodityCategory + '*' +
+        childs[i].value = '*' + childs[i].commodityCategory + '*' + childs[i].commodityName
+        // delete childs[i].commodityName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].buyerName) {
+        childs[i].label = childs[i].buyerName
+        childs[i].value = childs[i].buyerName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].childrenList) {
+        if (childs[i].childrenList.length) {
+          childs[i].children = childs[i].childrenList
+          deleteChildren(childs[i].childrenList)
+        } else {
+          delete childs[i].childrenList
         }
-        console.log(deleteChildren(this.restaurants));
-      })
+      }
+    }
+  }
+  return arr
+}
 ```
 
