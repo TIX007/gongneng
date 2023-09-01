@@ -810,3 +810,73 @@ export default {
  }
 </script>
 ```
+### el-autocomplete组件添加底部固定按钮
+首先是组件的使用：
+```html
+<el-autocomplete
+   class="voucher-subject-input"
+   :ref="'inputcredit_2_'+index"
+   :popper-append-to-body="false"
+   :class="{ 'subject-opacity': voucher.items[index].showText }"
+   v-model="voucher.items[index].subjectName"
+   value-key="name"
+   :fetch-suggestions="querySearch"
+   :highlight-first-item="true"
+   @select="handleSelectSubject($event,index)"
+   @focus="handleFocusSubject($event,index)"
+   >
+   <!-- 下一篇小编为大家带来这里使用:popper-append-to-body="false"时候，又要监听@blur与@select事件会发生什么，该怎么解决 -->
+  <template slot-scope="{ item }">
+     <el-button
+       v-if="item.is_add"
+       type="primary" plain
+       style="width: 100%;position: absolute;bottom: 0px;left: 0px;"
+       class="add-button"
+       @click="accAddBtn()"
+       >
+       添加
+    </el-button>
+ </template>
+</el-autocomplete>
+```
+vue部分（在methods中使用如下方法）：
+```js
+//会计科目返回查询结果
+querySearch(queryString, cb) {
+  // console.log("会计科目返回查询结果",results)
+  var restaurants = this.selectArrObj.SubjectsList;
+  var results = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+  results = results.length > 0 ? results : [{name: '没有匹配项'}]
+  //这里给列表中的每串数据都加上is_add:false控制组件部分的按钮显示
+  for (let i = 0;i<results.length;i++){
+  	results[i].is_add = false
+  }
+  //注意的是这里要加上name，因为我是根据name模糊查询的，不然会报错，导致不可用
+  results.push({name:'',is_add:true});
+  // 调用 callback 返回建议列表的数据
+  cb(results);
+},
+//会计科目查询(模糊查询)
+createFilter(queryString) {
+  return (restaurant) => {
+  	return (restaurant.name.toLowerCase().indexOf(queryString.toLowerCase()) !== -1);
+  };
+ },
+```
+这就是把按钮添加到el-autocomplete组件建议值下拉列表的大致部分，
+那么，这里小编先带大家了解一下为什么这里要使用:popper-append-to-body=“false”，我们看文档可以看到
+
+如果使用默认的true，查看dom结构发现是因为下拉列表的class是插入至body下的，而不是vue app 下。所以我们使用深度选择器是没办法控制他的css样式的。
+因此这里我们要使用false，让他在vue app下。然后在css中我们就可以使用深度选择器，调整下拉框的底部内边距，使按钮能够置于最底下不会挡到选项。
+```js
+<style scoped>
+    /deep/ .el-scrollbar__wrap{
+      margin-bottom: 30px;
+      overflow-x: hidden;
+    }
+    /deep/ .el-autocomplete-suggestion__list{
+      padding-bottom: 50px;
+    }
+</style>
+```
+
