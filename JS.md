@@ -239,6 +239,23 @@ form.append("212", "2121");
 console.log(form.getAll("212"));
 ```
 
+### 截取
+截取前面所有的字符
+```js
+let a = 'shangwu,xiawu';
+let b = a.indexOf(',');
+let c = a.substring(0,b)
+console.log(c);
+```
+截取后面所有的字符
+```js
+let h = 'shangwu,xiawu';
+let s = h.split(',');
+console.log(s,'不加下标返回数组');
+console.log(s[1],'获取想要的字符')
+```
+
+
 ### 逗号隔开的字符串转数组
 
 ```
