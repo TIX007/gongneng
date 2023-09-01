@@ -2570,3 +2570,13 @@ cascaderName(newVal, oldVal) {
 @dblclick="handleIconClick"
 ```
 
+### 接口数据给el-input赋值成功后不能编辑
+
+原因：在Vue实例创建时，obj.b并未声明，因此就没有被Vue转换为响应式的属性，自然就不会触发视图的更新
+
+解决：this.$set(val1,val1.val2,val3)
+```js
+this.$set(this.convenForm, 'orPrice', this.convenForm.orPrice);
+```
+**注：this.convenForm是对象，orPrice是对象里字段，最后一个是赋值**
+
