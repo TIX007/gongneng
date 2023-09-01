@@ -2563,4 +2563,10 @@ cascaderName(newVal, oldVal) {
 }
 ```
 
+### 鼠标双击事件
+
+```js
+@dblclick.native.prevent="handleIconClick"
+@dblclick="handleIconClick"
+```
 
