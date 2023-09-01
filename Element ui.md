@@ -840,6 +840,7 @@ export default {
 </el-autocomplete>
 ```
 vue部分（在methods中使用如下方法）：
+添加一个空的数据，然后把这个空的数据当做button使用
 ```js
 //会计科目返回查询结果
 querySearch(queryString, cb) {
