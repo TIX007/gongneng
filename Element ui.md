@@ -825,7 +825,8 @@ export default {
    @select="handleSelectSubject($event,index)"
    @focus="handleFocusSubject($event,index)"
    >
-   <!-- 下一篇小编为大家带来这里使用:popper-append-to-body="false"时候，又要监听@blur与@select事件会发生什么，该怎么解决 -->
+   <!-- 下一篇小编为大家带来这里使用:popper-append-to-body="false"时候，又要监听@blur与@select事件会发生什么，该怎么解决 position: absolute;bottom: 0px;left: 0px;可不添加 -->
+
   <template slot-scope="{ item }">
      <el-button
        v-if="item.is_add"
