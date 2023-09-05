@@ -585,3 +585,116 @@ export function deleteChildren(arr) {
 }
 ```
 
+### 电子发票的商品计算逻辑
+
+```js
+handleBlur(data) {
+      console.log(data);
+      var row = data
+      var hj = 0;
+      for (var i = 0; i < this.form.dynamicItem.length; i++) {
+        var je = this.form.dynamicItem[i].unitPrice
+        var sl = this.form.dynamicItem[i].quantity
+        var ze = this.form.dynamicItem[i].amount
+        var shui = this.form.dynamicItem[i].taxRate
+        var zez = this.form.dynamicItem[i].amountWithTax
+        // debugger
+        // if (je != "" && sl != "") {
+        //   hj += (Number(je).toFixed(2)) * Number(sl);
+        //   console.log(hj, 'hj');
+        // }
+        if (this.hs == true) {
+          if (je != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(zez).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+          }
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (zez != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amountWithTax = ''
+                this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                console.log(Number(zez));
+                this.form.dynamicItem[i].amountWithTax = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+        } else {
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (ze != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amount = ''
+                this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                this.form.dynamicItem[i].amount = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+          if (je != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(ze).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(ze).toFixed(2)) / Number(sl);
+          }
+        }
+      }
+      console.log(total(this.form.dynamicItem));
+      taxCalculation(this.form.dynamicItem)
+      hj = total(this.form.dynamicItem)
+
+      if (hj == 0) {
+        this.dxhj = '零圆整'
+      } else {
+        this.dxhj = dealBigMoney(hj)
+      }
+      this.xxhj = hj.toFixed(2);
+    },
+```
+封装的方法
+```js
+export function total(arr) {
+  console.log(arr);
+  let hj = 0;
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+    hj += (Number(je).toFixed(2)) * Number(sl);
+  }
+  return hj
+}
+
+export function taxCalculation(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+  }
+  return arr
+}
+```
+
