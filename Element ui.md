@@ -882,3 +882,12 @@ createFilter(queryString) {
 </style>
 ```
 
+### 表单标签颜色自定义
+```html
+<el-form-item class="text_align100 ">
+                  <template slot="label">
+                    单价<span :class="hs ? 'redText' : ''">{{ hs ? '(含税)' : '(不含税)' }}</span>
+                  </template>
+                </el-form-item>
+```
+
