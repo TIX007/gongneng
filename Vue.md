@@ -2580,3 +2580,190 @@ this.$set(this.convenForm, 'orPrice', this.convenForm.orPrice);
 ```
 **注：this.convenForm是对象，orPrice是对象里字段，最后一个是赋值**
 
+### 邮箱输入带@提示
+```vue
+<template>
+
+  <div>
+
+    <el-form class="mailbox" :rules="rules" ref="form" :model="form">
+
+      <el-form-item prop="inputEmail">
+
+        <el-input
+
+          v-model="form.inputEmail"
+
+          placeholder="请输入邮箱账号"
+
+          clearable
+
+          prefix-icon="el-icon-user"
+
+        ></el-input>
+
+      </el-form-item>
+
+      <div class="hintBox">
+
+        <div
+
+          @click="setInput(mail)"
+
+          class="hintItem"
+
+          v-for="mail in emails"
+
+          :key="mail"
+
+        >
+
+          {{ mail }}
+
+        </div>
+
+      </div>
+
+    </el-form>
+
+  </div>
+
+</template>
+
+  <script>
+
+export default {
+
+  data() {
+
+    return {
+
+      form:{
+
+        inputEmail: "",
+
+      },
+
+      rules: {
+
+        inputEmail: [
+
+          { required: true, message: "请输入正确的邮箱", trigger: "blur" },
+
+        ],}
+
+    };
+
+  },
+
+  created() {},
+
+  computed: {
+
+    emails() {
+
+      // 如果inputEmail中没有任何东西，则不处理
+
+      if (!this.form.inputEmail) return [];
+
+      // 考虑到用户自己要输@符号，如果@符号首次出现的位置大于等于第零个位置时，则不处理
+
+      if (this.form.inputEmail.indexOf("@") > -1) return [];
+
+      return [
+
+       this.form.inputEmail + "@163.com",
+
+       this.form.inputEmail + "@126.com",
+
+       this.form.inputEmail + "@0355.net",
+
+       this.form.inputEmail + "@263.net",
+
+       this.form.inputEmail + "@3721.net",
+
+       this.form.inputEmail + "@qq.com",
+
+       this.form.inputEmail + "@yahoo.com",
+
+       this.form.inputEmail + "@gmail.com",
+
+       this.form.inputEmail + "@msn.com",
+
+       this.form.inputEmail + "@hotmail.com",
+
+       this.form.inputEmail + "@aol.com",
+
+       this.form.inputEmail + "@ask.com",
+
+       this.form.inputEmail + "@live.com",
+
+       this.form.inputEmail + "@yeah.net",
+
+      ];
+
+    },
+
+  },
+
+  methods: {
+
+    // 点击该邮箱后缀是补全文本框
+
+    setInput(mail) {
+
+     this.form.inputEmail = mail;
+
+      this.$emit("MailboxDelivery",this.form.inputEmail);
+
+    },
+
+  },
+
+};
+
+</script>
+
+  <style scoped>
+
+.hintBox {
+
+  width: 100%;
+
+  max-height: 120px;
+
+  overflow-y: scroll;
+
+  overflow-x: auto;
+
+  position: absolute;
+
+  z-index: 999;
+
+  background-color: #fff;
+
+}
+
+.hintItem {
+
+  margin-top: 2px;
+
+  cursor: pointer;
+
+  margin-left: 30px;
+
+  font-size: 13px;
+
+  color: #898989;
+
+}
+
+.el-form-item {
+
+    margin: 0;
+
+}
+
+</style>
+```
+
