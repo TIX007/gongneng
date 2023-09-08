@@ -2583,51 +2583,29 @@ this.$set(this.convenForm, 'orPrice', this.convenForm.orPrice);
 ### 邮箱输入带@提示
 ```vue
 <template>
-
   <div>
-
     <el-form class="mailbox" :rules="rules" ref="form" :model="form">
-
       <el-form-item prop="inputEmail">
-
         <el-input
-
           v-model="form.inputEmail"
-
           placeholder="请输入邮箱账号"
-
           clearable
-
           prefix-icon="el-icon-user"
-
         ></el-input>
-
-      </el-form-item>
-
-      <div class="hintBox">
-
+	<div class="hintBox">
         <div
-
           @click="setInput(mail)"
-
           class="hintItem"
-
           v-for="mail in emails"
-
           :key="mail"
-
         >
-
           {{ mail }}
-
         </div>
-
       </div>
-
+      </el-form-item>
+      
     </el-form>
-
   </div>
-
 </template>
 
   <script>
@@ -2727,41 +2705,34 @@ export default {
   <style scoped>
 
 .hintBox {
-
-  width: 100%;
-
   max-height: 120px;
-
   overflow-y: scroll;
-
   overflow-x: auto;
-
   position: absolute;
-
   z-index: 999;
-
   background-color: #fff;
-
+  list-style-type: disc;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
 }
 
 .hintItem {
-
-  margin-top: 2px;
-
-  cursor: pointer;
-
-  margin-left: 30px;
-
-  font-size: 13px;
-
-  color: #898989;
-
+padding: 0 20px;
+margin: 0;
+line-height: 34px;
+cursor: pointer;
+color: #606266;
+font-size: 14px;
+list-style: none;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 .el-form-item {
-
     margin: 0;
-
 }
 
 </style>
