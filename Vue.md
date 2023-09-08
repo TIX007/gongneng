@@ -2860,49 +2860,55 @@ handleBlur(item, row) {
       let unitPrice = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.quantity)))), 8)
       let quantity = Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.unitPrice))))
       // ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))
-
+      // debugger
       if (this.hs == true) {
         if (item.unitPrice != "" && item.amountWithTax != '' && item.quantity == "") {
           item.quantity = quantity
+          return
         }
         if (item.unitPrice == "" && item.amountWithTax != '' && item.quantity != "") {
           item.unitPrice = unitPrice
+          return
         }
-        if (item.unitPrice != "" && item.quantity != "") {
+        if (item.unitPrice != "" && item.amountWithTax == '' && item.quantity != "") {
           item.amountWithTax = amountWithTax
-          if (item.amountWithTax != '') {
-            if (row == 'unitPrice') {
-              item.amountWithTax = ''
-              item.amountWithTax = amountWithTax
-            } else if (row == 'amount') {
-              item.unitPrice = ''
-              item.unitPrice = unitPrice
-            } else {
-              item.amountWithTax = ''
-              item.amountWithTax = amountWithTax
-            }
+          return
+        }
+        if (item.unitPrice != "" && item.quantity != "" && item.amountWithTax != '') {
+          if (row == 'unitPrice') {
+            item.amountWithTax = ''
+            item.amountWithTax = amountWithTax
+          } else if (row == 'amount') {
+            item.unitPrice = ''
+            item.unitPrice = unitPrice
+          } else {
+            item.amountWithTax = ''
+            item.amountWithTax = amountWithTax
           }
         }
       } else {
         if (item.unitPrice != "" && item.amount != '' && item.quantity == "") {
           item.quantity = quantity
+          return
         }
         if (item.unitPrice == "" && item.amount != '' && item.quantity != "") {
           item.unitPrice = unitPrice
+          return
         }
-        if (item.unitPrice != "" && item.quantity != "") {
+        if (item.unitPrice != "" && item.amount == '' && item.quantity != "") {
           item.amount = amount
-          if (item.amount != '') {
-            if (row == 'unitPrice') {
-              item.amount = ''
-              item.amount = amount
-            } else if (row == 'amount') {
-              item.unitPrice = ''
-              item.unitPrice = unitPrice
-            } else {
-              item.amount = ''
-              item.amount = amount
-            }
+          return
+        }
+        if (item.unitPrice != "" && item.quantity != "" && item.amount != '') {
+          if (row == 'unitPrice') {
+            item.amount = ''
+            item.amount = amount
+          } else if (row == 'amount') {
+            item.unitPrice = ''
+            item.unitPrice = unitPrice
+          } else {
+            item.amount = ''
+            item.amount = amount
           }
         }
       }
@@ -2917,7 +2923,7 @@ handleBlur(item, row) {
       this.xxhj = hj.toFixed(2);
     },
 }
-}
+
 // 含税不含税切换逻辑
 watch:{
 hs(newVal, oldVal) {
@@ -2970,6 +2976,7 @@ hs(newVal, oldVal) {
         }
       }
     },
+}
 }
 </script>
 ```
