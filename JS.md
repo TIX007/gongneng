@@ -698,3 +698,9 @@ export function taxCalculation(arr) {
 }
 ```
 
+### 数组插入数据方法
+```js
+// 为0时就是不删除元素
+this.form.dynamicItem.splice(discountIndex, 0, this.discount)
+```
+
