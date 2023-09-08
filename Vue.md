@@ -2767,3 +2767,279 @@ export default {
 </style>
 ```
 
+### 电子发票商品计算及含税不含税逻辑
+```vue
+<template>
+<el-form :model="form" ref="form" border :inline="true" class="fieldStyleForm" style="width: 100%;">
+                <el-form-item label="行号" class="text_align50">
+                </el-form-item>
+                <el-form-item label="项目名称" class="text_align500">
+                </el-form-item>
+                <el-form-item label="规格型号" class="text_align120">
+                </el-form-item>
+                <el-form-item label="单位" class="text_align100">
+                </el-form-item>
+                <el-form-item label="数量" class="text_align100">
+                </el-form-item>
+                <el-form-item class="text_align100 ">
+                  <template slot="label">
+                    单价<span :class="hs ? 'redText' : ''">{{ hs ? '(含税)' : '(不含税)' }}</span>
+                  </template>
+                </el-form-item>
+                <el-form-item label="金额(含税)" v-show="hs" class="text_align100 tax">
+                  <template slot="label">
+                    金额<span class="redText">{{ '(含税)' }}</span>
+                  </template>
+                </el-form-item>
+                <el-form-item label="金额(不含税)" v-show="!hs" class="text_align100" style="width: 6%;">
+                </el-form-item>
+                <el-form-item label="税率" class="text_align100">
+                </el-form-item>
+                <el-form-item label="税额" class="text_align100" style="width: 80px;">
+                </el-form-item>
+                <el-form-item label="操作" class="text_align_right150">
+                </el-form-item>
+                <hr>
+
+                <div v-for="(item, index) in form.dynamicItem" :key="index">
+
+                  <el-form-item class="text_align50">
+                    <span class="text_align50">{{ index + 1 }}</span>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.goodsName'" class="text_align500">
+                    <!-- <el-input v-model="item.goodsName" class="text_align500"></el-input> -->
+                    <!-- <el-cascader v-model="item.goodsName" :options="restaurants" clearable class="text_align500"></el-cascader> -->
+                    <!-- <el-cascader ref="cascader" v-model="item.goodsName" :options="restaurants" clearable
+                      class="text_align500"></el-cascader> @change="getByName(item)"-->
+                    <!-- {{ item.commodityCategory }} -->
+                    <el-autocomplete v-model="item.goodsName" :fetch-suggestions="querySearchAsync"
+                      :trigger-on-focus="false" placeholder="请输入项目名称" @select="handleSelect"
+                      @focus="getByName(item, index)" @dblclick.native.prevent="handleIconClick" :disabled="item.disabled"
+                      class="text_align500">
+                      <!-- <i class="el-icon-edit el-input__icon" slot="suffix" @click="handleIconClick">
+                      </i> -->
+                      <template slot-scope="{ item }">
+                        <el-button v-if="item.is_add" type="primary" plain class="add_button" style=""
+                          @click="handleIconClick">
+                          添加
+                        </el-button>
+                      </template>
+                    </el-autocomplete>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.specification'" class="text_align120">
+                    <el-input v-model="item.specification" :disabled="item.disabled" class="text_align120"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.unit'" class="text_align100">
+                    <el-input v-model="item.unit" :disabled="item.disabled" class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.quantity'" class="text_align100">
+                    <el-input v-model="item.quantity" :disabled="item.disabled" @change="handleBlur(item, 'quantity')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.unitPrice'" class="text_align100">
+                    <el-input v-model="item.unitPrice" :disabled="item.disabled" @change="handleBlur(item, 'unitPrice')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.amountWithTax'" v-show="hs" class="text_align100">
+                    <el-input v-model="item.amountWithTax" :disabled="item.disabled" @change="handleBlur(item, 'amount')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.amount'" v-show="!hs" class="text_align100">
+                    <el-input v-model="item.amount" :disabled="item.disabled" @change="handleBlur(item, 'amount')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.taxRate'" class="text_align100">
+                    <el-select v-model="item.taxRate" :disabled="item.disabled" @change="handleBlur(item)" clearable>
+                      <el-option v-for="dict in dict.type.sys_tax_rate" :key="dict.value" :label="dict.label"
+                        :value="dict.value" />
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.taxAmount'" class="text_align70">
+                    <el-input v-model="item.taxAmount" class="text_align70" disabled="disabled"></el-input>
+                  </el-form-item>
+                  <el-form-item class="text_align_right150">
+                    <el-button type="text" @click="discount(item, index)" :disabled="item.disabled">折</el-button>
+                    <el-button type="text" @click="deleteItem(item, index)">删</el-button>
+                  </el-form-item>
+                  <hr>
+                </div>
+                <div style="border-style: dashed;border-width: 0.1px;margin-left: 58px; width: 30%;">
+                  <el-button type="text" class="background_color" @click="addItem(0)" icon="el-icon-plus"
+                    aria-label="+">新增</el-button>
+                </div>
+                <hr>
+                <div style="display: flex;">
+                  <div style="margin-left: 10%;">价税合计 (大写) ⊗ {{ this.dxhj }}</div>
+                  <div style="margin-left: 40%;">(小写) ￥ {{ this.xxhj }} </div>
+                </div>
+                <hr>
+              </el-form>
+</template>
+
+<script>
+import { Decimal } from 'decimal.js'
+export default {
+
+ methods: {
+handleBlur(item, row) {
+      console.log(item, '9999');
+      var hj = 0;
+      let amountWithTax = roundFixed(Number(Decimal(Number(item.unitPrice)).mul(Decimal(Number(item.quantity)))), 2)
+      let amount = roundFixed(Number(Decimal(Number(item.unitPrice)).mul(Decimal(Number(item.quantity)))), 2)
+      let unitPrice = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.quantity)))), 8)
+      let quantity = Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.unitPrice))))
+      // ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))
+
+      if (this.hs == true) {
+        if (item.unitPrice != "" && item.amountWithTax != '' && item.quantity == "") {
+          item.quantity = quantity
+        }
+        if (item.unitPrice == "" && item.amountWithTax != '' && item.quantity != "") {
+          item.unitPrice = unitPrice
+        }
+        if (item.unitPrice != "" && item.quantity != "") {
+          item.amountWithTax = amountWithTax
+          if (item.amountWithTax != '') {
+            if (row == 'unitPrice') {
+              item.amountWithTax = ''
+              item.amountWithTax = amountWithTax
+            } else if (row == 'amount') {
+              item.unitPrice = ''
+              item.unitPrice = unitPrice
+            } else {
+              item.amountWithTax = ''
+              item.amountWithTax = amountWithTax
+            }
+          }
+        }
+      } else {
+        if (item.unitPrice != "" && item.amount != '' && item.quantity == "") {
+          item.quantity = quantity
+        }
+        if (item.unitPrice == "" && item.amount != '' && item.quantity != "") {
+          item.unitPrice = unitPrice
+        }
+        if (item.unitPrice != "" && item.quantity != "") {
+          item.amount = amount
+          if (item.amount != '') {
+            if (row == 'unitPrice') {
+              item.amount = ''
+              item.amount = amount
+            } else if (row == 'amount') {
+              item.unitPrice = ''
+              item.unitPrice = unitPrice
+            } else {
+              item.amount = ''
+              item.amount = amount
+            }
+          }
+        }
+      }
+      taxCalculation(item, this.hs)
+      hj = total(this.form.dynamicItem, this.hs)
+
+      if (hj == 0) {
+        this.dxhj = '零圆整'
+      } else {
+        this.dxhj = dealBigMoney(hj)
+      }
+      this.xxhj = hj.toFixed(2);
+    },
+}
+}
+// 含税不含税切换逻辑
+watch:{
+hs(newVal, oldVal) {
+      console.log(newVal, oldVal)
+      Decimal.set({ precision: 5, rounding: 4 })
+      console.log(Number(Decimal(5).div(Decimal(0.13))));
+      console.log(roundFixed(2.335, 2), (2.335.toFixed(2)));
+      if (newVal == false && this.form.dynamicItem[0].amountWithTax != '' && this.form.dynamicItem[0].amountWithTax != ''
+      ) {
+        for (var i = 0; i < this.form.dynamicItem.length; i++) {
+          var je = this.form.dynamicItem[i].unitPrice
+          var sl = this.form.dynamicItem[i].quantity
+          var ze = this.form.dynamicItem[i].amount
+          var shui = this.form.dynamicItem[i].taxRate
+          var zez = this.form.dynamicItem[i].amountWithTax
+          var se = this.form.dynamicItem[i].taxAmount
+          // let unit = Decimal(Number(je)).sub((Decimal(Number(je))).div(Decimal(Number(shui) + 1)).mul(Decimal(Number(shui))))
+          let unit = Decimal(Number(je)).sub(Decimal(Number(se)).div(Decimal(Number(sl))))
+          console.log(unit, Number(unit));
+          if (Number(unit) == -Infinity || Number(unit) == Infinity) {
+            this.form.dynamicItem[i].unitPrice = ''
+            this.form.dynamicItem[i].amount = roundFixed((Number(zez) - (Number(zez) / (1 + Number(shui)) * Number(shui))), 2)
+          } else {
+            this.form.dynamicItem[i].unitPrice = roundFixed(Number(unit), 8)
+            this.form.dynamicItem[i].amount = roundFixed((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))), 2)
+          }
+
+          // .length > 8 ? ((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui)))).toFixed(8) : ((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui)))).toFixed(2);
+          // this.form.dynamicItem[i].amount = this.form.dynamicItem[i].unitPrice * Number(sl)
+        }
+      } else {
+        for (var i = 0; i < this.form.dynamicItem.length; i++) {
+          console.log('oldVal', oldVal);
+          var je = this.form.dynamicItem[i].unitPrice
+          var sl = this.form.dynamicItem[i].quantity
+          var ze = this.form.dynamicItem[i].amount
+          var shui = this.form.dynamicItem[i].taxRate
+          var zez = this.form.dynamicItem[i].amountWithTax
+          var se = this.form.dynamicItem[i].taxAmount
+          let unit = Decimal(Number(je)).add(Decimal(Number(se)).div(Decimal(Number(sl))))
+          if (Number(unit) == -Infinity || Number(unit) == Infinity) {
+            this.form.dynamicItem[i].unitPrice = ''
+            // this.form.dynamicItem[i].amountWithTax = roundFixed(this.form.dynamicItem[i].unitPrice * Number(sl), 2)
+          } else {
+            this.form.dynamicItem[i].unitPrice = roundFixed(Number(unit), 8)
+            this.form.dynamicItem[i].amountWithTax = roundFixed(this.form.dynamicItem[i].unitPrice * Number(sl), 2)
+          }
+          // this.form.dynamicItem[i].unitPrice = Number(Decimal(Number(je)).add((Decimal(Number(je))).mul(Decimal(Number(shui)))))
+
+        }
+      }
+    },
+}
+</script>
+```
+```js
+import { Decimal } from 'decimal.js'
+export function total(arr, row) {
+  console.log(arr);
+  let hj = 0;
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    var se = arr[i].taxAmount
+    if (row == true) {
+      hj += Number(zez);
+    } else {
+      hj += Number(ze) + Number(se);
+    }
+  }
+  return hj
+}
+
+export function taxCalculation(item, row) {
+  let taxAmountWithTax = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.taxRate) + 1)).mul(Decimal(Number(item.taxRate)))), 2)
+  let taxAmount = Decimal(Number(item.amount)).mul(Decimal(Number(item.taxRate)))
+  if (row == true) {
+    item.taxAmount = taxAmountWithTax
+  } else {
+    item.taxAmount = taxAmount
+  }
+  return item
+}
+
+export function roundFixed(num, fixed) {//修改js四舍五入
+  var pos = num.toString().indexOf('.'),
+    decimal_places = num.toString().length - pos - 1,
+    _int = num * Math.pow(10, decimal_places),
+    divisor_1 = Math.pow(10, decimal_places - fixed),
+    divisor_2 = Math.pow(10, fixed);
+  return Math.round(_int / divisor_1) / divisor_2;
+}
+```
