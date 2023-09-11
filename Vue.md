@@ -2859,21 +2859,11 @@ handleBlur(item, row) {
       let amount = roundFixed(Number(Decimal(Number(item.unitPrice)).mul(Decimal(Number(item.quantity)))), 2)
       let unitPrice = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.quantity)))), 8)
       let quantity = Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.unitPrice))))
+      let taxAmountWithTax = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.taxRate) + 1)).mul(Decimal(Number(item.taxRate)))), 2)
+      let taxAmount = Decimal(Number(item.amount)).mul(Decimal(Number(item.taxRate)))
       // ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))
       // debugger
       if (this.hs == true) {
-        if (item.unitPrice != "" && item.amountWithTax != '' && item.quantity == "") {
-          item.quantity = quantity
-          return
-        }
-        if (item.unitPrice == "" && item.amountWithTax != '' && item.quantity != "") {
-          item.unitPrice = unitPrice
-          return
-        }
-        if (item.unitPrice != "" && item.amountWithTax == '' && item.quantity != "") {
-          item.amountWithTax = amountWithTax
-          return
-        }
         if (item.unitPrice != "" && item.quantity != "" && item.amountWithTax != '') {
           if (row == 'unitPrice') {
             item.amountWithTax = ''
@@ -2886,19 +2876,21 @@ handleBlur(item, row) {
             item.amountWithTax = amountWithTax
           }
         }
-      } else {
-        if (item.unitPrice != "" && item.amount != '' && item.quantity == "") {
+        if (item.unitPrice != "" && item.amountWithTax != '' && item.quantity == "") {
           item.quantity = quantity
-          return
+
         }
-        if (item.unitPrice == "" && item.amount != '' && item.quantity != "") {
+        if (item.unitPrice == "" && item.amountWithTax != '' && item.quantity != "") {
           item.unitPrice = unitPrice
-          return
+
         }
-        if (item.unitPrice != "" && item.amount == '' && item.quantity != "") {
-          item.amount = amount
-          return
+        if (item.unitPrice != "" && item.amountWithTax == '' && item.quantity != "") {
+          item.amountWithTax = amountWithTax
+
         }
+
+      } else {
+        console.log(amount, 'amount');
         if (item.unitPrice != "" && item.quantity != "" && item.amount != '') {
           if (row == 'unitPrice') {
             item.amount = ''
@@ -2911,6 +2903,19 @@ handleBlur(item, row) {
             item.amount = amount
           }
         }
+        if (item.unitPrice != "" && item.amount != '' && item.quantity == "") {
+          item.quantity = quantity
+
+        }
+        if (item.unitPrice == "" && item.amount != '' && item.quantity != "") {
+          item.unitPrice = unitPrice
+
+        }
+        if (item.unitPrice != "" && item.amount == '' && item.quantity != "") {
+          item.amount = amount
+
+        }
+
       }
       taxCalculation(item, this.hs)
       hj = total(this.form.dynamicItem, this.hs)
@@ -2934,6 +2939,7 @@ hs(newVal, oldVal) {
       if (newVal == false && this.form.dynamicItem[0].amountWithTax != '' && this.form.dynamicItem[0].amountWithTax != ''
       ) {
         for (var i = 0; i < this.form.dynamicItem.length; i++) {
+          this.form.dynamicItem[i].taxSign = '0'
           var je = this.form.dynamicItem[i].unitPrice
           var sl = this.form.dynamicItem[i].quantity
           var ze = this.form.dynamicItem[i].amount
@@ -2957,6 +2963,7 @@ hs(newVal, oldVal) {
       } else {
         for (var i = 0; i < this.form.dynamicItem.length; i++) {
           console.log('oldVal', oldVal);
+          this.form.dynamicItem[i].taxSign = '1'
           var je = this.form.dynamicItem[i].unitPrice
           var sl = this.form.dynamicItem[i].quantity
           var ze = this.form.dynamicItem[i].amount
