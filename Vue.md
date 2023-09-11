@@ -2430,6 +2430,44 @@ export function download(url, params, filename) {
 }
 ```
 
+### 文件流zip下载
+
+```js
+export function download2(url, params, filename) {
+  downloadLoadingInstance = Loading.service({ text: "正在下载数据，请稍候", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
+  return service.post(url, params, {
+    headers: { 'Content-Type': 'application/json' },
+    responseType: 'blob',
+  }).then(async (data) => {
+    console.log(data);
+    const isBlob = blobValidate(data);
+    if (isBlob) {
+      const blob = new Blob([data], { type: 'application/zip' })
+      saveAs(blob, filename)
+    } else {
+      const resText = await data.text();
+      const rspObj = JSON.parse(resText);
+      const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default']
+      Message.error(errMsg);
+    }
+    downloadLoadingInstance.close();
+  }).catch((r) => {
+    console.error(r)
+    Message.error('下载文件出现错误，请联系管理员！')
+    downloadLoadingInstance.close();
+  })
+}
+// 使用
+/** 导出zip文件按钮操作 */
+    downloadFile(type, ids) {
+      console.log(type, ids, 'type, ids');
+      download2('hsy/invoice/downLoad?type=' + type + '&ids=' + ids,
+        ids
+        , `invoice_${new Date().getTime()}.zip`)
+    }
+```
+
+
 ### vue中实现拖动调整左右两侧div的宽度
 
 ```vue
