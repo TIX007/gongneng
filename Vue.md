@@ -128,6 +128,19 @@ this.$router.push({
 
 ```
 
+### watch监听router
+```js
+'$route': { // $route可以用引号，也可以不用引号
+      handler(to, from) {
+        console.log('路由变化了')
+        console.log('当前页面路由：' + to); //新路由信息
+        console.log('上一个路由：' + from); //老路由信息
+      },
+      deep: true, // 深度观察监听
+      immediate: true, // 第一次初始化渲染就可以监听到
+    },
+```
+
 ### vue 给data 数据的重新初始化
 
 初始化data中某个字段key数据
