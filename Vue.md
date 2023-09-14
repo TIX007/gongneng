@@ -3079,3 +3079,46 @@ export function roundFixed(num, fixed) {//修改js四舍五入
   return Math.round(_int / divisor_1) / divisor_2;
 }
 ```
+
+### 生成二维码
+```vue
+<template>
+  <div class="about">
+    <h1>This is an about page11</h1>
+    <div class="qr">
+      <vue-qr :logoSrc="src2" :text="src" :size="200"></vue-qr>
+    </div>
+
+  </div>
+</template>
+<script>
+import VueQr from 'vue-qr'
+// npm install vue-qr --save
+export default {
+  components: { VueQr },
+  data() {
+    return {
+      // 中间图片
+      src2: require('@/assets/logo.png'),
+      src: ''
+    }
+  },
+  mounted() {
+    console.log(this);
+    let url = window.location.origin
+    this.src = url + '/'
+    // this.src = 'http://192.168.20.160:8081/'
+  },
+  methods: {
+
+  }
+}
+</script>
+<style lang="scss">
+.qr {
+  width: 200px;
+  height: 200px;
+}
+</style>
+```
+
