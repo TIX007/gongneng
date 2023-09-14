@@ -749,3 +749,11 @@ export function parseTime(time, pattern) {
 // parseTime(new Date())
 ```
 
+### 中断js执行
+```js
+if (Number(childs[i].amountWithTax) == 0) {
+      Message({ message: "校验失败，明细行第" + (i + 1) + "金额不能等于零!", type: 'error' })
+      throw Promise.reject("校验失败，明细行第" + (i + 1) + "金额不能等于零!")
+    }
+```
+
