@@ -464,6 +464,61 @@ mounted() {
     }
 ```
 
+### 吸顶效果
+```vue
+
+<template>
+  <div class="nav-sub ">
+          <active-btn :class="fixed == true ? 'fixed' : ''">
+            可添加文字</active-btn
+          >
+ </div>
+</template>
+
+<script>
+export default {
+  data () {
+    return { fixed: false }
+  },
+  mounted () {
+    window.addEventListener('scroll', this.fixedActiveBtn)
+  },
+  methods: {
+    fixedActiveBtn () {
+      var scrollTop =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop
+      scrollTop >= 120 ? (this.fixed = true) : (this.fixed = false)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.nav-sub {
+  // position: relative;
+  height: 90px;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  // position: sticky;
+}
+.fixed {
+  position: fixed;
+  z-index: 21;
+  height: 60px;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid #dadada;
+  background-image: -webkit-linear-gradient(#fff, #f1f1f1);
+  background-image: linear-gradient(#fff, #f1f1f1);
+}
+
+</style>
+```
+
 ### 页面跳转路由时滚动条置顶
 
 ```vue
