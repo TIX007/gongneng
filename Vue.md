@@ -3177,3 +3177,621 @@ export default {
 </style>
 ```
 
+### 发票模版
+```vue
+<template>
+    <div>
+        <el-dialog :title="title" :visible.sync="open" width="80%" append-to-body>
+      <div class="invoice-box">
+        <br>
+        <div id="myComponent">
+          <div class="top">
+            <div class="title">
+              <h1>{{ forTitle(invoiceData.itype) }}</h1>
+            </div>
+            <div class="top-tips">
+              <div class="tips-box">发票代码：<span>{{ invoiceData.fpDm }}</span></div>
+              <div class="tips-box">发票号码：<span>{{ invoiceData.fpHm }}</span></div>
+              <div class="tips-box">开票日期：<span>{{ invoiceData.kprq }}</span></div>
+              <div class="tips-box"><span class="jym">校验码</span><i>：</i><span class="JYM">{{
+                invoiceData.jym
+              }}</span>
+              </div>
+            </div>
+            <img :src="qrCodeData" alt="二维码">
+            <div class="tips-box jqbh">
+              机器编号：<span>{{ invoiceData.jqbh }}</span>
+            </div>
+          </div>
+          <div class="center">
+            <div class="invoice-info">
+              <div class="gmf">
+                <div class="title">购买方</div>
+                <div class="info">
+                  <p>
+                    <span class="mc">名称</span>
+                    <i class="mc-i">：</i>
+                    <span class="parameter">{{ invoiceData.gmfMc }}</span>
+                  </p>
+                  <p>
+                    纳税人识别号：<span class="parameter">{{ invoiceData.gmfNsrsbh }}</span>
+                  </p>
+                  <p>
+                    <span class="dzdh">地址、电话</span>
+                    <i class="dzdh-i">：</i>
+                    <span class="parameter">{{ invoiceData.gmfDzdh }}</span>
+                  </p>
+                  <p>
+                    开户行及账号：<span class="parameter">{{ invoiceData.gmfYhzh }}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="password">
+                <div class="title">密码区</div>
+                <p>{{ invoiceData.fpMw }}</p>
+              </div>
+            </div>
+            <table cellspacing="0" cellpadding="0">
+              <thead>
+                <tr>
+                  <th class="spmc">货物或应税劳务、服务名称</th>
+                  <th class="ggxh">规格型号</th>
+                  <th class="dw">单位</th>
+                  <th class="sum">数量</th>
+                  <th class="dj">单价</th>
+                  <th class="je">金额</th>
+                  <th class="sl">税率</th>
+                  <th class="se">税额</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!--              <tr v-for="(item, index) in invCrestvInvoiceItemList" :key="index">-->
+                <tr v-for="(item, index) in invCrestvInvoiceItemList" :key="index">
+                  <td>{{ item.spmc }}</td>
+                  <td>{{ item.ggxh }}</td>
+                  <td>{{ item.dw }}</td>
+                  <td>{{ item.spsl }}</td>
+                  <td>{{ item.hsdj }}</td>
+                  <td>{{ item.hsje }}</td>
+                  <td>{{ item.sl }}</td>
+                  <td class="se">{{ item.se }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="hjh">
+                  <td class="hj"> 合　　计</td>
+                  <td />
+                  <td />
+                  <td />
+                  <td />
+                  <td style="text-align: right">{{ invoiceData.hjje }}</td>
+                  <td />
+                  <td class="se" style="text-align: right">{{ invoiceData.hjse }}</td>
+                </tr>
+                <tr class="hjh no-border">
+                  <td class="jshj">价税合计（大写）</td>
+                  <td colspan="7" class="no-border">
+                    <span class="uppercase">⊗{{ dealBigMoney(invoiceData.jshj) }}</span>
+                    <span class="lowercase">（小写）<i>￥{{ invoiceData.jshj }}</i></span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="invoice-info xsf-box">
+              <div class="xsf">
+                <div class="title">销售方</div>
+                <div class="info">
+                  <p>
+                    <span class="mc">名称</span><i class="mc-i">：</i><span class="parameter">{{
+                      invoiceData.xsfMc
+                    }}</span>
+                  </p>
+                  <p>
+                    纳税人识别号：<span class="parameter">{{ invoiceData.xsfNsrsbh }}</span>
+                  </p>
+                  <p>
+                    <span class="dzdh">地址、电话</span><i class="dzdh-i">：</i><span class="parameter">{{
+                      invoiceData.xsfDzdh
+                    }}</span>
+                  </p>
+                  <p>
+                    开户行及账号：<span class="parameter">{{ invoiceData.xsfYhzh }}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="password">
+                <div class="title bz">备注</div>
+                <p>{{ invoiceData.bz }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="yz">
+            <img :src="fpylyz" alt="fpylyz">
+          </div>
+          <div class="footer">
+            <span class="skr">收款人：<i class="parameter"> {{ invoiceData.skr }}</i></span>
+            <span class="fh">复核：<i class="parameter"> {{ invoiceData.fhr }}</i></span>
+            <span class="kpr">开票人：<i class="parameter">{{ invoiceData.kpr }}</i></span>
+            <span class="xsf">销售方（章）：</span>
+          </div>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="printComponent('myComponent')">打 印</el-button>
+        <el-button @click="cancel()">取 消</el-button>
+      </div>
+    </el-dialog>
+    </div>
+</template>
+
+<script>
+export default {
+
+	methods:{
+	// 表单重置
+    reset() {
+      this.form = {
+        id: null,
+        seqNumber: null,
+        udisksn: null,
+        itype: "0",
+        dataResources: null,
+        kplx: null,
+        zsfs: null,
+        xsfNsrsbh: null,
+        xsfMc: null,
+        xsfDzdh: null,
+        xsfYhzh: null,
+        gmfNsrsbh: null,
+        gmfMc: null,
+        gmfDzdh: null,
+        gmfYhzh: null,
+        fpHm: null,
+        fpDm: null,
+        jym: null,
+        kprq: null,
+        jqbh: null,
+        fpMw: null,
+        kpr: null,
+        skr: null,
+        fhr: null,
+        yfpDm: null,
+        yfpHm: null,
+        yfpYf: null,
+        jshj: null,
+        hjje: null,
+        hjse: null,
+        kce: null,
+        bz: null,
+        qdbz: null,
+        tspz: null,
+        fpmw: null,
+        ewm: null,
+        slxzyy: null,
+        yfplx: null,
+        ykprq: null,
+        tzdbh: null,
+        chyydm: null,
+        spflbbh: null,
+        previewUrl: null,
+        ofdUrl: null,
+        pdfUrl: null,
+        state: null,
+        zfr: null,
+        zfrq: null,
+        hzxxbbh: null,
+        hzsqdbh: null,
+        zfbz: null,
+        invoiceResult: null,
+        zfSeqnumber: null,
+        hcbz: null,
+        originalId: null,
+        importTime: null,
+        isRelevancy: null,
+        qfjg: null,
+        isQf: null
+      };
+      this.invCrestvInvoiceItemList = [];
+
+
+      this.standardform = {
+        id: null,
+        jsrq: null,
+        // gdh: null,
+        cph: null,
+        wxlx: null,
+        cz: null,
+        zje: null,
+        vin: null,
+        czbh: null,
+        drsj: null,
+        sfygl: null
+      };
+      this.resetForm("standardform");
+      this.resetForm("form");
+    },
+	/** 发票明细 */
+    queryItem(row) {
+      console.log(row);
+      this.reset();
+      const id = row.id || this.ids
+      getCrestv(id).then(response => {
+        this.invoiceData = response.data;
+        console.log('response.data', response.data);
+        let kprq = formatDate(this.invoiceData.kprq);
+        this.invoiceData.kprq = kprq;
+        this.invoiceData.state = this.invoiceData.state;
+        this.invCrestvInvoiceItemList = response.data.invCrestvInvoiceItemList;
+        const { ewm } = this.invoiceData;
+        QRCode.toDataURL(ewm)
+          .then(dataUrl => {
+            this.qrCodeData = dataUrl;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+        this.open = true;
+        this.title = "发票";
+      });
+    },
+
+	}
+}
+</script>
+
+<style lang="scss" scoped>
+.yz {
+  top: -65px;
+  position: relative;
+  right: 5px;
+  float: right;
+  transform: rotate(-31deg);
+}
+
+/* 发票详情展示 */
+.invoice-box {
+  border: 2px solid #902121;
+  width: 1100px;
+  font-size: 15px;
+  margin: 0 auto;
+  background: #fff;
+}
+
+
+.invoice-box code {
+  color: #000;
+  box-shadow: none;
+  background: none;
+  display: block;
+  border: 0;
+  font-size: 18px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.top {
+  height: 155px;
+  position: relative;
+  border: none;
+  overflow: hidden;
+
+  .title {
+    width: 408px;
+    margin: 0 auto;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #983232;
+    position: relative;
+
+    .el-image {
+      position: absolute;
+      width: 140px;
+      left: 135px;
+      top: 0px;
+    }
+
+    h1 {
+      font-size: 32px;
+      text-align: center;
+      margin: 45px auto 0;
+      padding-bottom: 18px;
+      font-weight: 500;
+      color: #9e5210;
+      border-bottom: 1px solid #800000;
+      letter-spacing: 4px;
+    }
+  }
+}
+
+.invoice-box .top-tips {
+  position: absolute;
+  right: 40px;
+  top: 20px;
+  margin-left: 30px;
+  font-size: 16px;
+  color: #9e5210;
+}
+
+.invoice-box .tips-box {
+  height: 30px;
+  line-height: 30px;
+}
+
+.invoice-box .tips-box span {
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  color: #000;
+  margin-right: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.invoice-box .top-tips .jym {
+  color: #9e5210;
+  letter-spacing: 8px;
+  margin-right: 0;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.invoice-box .top-tips i {
+  margin-left: -8px;
+  font-style: normal;
+}
+
+.invoice-box .top img {
+  position: absolute;
+  width: 94px;
+  height: 94px;
+  left: 70px;
+  top: 15px;
+}
+
+.invoice-box .jqbh {
+  position: absolute;
+  left: 55px;
+  top: 115px;
+  font-size: 16px;
+  color: #9e5210;
+}
+
+.invoice-box .center {
+  width: 1045px;
+  /* min-height: 485px; */
+  margin: 0 auto;
+  border: 2px solid #902121;
+}
+
+.invoice-box .center .invoice-info {
+  height: 110px;
+  border-bottom: 2px solid #ba7575;
+  overflow: hidden;
+}
+
+.invoice-box .invoice-info div {
+  float: left;
+}
+
+.invoice-box .invoice-info .gmf,
+.invoice-box .invoice-info .xsf {
+  width: 600px;
+  height: 110px;
+  border-right: 2px solid #902121;
+}
+
+.invoice-box .invoice-info .title {
+  width: 35px;
+  height: 110px;
+  line-height: 30px;
+  padding-top: 10px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-align: center;
+  border-right: 2px solid #902121;
+  color: #9e5210;
+}
+
+.invoice-box .invoice-info .bz {
+  line-height: 48px;
+}
+
+.invoice-box .info p {
+  margin: 3px 0 3px 10px;
+  width: 550px;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #9e5210;
+  font-size: 16px;
+  line-height: 23px;
+}
+
+.invoice-box i {
+  font-style: normal;
+}
+
+.invoice-box .info .mc {
+  letter-spacing: 64px;
+}
+
+.invoice-box .info .parameter {
+  font-size: 15px;
+  color: #000;
+}
+
+.invoice-box .mc-i {
+  margin-left: -64px;
+}
+
+.invoice-box .info .dzdh {
+  letter-spacing: 4px;
+}
+
+.invoice-box .dzdh-i {
+  margin-left: -4px;
+}
+
+.invoice-box .password {
+  width: 440px;
+}
+
+.invoice-box .password p {
+  float: left;
+  width: 400px;
+  padding: 10px 30px;
+  margin: 0;
+  font-size: 18px;
+  height: 110px;
+  overflow: hidden;
+  letter-spacing: 2px;
+}
+
+.invoice-box .center .xsf-box {
+  border-top: 2px solid #902121;
+  border-bottom: none;
+}
+
+.invoice-box table {
+  color: #9e5210;
+  border: none;
+}
+
+.invoice-box table th {
+  text-align: center;
+}
+
+.invoice-box table th,
+.invoice-box table td {
+  border-right: 2px solid #902121;
+}
+
+.invoice-box table .spmc {
+  width: 280px;
+}
+
+.invoice-box table .ggxh {
+  width: 80px;
+}
+
+.invoice-box table .dw {
+  width: 65px;
+}
+
+.invoice-box table .sum {
+  width: 120px;
+}
+
+.invoice-box table .dj {
+  width: 130px;
+}
+
+.invoice-box table .je {
+  width: 165px;
+}
+
+.invoice-box table .sl {
+  width: 45px;
+}
+
+.invoice-box table .se {
+  width: 160px;
+  border: none;
+}
+
+.invoice-box table tr {
+  height: 20px;
+}
+
+.invoice-box table td {
+  color: #000;
+}
+
+.invoice-box .hjh td {
+  border-bottom: 2px solid #902121;
+}
+
+.invoice-box .hjh .hj {
+  color: #9e5210;
+  text-align: center;
+}
+
+.invoice-box .hjh .jshj {
+  color: #9e5210;
+  text-align: center;
+  border-bottom: none;
+}
+
+.invoice-box .hjh span {
+  display: inline-block;
+  margin-left: 20px;
+  color: #9e5210;
+}
+
+.invoice-box .hjh i,
+.invoice-box .hjh .uppercase {
+  color: #000;
+}
+
+.invoice-box .hjh .lowercase {
+  margin-left: 380px;
+}
+
+.invoice-box table .no-border {
+  border: none;
+}
+
+.invoice-box tbody td {
+  text-align: right;
+  padding: 0 2px;
+  font-size: 14px;
+}
+
+.invoice-box tbody td:nth-child(1) {
+  text-align: left;
+  font-weight: bold;
+}
+
+.invoice-box .footer {
+  margin: 20px auto;
+  position: relative;
+  color: #9e5210;
+  height: 60px;
+  overflow: hidden;
+}
+
+.invoice-box .footer span {
+  position: absolute;
+}
+
+.invoice-box .footer .skr {
+  top: 0;
+  left: 60px;
+}
+
+.invoice-box .footer .fh {
+  top: 0;
+  left: 350px;
+}
+
+.invoice-box .footer .kpr {
+  top: 0;
+  left: 575px;
+}
+
+.invoice-box .footer .xsf {
+  top: 0;
+  left: 800px;
+}
+
+.invoice-box .footer i {
+  color: #000;
+}
+
+
+.inputys {
+  width: 100px;
+  // display: inline-block;
+  border: none;
+  outline: none;
+  background-color: white;
+}
+</style>
+
