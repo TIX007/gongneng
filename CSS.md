@@ -108,6 +108,22 @@ cursor : pointer;
 }
 ```
 
+### 透明背景虚化
+```css
+.betton_form {
+  text-align: center;
+  position: fixed;
+  top: 92%;
+  z-index: 9999;
+  margin-top: 2%;
+  // 背景虚化
+  background-color: rgba(212, 212, 212, 0.5);
+  backdrop-filter: blur(5px);
+  height: 80px;
+  width: 100%;
+}
+```
+
 ### 毛玻璃
 
 [玻璃拟态是什么？前端该如何实现 - 掘金 (juejin.cn)](https://juejin.cn/post/7086759520025706526)
