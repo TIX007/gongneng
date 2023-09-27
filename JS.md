@@ -164,6 +164,15 @@ Math.round((scope.row.openvolume / scope.row.number) * 10000) / 100 + '％'
         })
         console.log(news);  //[2, 3, 4, 6, 8, 11]
 
+// 2
+     sortBys(field) { // field表示（vicechairmanlist1数组对象）需要排序的字段名称
+	return (x, y) => {
+	// return y[field] - x[field] // 数字大的在前面
+	return x[field] - y[field] // 数字小的在前面
+	 }
+	},
+
+   console.log(arr.sort(this.sortBys('one'))); // 使用
 ```
 
 ### 检查某个对象自身是否拥有某个属性
