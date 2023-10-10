@@ -1,3 +1,25 @@
+
+### 如何判断undefined和null
+测试证明对undefined、null和空字符串取反为true，对其余任何值取反都为false。如：
+```js
+!undefined; // true
+!null; // true
+!''; // true
+!1; // false
+!'123'; // false
+```
+所以，如果想判断一个值是undefined、null和空字符串中的一种，只要用 ! 就可以。如：
+```js
+if (!data) {
+    ...
+}
+```
+同理，如果想判断一个值不是undefined、null和空字符串中的一种，则用 !! 就可以。如：
+```js
+if (!!data) {
+    ...
+}
+```
 ### 查找数组中对象里元素的位置，返回值为数字
 
 ```js
