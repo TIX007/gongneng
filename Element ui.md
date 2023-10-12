@@ -922,3 +922,23 @@ getSummaries(param) {
     }
 ```
 
+### 动态表格
+
+```html
+<el-table v-loading="loading" :data="invoiceList" border @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" align="center" />
+      <el-table-column v-for="(item, index) in titleList" :key="index" :label="invoiceListTittle[item]" align="center"
+        :prop="item" width="150" />
+    </el-table>
+```
+```json
+"title": [ //表头
+    "name",
+    "total",
+    "one",
+    "thirteen"
+],
+"list":[ // 列表
+    {},
+    {}
+]
