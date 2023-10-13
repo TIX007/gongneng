@@ -4030,7 +4030,8 @@ import printJS from 'print-js';
 
 /** 打印 */
 printComponent(componentId) {
-html2canvas(document.querySelector(`#${componentId}`)).then(canvas => {
+// 将分辨率提高到特定的DPI 提高16倍
+html2canvas(document.querySelector(`#${componentId}`), { dpi: window.devicePixelRatio * 16, scale: 16 }).then(canvas => {
 printJS({
   printable: canvas.toDataURL('image/png'),
   type: 'image'
