@@ -4020,3 +4020,22 @@ export default {
 ```
 
 使用`<marqueeLeft :sendVal="newsList"></marqueeLeft>`
+
+### HTML打印
+
+```js
+// @click="printComponent('myComponent')"  myComponent为需要打印的dive的id名称（<div id="myComponent" class="id-card-holder">）
+import html2canvas from 'html2canvas';
+import printJS from 'print-js';
+
+/** 打印 */
+printComponent(componentId) {
+html2canvas(document.querySelector(`#${componentId}`)).then(canvas => {
+printJS({
+  printable: canvas.toDataURL('image/png'),
+  type: 'image'
+});
+});
+},
+```
+
