@@ -956,3 +956,12 @@ getSummaries(param) {
                     </template>
                   </el-autocomplete>
 ```
+
+```css
+.dynamicItem :deep .el-form-item__content,
+.el-autocomplete,
+.el-input--medium,
+.el-input__inner {
+  width: 98%;
+}
+```
