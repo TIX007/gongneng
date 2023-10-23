@@ -942,3 +942,17 @@ getSummaries(param) {
     {},
     {}
 ]
+
+### 搜索提示带左右两个不同数据
+
+```html
+<el-autocomplete v-model="formData.purchaserName" :fetch-suggestions="querySearchAsyncName"
+                    placeholder="请输入购方名称" @select="handleSelectName" @dblclick.native.prevent="selectingCustomers"
+                    clearable :style="{ width: '100%' }">
+                    <el-button slot="append" @click="selectingCustomers" icon="el-icon-more"></el-button>
+                    <template slot-scope="{ item }">
+                      <div class="autocomplete">{{ item.buyerName }}</div>
+                      <div class="autocomplete">{{ item.source == 2 ? '扫码录入' : '本地' }}</div>
+                    </template>
+                  </el-autocomplete>
+```
