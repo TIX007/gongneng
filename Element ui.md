@@ -965,3 +965,61 @@ getSummaries(param) {
   width: 98%;
 }
 ```
+
+### el-date-picker 限制选择日期在一个月范围内
+``` vue
+<template>
+  <el-date-picker
+    placeholder="请选择"
+    unlink-panels
+    :value="timeArr"
+    type="datetimerange"
+    range-separator="至"
+    start-placeholder="开始日期"
+    end-placeholder="结束日期"
+    value-format="yyyy-MM-dd HH:mm:ss"
+    :default-time="['00:00:00', '23:59:59']"
+    :picker-options="pickerOptions"
+    @input="change($event)"
+  />
+</template>
+
+<script>
+export default {
+  name: 'DatePicker', 
+  props: {
+    value: {
+      type: Array,
+      default: []
+    }
+  },
+  data() {
+    return {
+      selectDate: '',
+      // 日期时间范围在一个月以内
+      pickerOptions: {
+        onPick: ({ maxDate, minDate }) => {
+          this.selectDate = minDate.getTime()
+          if (maxDate) {
+            this.selectDate = ''
+          }
+        },
+        disabledDate: (time) => {
+         if (this.selectDate !== '') {
+            const one = 30 * 24 * 3600 * 1000
+            const minTime = this.selectDate - one
+            const maxTime = this.selectDate + one
+            return time.getTime() < minTime || time.getTime() > maxTime
+          }
+        }
+      }
+    }
+  },
+  methods: {
+    change(val) {
+      this.$emit('input', val)
+    }
+  }
+}
+</script>
+```
