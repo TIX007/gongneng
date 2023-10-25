@@ -1023,3 +1023,36 @@ export default {
 }
 </script>
 ```
+
+### el-table支持单选
+```html
+<el-table
+    :data="tableData"
+    style="width: 100%"
+    @row-click="rowCommoditysClick"
+    @selection-change="handleSelectionChange">
+     <el-table-column
+      label="选择项"
+      width="55">
+      <template slot-scope="scope">
+      	<el-radio v-model="tableRadio" :label="scope.row"></el-radio>
+      </template>
+    </el-table-column>
+</el-table>
+
+```
+
+```js
+data(){
+	return{
+		tableRadio: '',
+	}
+}
+handleSelectionChange(currentRow){
+	this.tableRadio = currentRow
+},
+rowCommoditysClick(row) {
+      this.commodityValue = row;
+      this.tableRadio = row.revenueCode
+    },
+```
