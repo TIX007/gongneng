@@ -4040,3 +4040,41 @@ printJS({
 },
 ```
 
+### Vue输入框同时绑定了blur和其他事件，避免同时触发两次事件
+做的项目有个需求，弹窗里面有个表单，里面的输入框按回车和失焦都可以触发某一事件，如果同时绑定就会出现按回车之后，在关闭弹窗或点击其他位置都会触发blur的事件，解决方法：
+```html
+<el-input
+ @input="func()"
+ @blur="blur&&getTestInfoBlur()"
+></el-input
+```
+```js
+// An highlighted block
+export default {
+  data() {
+    return {
+      blur:true,
+      },
+  },
+  methods: {
+  //func函数是用来解决用户enter之后再输入内容blur失效的问题
+    func(){
+      this.blur=true;
+    },
+    //blur触发的事件
+    getTestInfoBlur(){
+      this.getTestInfo();
+    },
+    //enter触发的事件，触发之后把blur设置为false，避免重复触发
+     getTestInfoEnter(){
+      this.blur=false;
+      this.getTestInfo();
+    },
+    //你自己的代码
+    getTestInfo() {
+      ...
+    },
+};
+
+```
+
