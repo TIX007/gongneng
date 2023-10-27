@@ -1056,3 +1056,39 @@ rowCommoditysClick(row) {
       this.tableRadio = row.revenueCode
     },
 ```
+
+### 邮箱提示
+```html
+<el-autocomplete class="inline-input" v-model="formData.purchaserEmail"
+                  :fetch-suggestions="queryEmailName" placeholder="请输入内容" :trigger-on-focus="false"></el-autocomplete>
+```
+
+```js
+queryEmailName(queryString, cb) {
+      // var restaurants = this.restaurantsName;
+      let index = this.formData.purchaserEmail.indexOf("@")
+      if (index == -1) {
+        index = this.formData.purchaserEmail.length
+      }
+      let newEmail = this.formData.purchaserEmail.substring(0, index)
+      let Emails = [
+        { "value": newEmail + "@163.com" },
+        { "value": newEmail + "@126.com" },
+        { "value": newEmail + "@139.com" },
+        { "value": newEmail + "@189.cn" },
+        { "value": newEmail + "@qq.com" },
+        { "value": newEmail + "@yahoo.com" },
+        { "value": newEmail + "@gmail.com" },
+        { "value": newEmail + "@msn.com" },
+        { "value": newEmail + "@aliyun.com" },
+      ]
+      var restaurants = Emails;
+      restaurants = queryString ? restaurants.filter(this.createFilter(queryString)) : restaurants;
+      cb(restaurants);
+    },
+    createFilter(queryString) {
+      return (restaurant) => {
+        return (restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) === 0);
+      };
+    },
+```
