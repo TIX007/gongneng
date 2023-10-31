@@ -788,3 +788,29 @@ if (Number(childs[i].amountWithTax) == 0) {
     }
 ```
 
+### 实现文本域`textarea`文字添加删除
+
+```html
+<el-button @click.stop="addRemarks(formData, $event)" class="icon_selecting"></el-button>
+```
+
+```js
+addRemarks(text, event) {
+      let remark_text = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+      let target = event.target;
+      if (target.classList.contains("active")) {
+        // 再次点击删除
+        console.log('remark_text', remark_text);
+        this.formData.remark = this.formData.remark.replace(remark_text, '');
+        console.log(this.formData.remark);
+      } else {
+        if (this.formData.remark == '' || this.formData.remark == null) {
+          this.formData.remark = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        } else {
+          this.formData.remark = this.formData.remark + '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        }
+      }
+      target.classList.toggle("active");
+    },
+```
+
