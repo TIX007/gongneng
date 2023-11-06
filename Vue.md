@@ -4078,3 +4078,12 @@ export default {
 
 ```
 
+### 缓存页面接口重复调用
+
+```js
+if (this.isRequesting) return;
+this.isRequesting = true;
+// 调用接口
+this.isRequesting = false;
+```
+
