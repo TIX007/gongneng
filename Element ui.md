@@ -1092,3 +1092,16 @@ queryEmailName(queryString, cb) {
       };
     },
 ```
+
+### 简单消息通知
+
+```html
+<el-dropdown-menu slot="dropdown" class="padding12">
+            <el-tabs stretch class="width280">
+              <el-tab-pane label="通知"> <router-link to="/digital/fullElectronicList">{{ billNews }}</router-link>
+              </el-tab-pane>
+              <!-- <el-tab-pane label="消息">消息</el-tab-pane>
+              <el-tab-pane label="代办">代办</el-tab-pane> -->
+            </el-tabs>
+          </el-dropdown-menu>
+```
