@@ -1030,16 +1030,31 @@ export default {
     :data="tableData"
     style="width: 100%"
     @row-click="rowCommoditysClick"
-    @selection-change="handleSelectionChange">
+    @selection-change="handleSelectionChange"
+    class="commodity_list>
      <el-table-column
       label="选择项"
       width="55">
       <template slot-scope="scope">
-      	<el-radio v-model="tableRadio" :label="scope.row"></el-radio>
+      	<el-radio v-model="tableRadio" :label="scope.row.id"></el-radio>
       </template>
     </el-table-column>
 </el-table>
 
+```
+
+```js
+rowCommodityClick(row) {
+      console.log(this.form.dynamicItem[this.commodityCode], row);
+      this.rowCommodity = row;
+// 选中时获取当前唯一标识
+      this.tableRadioCommodity = row.id
+    },
+```
+```scss
+.commodity_list ::v-deep .el-radio__label {
+  display: none;
+}
 ```
 
 ```js
