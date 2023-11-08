@@ -1120,3 +1120,35 @@ queryEmailName(queryString, cb) {
             </el-tabs>
           </el-dropdown-menu>
 ```
+
+### 动态输入框表单
+
+```html
+<el-form ref="form" :model="form" label-width="80px">
+            <div v-for="(item, index) in dataList" :key="index">
+                <el-form-item :label="item.label">
+                    <el-input v-model="form[item.value]"></el-input>
+                </el-form-item>
+            </div>
+            <el-form-item>
+                <el-button type="primary" @click="onSubmit">立即创建</el-button>
+                <el-button>取消</el-button>
+            </el-form-item>
+        </el-form>
+```
+```js
+export const dataList = [
+    {
+        label: '姓名',
+        value: 'name'
+    },
+    {
+        label: '年龄',
+        value: 'age'
+    },
+    {
+        label: '专业',
+        value: 'one'
+    },
+]
+```
