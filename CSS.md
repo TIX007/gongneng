@@ -306,3 +306,14 @@ background:linear-gradient(to top right,rgba(255,249,245,.55) 0,rgba(255,249,245
 }
 ```
 
+### 放大效果
+```css
+.middle_li {
+  transition: all 0.5s; //控制速度，也可不加
+}
+.middle_li:hover {
+  transform: scale(1.1); //放大倍数
+}
+
+```
+
