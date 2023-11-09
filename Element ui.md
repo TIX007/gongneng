@@ -1152,3 +1152,17 @@ export const dataList = [
     },
 ]
 ```
+
+### 单选重复点击取消选中
+
+```html
+<el-radio-group v-model="radioColor">
+    <el-radio :label="'black'" @click.native.prevent="clickitemdataType('black')">黑色</el-radio>
+    <el-radio :label="'white'" @click.native.prevent="clickitemdataType('white')">白色</el-radio>
+</el-radio-group>
+```
+```js
+clickitemdataType (e) { // e为radio的label值
+      e === this.radioColor ? this.radioColor = '' : this.radioColor = e
+ },
+```
