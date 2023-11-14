@@ -1166,3 +1166,17 @@ clickitemdataType (e) { // e为radio的label值
       e === this.radioColor ? this.radioColor = '' : this.radioColor = e
  },
 ```
+
+### 表单标签两端对齐
+先给from标签一个`wordSpacing`类
+```css
+.wordSpacing :deep label {
+  width: 110px;
+  font-size: 16px;
+  text-align: justify;
+  text-align-last: justify;
+  -moz-text-align-last: justify;
+  text-justify: distribute-all-lines;
+  display: inline-block;
+}
+```
