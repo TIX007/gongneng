@@ -20,6 +20,15 @@ if (!!data) {
     ...
 }
 ```
+
+### 将斜杠改为问号
+```js
+const url = 'https://w.url.cn/s/Ackphg4/cak=krNIw5qjllJUl1ldnrze8a';
+const newUrl = url.replace(/\/cak/, '?cak');
+console.log(newUrl);
+// https://w.url.cn/s/Ackphg4?cak=krNIw5qjllJUl1ldnrze8a
+```
+
 ### 查找数组中对象里元素的位置，返回值为数字
 
 ```js
