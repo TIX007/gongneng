@@ -4087,3 +4087,113 @@ this.isRequesting = true;
 this.isRequesting = false;
 ```
 
+### 扫码枪扫码自动请求事件
+
+```vue
+<template>
+    <div>
+     <el-dialog title="微信扫码新增信息" class="dialogBox" :show-close="false" :visible.sync="scanVisible" width="400px">
+      <el-descriptions :title="addData.buyerName" :column="1" :labelStyle="{ width: '60px' }">
+        <el-descriptions-item label="税号">{{ addData.buyerNsrsbh }}</el-descriptions-item>
+        <el-descriptions-item label="单位地址">{{ addData.address }}</el-descriptions-item>
+        <el-descriptions-item label="电话">{{ addData.companyTel }}</el-descriptions-item>
+        <el-descriptions-item label="开户银行">{{ addData.yhmc }}</el-descriptions-item>
+        <el-descriptions-item label="银行账户">{{ addData.yhzh }}</el-descriptions-item>
+      </el-descriptions>
+      <el-button type="primary" @click="submitAdd">确认</el-button>
+    </el-dialog>
+    </div>
+</template>
+<script>
+export default {
+  data() {
+   return{
+      formScan: {},
+      keyupLastTime: null,
+      realBarcode: '',
+      realBarcode1: '',
+      addData: {},
+    }
+  },
+methods: {
+// 扫码新增
+    handleKeyUp(e) {
+      let gap = 0;
+      clearTimeout
+      if (this.keyupLastTime) {
+        gap = new Date().getTime() - this.keyupLastTime;
+        if (gap > 50) {
+          gap = 0;
+          this.realBarcode = "";
+        }
+      }
+      this.keyupLastTime = new Date().getTime();
+      if (e.key != "Process" && gap < 50) {
+        if (e.key.trim().length == 1) {
+          // 输入单个字母或者数字
+          this.realBarcode += e.key;
+          if (this.realBarcode.length == 53) {
+            // this.realBarcode = this.realBarcode.replace(/\/cak/, '?cak');
+            console.log(this.realBarcode1);
+            this.formScan.scanEntry = this.realBarcode;
+            this.submitScan()
+          }
+          console.log(e);
+          console.log(this.realBarcode.length);
+          console.log('this.realBarcode**', this.realBarcode);
+        }
+      } else {
+        console.log(this.realBarcode1);
+        // this.formScan.scanEntry = this.realBarcode;
+        // this.submitScan()
+      }
+    },
+    scanAdd() {
+      this.formScan = {};
+      this.scanVisible = true;
+      let that = this;
+      document.onkeypress = function (e) {
+        that.handleKeyUp(e);
+      };
+    },
+    submitScan() {
+      let scanData = { scanText: this.formScan.scanEntry }
+      this.$modal.loading("正在获取数据，请稍候...");
+      scanTitle(scanData).then((res) => {
+        // console.log(res);
+        let { title, phone, taxNo, addr, bankType, bankNo } = res.data
+        this.addData = {
+          buyerName: title,
+          companyTel: phone,
+          buyerNsrsbh: taxNo,
+          address: addr,
+          yhmc: bankType,
+          yhzh: bankNo
+        }
+        this.$modal.msgSuccess("获取成功");
+        this.$modal.closeLoading()
+      }).catch(() => {
+        this.realBarcode = "";
+        let that = this;
+        document.onkeyup = function (e) {
+          that.handleKeyUp(e);
+        };
+        this.$modal.closeLoading()
+      });
+    },
+    submitAdd() {
+      addBuyer(this.addData).then(response => {
+        this.$modal.msgSuccess("新增成功");
+        this.$modal.closeLoading()
+        this.scanVisible = false;
+        this.getList();
+      }).catch(() => {
+        this.realBarcode = "";
+        this.$modal.closeLoading()
+      });
+    },
+ }
+
+}
+</script>
+```
