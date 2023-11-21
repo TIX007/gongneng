@@ -4197,3 +4197,77 @@ methods: {
 }
 </script>
 ```
+
+### 发票PDF预览
+```vue
+<template>
+  <el-dialog :title="title" :visible.sync="examineOpen" width="1000px" class="invoice-dialog" append-to-body>
+    <div :style="{ height: examineHeight }" v-loading="examineOpenOf">
+      <vue-office-pdf ref="examineOpenPDF" :src="examinePDF" @rendered="renderedHandler" @error="errorHandler" />
+    </div>
+  </el-dialog>
+</template>
+
+<script>
+import VueOfficePdf from '@vue-office/pdf'
+export default {
+  components: {
+    VueOfficePdf
+  },
+  data() {
+    return {
+      examineOpen: false,
+      examineOpenOf: true,
+      examinePDF: '',
+      examineHeight: '600px',
+    }
+  },
+  methods: {
+    /** 发票明细点击事件 */
+    handlePreview(row) {
+      const id = row.id || this.ids
+      queryDetailInfoById(id).then(response => {
+        this.invoiceData = response.data;
+        this.invoiceData.state = this.invoiceData.state;
+        this.examinePDF = this.invoiceData.qdPdfUrl;
+        this.invCrestvInvoiceItemList = response.data.invoiceItemList;
+        const { ewm, fpDm, fpHm, hjje, kprq } = this.invoiceData;
+        let ewms = '01,01,' + '' + ',' + fpHm + ',' + hjje + ',' + kprq + ',' + '' + ',' + '727C'
+        let kprqs = formatDate(this.invoiceData.kprq);
+        this.invoiceData.kprq = kprqs;
+        if (this.invoiceData.qdPdfUrl == '') {
+          this.open = true;
+          this.title = "发票预览";
+        } else {
+          this.examineOpenOf = true;
+          this.examineOpen = true;
+          this.title = "PDF预览";
+          if (!!this.$refs.examineOpenPDF) {
+            setTimeout(() => {
+              this.examineOpenOf = false;
+            }, 800);
+          }
+
+        }
+      });
+    },
+    renderedHandler() {
+      this.examineOpenOf = false;
+      console.log("渲染完成")
+      let ele = document.getElementsByClassName('vue-office-pdf-wrapper')
+      this.examineHeight = ele[0].childNodes[0].clientHeight + 3 + 'px';
+    },
+    errorHandler() {
+      console.log("渲染失败")
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.invoice-dialog :deep .vue-office-pdf-wrapper {
+  padding: 0 !important;
+  background: #fff !important;
+}
+</style>
+```
