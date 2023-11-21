@@ -206,6 +206,63 @@ Math.round((scope.row.openvolume / scope.row.number) * 10000) / 100 + '％'
    console.log(arr.sort(this.sortBys('one'))); // 使用
 ```
 
+### 数组合并去重
+```js
+let arr1 = [3,5,2,3,6];
+let arr2 = [5,2,4,6,8,7,9,2];
+let arr = arr1.concat(arr2);  //合并数组
+let arrNew= new Set(arr); //通过set集合去重
+console.log("arrNew",Array.from(arrNew)); //将set集合转化为数组
+
+// *********
+let arr=[
+    {id:1,name:'AAAA'},
+    {id:2,name:'BBBB'}
+]
+let arr1=[
+    {id:1,name:'AAAA'},
+    {id:3,name:'CCCC'}
+]
+let arrs=[...arr,...arr1];
+//根据id去重
+let map=new Map();
+for(let item of arrs){
+    if(!map.has(item.id)){
+        map.set(item.id,item)
+    }
+}
+let newArr=[...map.values()];//把map中所有的值取出来放进数组
+//****************
+removedup(arr, batch) {
+  if (!Array.isArray(arr)) {
+    return arr;
+  }
+  if (arr.length == 0) {
+    return [];
+  }
+  let obj = {};
+  let uniqueArr = arr.reduce(function (total, item) {
+    obj[item[batch]] ? '' : (obj[item[batch]] = true && total.push(item));
+    return total;
+  }, []);
+  return uniqueArr;
+}
+// arrObjList 需要去重的数组对象，  score 根据这个属性进行去重
+let uniqueArrObjList = removedup(arrObjList, "score");
+// **************遍历旧数组，把值加入新建的数组（当新数组中不存在该值时）
+function uniqueArr(array) {
+    var n = []; //一个新的临时数组
+    //遍历当前数组
+    for (var i = 0; i < array.length; i++) {
+        //如果当前数组的第i已经保存进了临时数组，那么跳过，
+        //否则把当前项push到临时数组里面
+        if (n.indexOf(array[i]) == -1) n.push(array[i]);
+    }
+    return n;
+}
+
+```
+
 ### 检查某个对象自身是否拥有某个属性
 
 ```js
