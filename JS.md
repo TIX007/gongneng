@@ -880,3 +880,51 @@ addRemarks(text, event) {
     },
 ```
 
+### 前端打印方法
+方法一：直接调用打印页面弹窗
+
+```js
+printClick() {
+// 获取原有页面的html内容
+ let oldStr = window.document.body.innerHTML;
+ // 根据id获取打印的html内容
+ let newStr = document.getElementById('test').innerHTML;
+ // html页面内容赋值
+ window.document.body.innerHTML = newStr;
+ // 调用打印弹窗
+ window.print();
+ // 页面内容还原
+ //window.document.body.innerHTML = oldStr;
+ // 打印完成后重新加载页面
+ window.location.reload()
+ }
+```
+
+方法二：把打印内容嵌入到页面，调用打印弹窗
+
+```js
+printClick() {
+  const printContentHtml = document.getElementById('test').innerHTML
+  const iframe = document.createElement('iframe')
+  iframe.setAttribute('style', 'position:absolute;width:0px;height:0px;left:-500px;top:-500px;')
+  document.body.appendChild(iframe)
+  iframe.contentDocument.write(printContentHtml)
+  iframe.contentDocument.close()
+  iframe.contentWindow.print()
+  document.body.removeChild(iframe)
+ }
+```
+
+方法三：打开新页面打印
+
+```js
+printClick() {
+   const printContentHtml = window.document.body.innerHTML;
+   const printPage = window.open()
+   printPage.document.write(printContentHtml)
+   printPage.document.close()
+   printPage.print()
+   printPage.close()
+ }
+```
+
