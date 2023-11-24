@@ -1180,3 +1180,26 @@ clickitemdataType (e) { // e为radio的label值
   display: inline-block;
 }
 ```
+
+### 给表头加必填星号
+### 1.在需要加必填星号的el-table-column上添加render-header属性。
+
+```html
+<el-table-column :render-header="addRedStar" v-for="(item, index) in columns" :prop="item.prop">
+  <template>
+    ...
+  </template>
+</el-table-column>
+```
+
+### 2.addRedStar函数。除了加红\*外也可以有别的控制表头内容的操作，可按需编写。
+
+```javascript
+    // 给表头加必填符号*
+    addRedStar(h, { column }) {
+      return [
+        h("span", { style: "color: red" }, "*"),
+        h("span", " " + column.label),
+      ];
+    },
+```
