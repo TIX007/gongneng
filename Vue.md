@@ -4271,3 +4271,263 @@ export default {
 }
 </style>
 ```
+
+### 网页打印小票解决方案
+
+1.先去网站下载控件[下载](https://www.lodop.net/download.html)
+
+2.在项目中执行`npm i lodop-print-designer`或者 `npm install kr-print-designer`
+并在main.js加入
+```js
+// import KrPrintDesigner from "kr-print-designer";
+// import "kr-print-designer/lib/kr-print-designer.css";
+
+// Vue.use(KrPrintDesigner);
+import LodopPrintDesigner from "lodop-print-designer";
+import "lodop-print-designer/lib/lodop-print-designer.css";
+
+Vue.use(LodopPrintDesigner);
+```
+
+3.定义一个jison样式
+```js
+export let printData = {
+    "title": "123",
+    "type": 1,
+    "width": 180,
+    "height": 500,
+    "pageWidth": 58,
+    "pageHeight": 140,
+    "tempItems": [
+        {
+            "type": "braid-txt",
+            "isEdit": 0,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 19,
+            "left": 0,
+            "top": 13,
+            "title": "公司名称",
+            "value": "{公司名称}",
+            "defaultValue": "某某公司",
+            "name": "companyName",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 10,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "ljlb357ae3k04e2b"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 171,
+            "height": 20,
+            "left": 12,
+            "top": 48,
+            "title": "出库单号",
+            "value": "{出库单号1111111111}",
+            "defaultValue": "CK-1234567890",
+            "name": "stockoutCode",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "bqath1ja3su0s1cm"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 168,
+            "height": 19,
+            "left": 12,
+            "top": 71,
+            "title": "出库时间",
+            "value": "{出库时间845848484}",
+            "defaultValue": "2020-08-27 12:00:00",
+            "name": "businessDate",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "kwoqo1jao95amhb5"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 141,
+            "height": 18,
+            "left": 12,
+            "top": 96,
+            "title": "合计金额",
+            "value": "{合计金额}",
+            "defaultValue": "123.00",
+            "name": "totalPrice",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "ek1ejq1k0jnbzhpg"
+        },
+        {
+            "type": "horizontal-line",
+            "isEdit": false,
+            "dragable": true,
+            "resizable": true,
+            "width": 177,
+            "height": 10,
+            "left": 2,
+            "top": 125,
+            "title": "横线",
+            "value": "横线",
+            "defaultValue": "——",
+            "name": "",
+            "style": {
+                "type": "solid",
+                "zIndex": 0,
+                "FontSize": 1,
+                "FontColor": "#000000",
+                "lineType": 0,
+                "ItemType": 0
+            },
+            "uuid": "uwu13b9oui5aio63"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 25,
+            "left": 0,
+            "top": 281,
+            "title": "自定义文本",
+            "value": "支付宝或微信扫码开票",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "c0p50209qqxg9wm2"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 23,
+            "left": 0,
+            "top": 308,
+            "title": "自定义文本",
+            "value": "请于2023年前扫码开票",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "emyb5a59to709i8b"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 177,
+            "height": 20,
+            "left": 1,
+            "top": 336,
+            "title": "自定义文本",
+            "value": "否则二维码将失效",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "3qe7nbdyhgx1e9i2"
+        },
+        {
+            "type": "bar-code",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 120,
+            "height": 120,
+            "left": 33,
+            "top": 142,
+            "title": "单号条码",
+            "value": "{单号}",
+            "defaultValue": "CK-1234567890",
+            "name": "stockoutCode",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "ShowBarText": false,
+                "codeType": "QRCode",
+                "ItemType": 0
+            },
+            "lodopStyle": {
+                "QRCodeVersion": "1",
+                "QRCodeErrorLevel": "L"
+            },
+            "uuid": "11vm4wo9kqimha8j"
+        }
+    ]
+}
+```
+4.之后直接进行调用
+```js
+import { printData } from "@/utils/print";
+this.$lodop.previewTemp(printData)
+```
