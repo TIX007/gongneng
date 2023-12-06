@@ -928,3 +928,111 @@ printClick() {
  }
 ```
 
+### WebSocket的简单封装示例
+
+```js
+export class WebSocketClient {
+  constructor(url) {
+    this.url = url;
+    this.ws = null;
+    this.heartbeatTimer = null;
+    this.onopen = null;
+    this.onclose = null;
+    this.onmessage = null;
+    this.onerror = null;
+  }
+
+  connect() {
+    if (!this.ws) {
+      this.ws = new WebSocket(this.url);
+      this.ws.onopen = (event) => {
+        console.log('WebSocket连接已打开');
+        if (this.onopen) {
+          this.onopen(event);
+        }
+        this.startHeartbeat();
+      };
+      this.ws.onclose = (event) => {
+        console.log('WebSocket连接已关闭');
+        if (this.onclose) {
+          this.onclose(event);
+        }
+        this.stopHeartbeat();
+        this.reconnect();
+      };
+      this.ws.onmessage = (event) => {
+        console.log('WebSocket收到消息');
+        if (this.onmessage) {
+          this.onmessage(event);
+        }
+        if (event.data === 'pong') {
+          // 心跳响应，重置定时器
+          clearInterval(this.heartbeatTimer);
+          this.startHeartbeat();
+        }
+      };
+      this.ws.onerror = (event) => {
+        console.error('WebSocket发生错误');
+        if (this.onerror) {
+          this.onerror(event);
+        }
+      };
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  send(message) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      console.log('WebSocket发送消息');
+      this.ws.send(message);
+    } else {
+      console.error('WebSocket未连接');
+    }
+  }
+
+  startHeartbeat() {
+    // 每隔一段时间发送心跳消息
+    this.heartbeatTimer = setInterval(() => {
+      console.log('WebSocket发送心跳');
+      this.send('ping');
+    }, 30000);
+  }
+
+  stopHeartbeat() {
+    clearInterval(this.heartbeatTimer);
+  }
+
+  reconnect() {
+    setTimeout(() => {
+      console.log('WebSocket重新连接中...');
+      this.connect();
+    }, 5000);
+  }
+}
+```
+用法
+```js
+import { WebSocketClient } from '@/utils/request'
+
+const ws = new WebSocketClient('wss://www.example.com/websocket');
+ws.onopen = (event) => {
+  console.log('WebSocket连接已打开');
+};
+ws.onclose = (event) => {
+  console.log('WebSocket连接已关闭');
+};
+ws.onmessage = (event) => {
+  console.log('WebSocket收到消息：' + event.data);
+};
+ws.onerror = (event) => {
+  console.error('WebSocket发生错误');
+};
+ws.connect();
+```
+
