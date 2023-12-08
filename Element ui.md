@@ -1206,3 +1206,72 @@ clickitemdataType (e) { // e为radio的label值
       ];
     },
 ```
+
+### 利用溢出隐藏实现展开收起
+
+```vue
+<template>
+    <div class=''>
+        <el-form :model="form" ref="form" :rules="rules" label-width="80px" :inline="false" size="normal">
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item label="生成时间" prop="orderGenerationTime">
+                        <el-date-picker v-model="form.orderGenerationTime" type="daterange" align="right" unlink-panels
+                            value-format="yyyy-MM-dd" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                            :picker-options="pickerOptions">
+                        </el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="失效时间" prop="orderExpirationTime">
+                        <el-date-picker v-model="form.orderExpirationTime" type="daterange" align="right" unlink-panels
+                            value-format="yyyy-MM-dd" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
+                            :picker-options="pickerOptions">
+                        </el-date-picker>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item>
+                        <el-button type="primary" icon="el-icon-search" size="mini" @click="manageQuery">搜索</el-button>
+                        <el-button icon="el-icon-refresh" size="mini" @click="manageResetQuery">重置</el-button>
+                        <el-button type="text" :icon="advanced ? 'el-icon-arrow-up' : 'el-icon-arrow-down'"
+                            @click="toggleAdvanced">{{
+                                advanced ? '收起' : '高级搜索' }}</el-button>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-form-item label="订单编号" prop="orderNum">
+                <el-input v-model="form.orderNum" placeholder="请输入订单编号" clearable @keyup.enter.native="manageQuery" />
+            </el-form-item>
+            <el-form-item label="购方名称" prop="buyerName">
+                <el-input v-model="form.buyerName" placeholder="请输入购方名称" clearable @keyup.enter.native="manageQuery" />
+            </el-form-item>
+        </el-form>
+
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            advanced: false,
+        };
+    },
+    methods: {
+        toggleAdvanced() {
+            this.advanced = !this.advanced
+        },
+    },
+
+}
+</script>
+
+<style lang='scss' scoped>
+.hide {
+    height: 52px;
+    overflow: hidden;
+}
+</style>
+```
+
