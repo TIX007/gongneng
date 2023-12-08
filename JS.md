@@ -1034,5 +1034,6 @@ ws.onerror = (event) => {
   console.error('WebSocket发生错误');
 };
 ws.connect();
+ws.disconnect(); //关闭 WebSocket
 ```
 
