@@ -1037,3 +1037,14 @@ ws.connect();
 ws.disconnect(); //关闭 WebSocket
 ```
 
+### 浏览器遮挡事件
+```js
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    // 页面变为可见状态时执行的操作
+  } else if (document.visibilityState === 'hidden') {
+    // 页面变为不可见状态时执行的操作
+  }
+});
+```
+
