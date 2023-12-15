@@ -4531,7 +4531,7 @@ export let printData = {
 import { printData } from "@/utils/print";
 this.$lodop.previewTemp(printData)
 ```
-法二
+#### 法二
 public内的html引入下面js文件
 ```js
 //==本JS是加载Lodop插件或Web打印服务CLodop/Lodop7的综合示例，可直接使用，建议理解后融入自己程序==
