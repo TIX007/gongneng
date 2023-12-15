@@ -4739,6 +4739,58 @@ vue文件中直接调用
       // LODOP.PREVIEW()
     },
 ```
+#### PDF打印
+写出共用方法，并全局注册
+```js
+function demoGetBASE64(dataArray) {
+  var digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  var strData = "";
+  for (var i = 0, ii = dataArray.length; i < ii; i += 3) {
+    if (isNaN(dataArray[i])) break;
+    var b1 = dataArray[i] & 0xFF, b2 = dataArray[i + 1] & 0xFF, b3 = dataArray[i + 2] & 0xFF;
+    var d1 = b1 >> 2, d2 = ((b1 & 3) << 4) | (b2 >> 4);
+    var d3 = i + 1 < ii ? ((b2 & 0xF) << 2) | (b3 >> 6) : 64;
+    var d4 = i + 2 < ii ? (b3 & 0x3F) : 64;
+    strData += digits.substring(d1, d1 + 1) + digits.substring(d2, d2 + 1) + digits.substring(d3, d3 + 1) + digits.substring(d4, d4 + 1);
+  }
+  return strData;
+}
+
+export function demoDownloadPDF(url) {
+  if (!(/^https?:/i.test(url))) return;
+  if (window.XMLHttpRequest) var xhr = new XMLHttpRequest(); else var xhr = new ActiveXObject("MSXML2.XMLHTTP");
+  xhr.open('GET', url, false); //同步方式
+  if (xhr.overrideMimeType)
+    try {
+      xhr.responseType = 'arraybuffer';
+      var arrybuffer = true;
+    } catch (err) {
+      xhr.overrideMimeType('text/plain; charset=x-user-defined');
+    }
+  xhr.send(null);
+  var data = xhr.response || xhr.responseBody;
+  if (typeof Uint8Array !== 'undefined') {
+    if (arrybuffer) var dataArray = new Uint8Array(data); else {
+      var dataArray = new Uint8Array(data.length);
+      for (var i = 0; i < dataArray.length; i++) { dataArray[i] = data.charCodeAt(i); }
+    }
+  } else
+    var dataArray = VBS_BinaryToArray(data).toArray(); //兼容IE低版本
+  return demoGetBASE64(dataArray);
+}
+```
+之后直接使用
+```js
+printLodop() {
+      var strURL = 'https://localhost.lodop.net:8443/CLodopDemos/PDFDemo.pdf';
+      LODOP = getLodop();
+      LODOP.PRINT_INIT("测试PDF打印功能");
+      LODOP.ADD_PRINT_PDF(0, 0, "100%", "100%", this.demoDownloadPDF(strURL));
+      // LODOP.PREVIEW();
+      LODOP.PRINT();
+    },
+```
+
 
 
 
