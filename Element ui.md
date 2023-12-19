@@ -1275,3 +1275,18 @@ export default {
 </style>
 ```
 
+### 在使用`el-table组件`时，数据已经发生了变化，但是页面显示的数据却没变化;
+
+**二、解决办法**
+
+在[el-table](https://so.csdn.net/so/search?q=el-table&spm=1001.2101.3001.7020)中添加一个key，可以设置成boolean类型的，在数据更新后更新这个key;
+
+```cobol
+  <el-table :data="currentRecordList" :key="isUpdate">        <el-table-column prop="address" label="Sender" min-width="10%" />        <el-table-column prop="date" label="Date" min-width="15%" />        <el-table-column label="Message conten" min-width="40%">          <template slot-scope="scope">            <span v-if="scope.row.bodyHighlights" v-html="scope.row.bodyHighlights"></span>            <span v-else>{{ scope.row.body }}</span>          </template>        </el-table-column>     </el-table>
+```
+
+在数据更新的地方后面加上如下 
+
+```kotlin
+this.isUpdate = !this.isUpdate;
+```
