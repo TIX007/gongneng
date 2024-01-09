@@ -71,6 +71,17 @@ rules: {
       }
 ```
 
+### 表单校验最大值与最小值
+```vue
+<el-table-column prop="outerDiscountAmountWithTax" label="折扣金额" align="center" sortable width="120">
+    <template slot-scope="scope">
+      <el-input type="number" v-model="scope.row.outerDiscountAmountWithTax"
+	@input="(v) => (scope.row.outerDiscountAmountWithTax = (v <= 0 ? 0 : (v > scope.row.amountWithTax ? scope.row.amountWithTax : v)))"
+	:disabled="!scope.row.amountWithTax"></el-input>
+    </template>
+  </el-table-column>
+```
+
 ### elementUI的table表格列宽自适应内容宽度
 
 businmantableData是数据data
