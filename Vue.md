@@ -450,6 +450,47 @@ export default {
 </script>
 ```
 
+### 新增一行数据滚动条自动滚到底部
+```vue
+<template>
+    <div>
+        <div ref="scrollContainer" style="height: 200px; overflow-y: auto;">
+            <ul>
+                <li v-for="item in items" :key="item.id">{{ item.name }}</li>
+            </ul>
+        </div>
+        <button @click="addItem">新增一行数据</button>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            items: [
+                { id: 1, name: 'Item 1' },
+                { id: 2, name: 'Item 2' },
+                // 其他数据...
+            ]
+        };
+    },
+    methods: {
+        addItem() {
+            // 模拟新增一行数据
+            const newItem = { id: this.items.length + 1, name: 'New Item' };
+            this.items.push(newItem);
+
+            // 滚动到底部
+            this.$nextTick(() => {
+                this.$refs.scrollContainer.scrollTop = this.$refs.scrollContainer.scrollHeight;
+            });
+        }
+    }
+};
+</script>
+```
+
+
 ### 获取滚动条距离顶部的距离
 
 ```vue
