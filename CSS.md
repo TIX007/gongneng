@@ -317,3 +317,11 @@ background:linear-gradient(to top right,rgba(255,249,245,.55) 0,rgba(255,249,245
 
 ```
 
+### 指定class的第二个元素
+
+```css
+.check_magin30 :deep .el-checkbox:nth-child(2) {
+  margin-left: 30px;
+}
+```
+
