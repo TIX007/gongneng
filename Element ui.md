@@ -70,6 +70,10 @@ rules: {
         ]
       }
 ```
+或者
+```vue
+ @input="(v) => (scope.row.amountWithTax = v.replace(/[^0-9.]/g, ''))"
+```
 
 ### 表单校验最大值与最小值
 ```vue
