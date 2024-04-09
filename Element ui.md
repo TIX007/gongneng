@@ -1390,6 +1390,22 @@ detailOrder(id).then((response) => {
       });
     });
 }
+methods:{
+handleSelectionChange(rows) {
+      let jshj = 0;
+      let hjse = 0;
+      this.currList = rows;
+      rows.forEach(function (value, index, array) {
+        hjse += Number(value["se"]);
+        jshj += Number(value["xmje"]);
+      });
+      this.jshjx = jshj.toFixed(2);
+      this.jshjd = smallToBig(this.jshjx);
+      this.hjje = (jshj - hjse).toFixed(2);
+      this.hjse = hjse.toFixed(2);
+    },
+}
+
 }
 
 </script>
