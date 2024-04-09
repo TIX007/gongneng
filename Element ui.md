@@ -1305,3 +1305,94 @@ export default {
 ```kotlin
 this.isUpdate = !this.isUpdate;
 ```
+
+### `el-table`表格中计算表格总价
+
+```vue
+<template>
+<el-col :span="24">
+	<el-table :inline="true" :data="yfList" ref="multipleTable2" :highlight-selection-row="true">
+	  <!-- <el-table-column type="selection" width="55" :selectable="selectEnable" disabled="true" align="center" /> -->
+	  <el-table-column label="货物或应税劳务、服务名称" align="center" prop="xmmc" />
+	  <el-table-column label="规格型号" align="center" prop="ggxh" />
+	  <el-table-column label="单位" align="center" prop="dw" />
+	  <el-table-column label="数量" align="center" prop="xmsl" />
+	  <el-table-column label="单价(含税)" align="center" prop="xmdj" />
+	  <el-table-column label="金额(含税)" align="center" prop="xmje" />
+	  <el-table-column label="税率" align="center" prop="sl">
+	    <template slot-scope="scope">
+	      <dict-tag :options="dict.type.sys_spbm_sl" :value="scope.row.sl" />
+	    </template>
+	  </el-table-column>
+	  <el-table-column label="税额" align="center" prop="se" />
+	</el-table>
+	</el-col>
+	
+	<el-col :span="24" class="card-box">
+	<el-card>
+	  <div class="el-table el-table--enable-row-hover el-table--medium">
+	    <el-col :span="24">
+	      <el-row>
+		<el-col :span="12">
+		  <el-form-item label="合计金额：" prop="mc" label-width="140px">
+		    {{ yfhjje }}
+		  </el-form-item>
+		</el-col>
+		<el-col :span="12">
+		  <el-form-item label="合计税额：" prop="mc" label-width="140px">
+		    {{ yfhjse }}
+		  </el-form-item>
+		</el-col>
+	      </el-row>
+	      <el-row>
+		<el-col :span="12">
+		  <el-form-item label="价税合计（大写）：" prop="mc" label-width="140px">
+		    {{ yfjshjd }}
+		  </el-form-item>
+		</el-col>
+		<el-col :span="12">
+		  <el-form-item label="小写：" prop="mc" label-width="140px">
+		    {{ yfjshjx }}
+		  </el-form-item>
+		</el-col>
+	      </el-row>
+	    </el-col>
+	  </div>
+	</el-card>
+	</el-col>
+
+</template>
+
+<script>
+export default {
+mounted(){
+detailOrder(id).then((response) => {
+      this.invoiceInfo = response.data;
+
+      var mxList = [];
+      //  invoiceSKRedAppItems
+      this.invoiceInfo.invoiceSKItemList.forEach((item, index) => {
+        const { xmje, se, xmsl } = item;
+        mxList.push({ ...item, xmje: xmje, se: se, xmsl: xmsl });
+      });
+      this.mxList = mxList;
+      this.hjje = this.invoiceInfo.hjje;
+      this.hjse = this.invoiceInfo.hjse;
+      this.jshjx = Number(this.hjje) + Number(this.hjse);
+      this.jshjd = "负" + smallToBig(this.jshjx.toFixed(2));
+      this.$nextTick(() => {
+        let table = this.mxList; // 从后台获取到的数据
+        table.forEach((row) => {
+          if (row.chbz != '1') {
+            this.$refs.multipleTable.toggleRowSelection(row, true);
+          }
+        });
+      });
+    });
+}
+}
+
+</script>
+
+```
+
