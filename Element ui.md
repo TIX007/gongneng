@@ -1384,7 +1384,7 @@ detailOrder(id).then((response) => {
         let table = this.mxList; // 从后台获取到的数据
         table.forEach((row) => {
           if (row.chbz != '1') {
-            this.$refs.multipleTable.toggleRowSelection(row, true);
+            this.$refs.multipleTable.toggleRowSelection(row, true); //--------
           }
         });
       });
