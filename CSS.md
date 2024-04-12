@@ -108,6 +108,22 @@ cursor : pointer;
 }
 ```
 
+### 透明背景虚化
+```css
+.betton_form {
+  text-align: center;
+  position: fixed;
+  top: 92%;
+  z-index: 9999;
+  margin-top: 2%;
+  // 背景虚化
+  background-color: rgba(212, 212, 212, 0.5);
+  backdrop-filter: blur(5px);
+  height: 80px;
+  width: 100%;
+}
+```
+
 ### 毛玻璃
 
 [玻璃拟态是什么？前端该如何实现 - 掘金 (juejin.cn)](https://juejin.cn/post/7086759520025706526)
@@ -276,3 +292,36 @@ filter: progid:DXImageTransform.Microsoft.BasicImage(grayscale=1);
 ```css
 background:linear-gradient(to top right,rgba(255,249,245,.55) 0,rgba(255,249,245,.55) calc(50% - 1px),#efefef 50%,rgba(255,249,245,.55) calc(50% + 1px),rgba(255,249,245,.55)),linear-gradient(to bottom right,rgba(255,249,245,.55) 0,rgba(255,249,245,.55) calc(50% - 1px),#efefef 50%,rgba(255,249,245,.55) calc(50% + 1px),rgba(255,249,245,.55))
 ```
+
+### 表单字左右对齐
+```css
+.wordSpacing :deep label {
+  width: 110px;
+  font-size: 16px;
+  text-align: justify;
+  text-align-last: justify;
+  -moz-text-align-last: justify;
+  text-justify: distribute-all-lines;
+  display: inline-block;
+}
+```
+
+### 放大效果
+```css
+.middle_li {
+  transition: all 0.5s; //控制速度，也可不加
+}
+.middle_li:hover {
+  transform: scale(1.1); //放大倍数
+}
+
+```
+
+### 指定class的第二个元素
+
+```css
+.check_magin30 :deep .el-checkbox:nth-child(2) {
+  margin-left: 30px;
+}
+```
+

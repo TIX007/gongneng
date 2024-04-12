@@ -1,3 +1,34 @@
+
+### 如何判断undefined和null
+测试证明对undefined、null和空字符串取反为true，对其余任何值取反都为false。如：
+```js
+!undefined; // true
+!null; // true
+!''; // true
+!1; // false
+!'123'; // false
+```
+所以，如果想判断一个值是undefined、null和空字符串中的一种，只要用 ! 就可以。如：
+```js
+if (!data) {
+    ...
+}
+```
+同理，如果想判断一个值不是undefined、null和空字符串中的一种，则用 !! 就可以。如：
+```js
+if (!!data) {
+    ...
+}
+```
+
+### 将斜杠改为问号
+```js
+const url = 'https://w.url.cn/s/Ackphg4/cak=krNIw5qjllJUl1ldnrze8a';
+const newUrl = url.replace(/\/cak/, '?cak');
+console.log(newUrl);
+// https://w.url.cn/s/Ackphg4?cak=krNIw5qjllJUl1ldnrze8a
+```
+
 ### 查找数组中对象里元素的位置，返回值为数字
 
 ```js
@@ -164,6 +195,72 @@ Math.round((scope.row.openvolume / scope.row.number) * 10000) / 100 + '％'
         })
         console.log(news);  //[2, 3, 4, 6, 8, 11]
 
+// 2
+     sortBys(field) { // field表示（vicechairmanlist1数组对象）需要排序的字段名称
+	return (x, y) => {
+	// return y[field] - x[field] // 数字大的在前面
+	return x[field] - y[field] // 数字小的在前面
+	 }
+	},
+
+   console.log(arr.sort(this.sortBys('one'))); // 使用
+```
+
+### 数组合并去重
+```js
+let arr1 = [3,5,2,3,6];
+let arr2 = [5,2,4,6,8,7,9,2];
+let arr = arr1.concat(arr2);  //合并数组
+let arrNew= new Set(arr); //通过set集合去重
+console.log("arrNew",Array.from(arrNew)); //将set集合转化为数组
+
+// *********
+let arr=[
+    {id:1,name:'AAAA'},
+    {id:2,name:'BBBB'}
+]
+let arr1=[
+    {id:1,name:'AAAA'},
+    {id:3,name:'CCCC'}
+]
+let arrs=[...arr,...arr1];
+//根据id去重
+let map=new Map();
+for(let item of arrs){
+    if(!map.has(item.id)){
+        map.set(item.id,item)
+    }
+}
+let newArr=[...map.values()];//把map中所有的值取出来放进数组
+//****************
+removedup(arr, batch) {
+  if (!Array.isArray(arr)) {
+    return arr;
+  }
+  if (arr.length == 0) {
+    return [];
+  }
+  let obj = {};
+  let uniqueArr = arr.reduce(function (total, item) {
+    obj[item[batch]] ? '' : (obj[item[batch]] = true && total.push(item));
+    return total;
+  }, []);
+  return uniqueArr;
+}
+// arrObjList 需要去重的数组对象，  score 根据这个属性进行去重
+let uniqueArrObjList = removedup(arrObjList, "score");
+// **************遍历旧数组，把值加入新建的数组（当新数组中不存在该值时）
+function uniqueArr(array) {
+    var n = []; //一个新的临时数组
+    //遍历当前数组
+    for (var i = 0; i < array.length; i++) {
+        //如果当前数组的第i已经保存进了临时数组，那么跳过，
+        //否则把当前项push到临时数组里面
+        if (n.indexOf(array[i]) == -1) n.push(array[i]);
+    }
+    return n;
+}
+
 ```
 
 ### 检查某个对象自身是否拥有某个属性
@@ -238,6 +335,23 @@ form.append("212", "2121");
 // });
 console.log(form.getAll("212"));
 ```
+
+### 截取
+截取前面所有的字符
+```js
+let a = 'shangwu,xiawu';
+let b = a.indexOf(',');
+let c = a.substring(0,b)
+console.log(c);
+```
+截取后面所有的字符
+```js
+let h = 'shangwu,xiawu';
+let s = h.split(',');
+console.log(s,'不加下标返回数组');
+console.log(s[1],'获取想要的字符')
+```
+
 
 ### 逗号隔开的字符串转数组
 
@@ -533,6 +647,880 @@ export function download(url, params, filename) {
 ```js
 download('/doc/download', { id: row.id }, row.fileName)
 window.location.href = "/app/doc/downloadApp?id="+ row.id
+```
+
+### 数组改为级联选择器
+
+```js
+export function deleteChildren(arr) {
+  let childs = arr
+  if (childs) {
+    for (let i = childs.length; i--; i > 0) {
+      if (childs[i].commodityName) {
+        childs[i].label = childs[i].commodityCode
+        // '*' + childs[i].commodityCategory + '*' +
+        childs[i].value = '*' + childs[i].commodityCategory + '*' + childs[i].commodityName
+        // delete childs[i].commodityName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].buyerName) {
+        childs[i].label = childs[i].buyerName
+        childs[i].value = childs[i].buyerName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].childrenList) {
+        if (childs[i].childrenList.length) {
+          childs[i].children = childs[i].childrenList
+          deleteChildren(childs[i].childrenList)
+        } else {
+          delete childs[i].childrenList
+        }
+      }
+    }
+  }
+  return arr
+}
+```
+
+### 电子发票的商品计算逻辑
+
+```js
+handleBlur(data) {
+      console.log(data);
+      var row = data
+      var hj = 0;
+      for (var i = 0; i < this.form.dynamicItem.length; i++) {
+        var je = this.form.dynamicItem[i].unitPrice
+        var sl = this.form.dynamicItem[i].quantity
+        var ze = this.form.dynamicItem[i].amount
+        var shui = this.form.dynamicItem[i].taxRate
+        var zez = this.form.dynamicItem[i].amountWithTax
+        // debugger
+        // if (je != "" && sl != "") {
+        //   hj += (Number(je).toFixed(2)) * Number(sl);
+        //   console.log(hj, 'hj');
+        // }
+        if (this.hs == true) {
+          if (je != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(zez).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+          }
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (zez != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amountWithTax = ''
+                this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                console.log(Number(zez));
+                this.form.dynamicItem[i].amountWithTax = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+        } else {
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (ze != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amount = ''
+                this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                this.form.dynamicItem[i].amount = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+          if (je != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(ze).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(ze).toFixed(2)) / Number(sl);
+          }
+        }
+      }
+      console.log(total(this.form.dynamicItem));
+      taxCalculation(this.form.dynamicItem)
+      hj = total(this.form.dynamicItem)
+
+      if (hj == 0) {
+        this.dxhj = '零圆整'
+      } else {
+        this.dxhj = dealBigMoney(hj)
+      }
+      this.xxhj = hj.toFixed(2);
+    },
+```
+封装的方法
+```js
+export function total(arr) {
+  console.log(arr);
+  let hj = 0;
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+    hj += (Number(je).toFixed(2)) * Number(sl);
+  }
+  return hj
+}
+
+export function taxCalculation(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+  }
+  return arr
+}
+```
+
+### 数组插入数据方法
+```js
+// 为0时就是不删除元素
+this.form.dynamicItem.splice(discountIndex, 0, this.discount)
+```
+
+### 日期格式化
+```js
+// 日期格式化
+export function parseTime(time, pattern) {
+  if (arguments.length === 0 || !time) {
+    return null
+  }
+  const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}'
+  let date
+  if (typeof time === 'object') {
+    date = time
+  } else {
+    if ((typeof time === 'string') && (/^[0-9]+$/.test(time))) {
+      time = parseInt(time)
+    } else if (typeof time === 'string') {
+      time = time.replace(new RegExp(/-/gm), '/').replace('T', ' ').replace(new RegExp(/\.[\d]{3}/gm), '');
+    }
+    if ((typeof time === 'number') && (time.toString().length === 10)) {
+      time = time * 1000
+    }
+    date = new Date(time)
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  }
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+    let value = formatObj[key]
+    // Note: getDay() returns 0 on Sunday
+    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value] }
+    if (result.length > 0 && value < 10) {
+      value = '0' + value
+    }
+    return value || 0
+  })
+  return time_str
+}
+// parseTime(new Date())
+```
+
+### 中断js执行
+```js
+if (Number(childs[i].amountWithTax) == 0) {
+      Message({ message: "校验失败，明细行第" + (i + 1) + "金额不能等于零!", type: 'error' })
+      throw Promise.reject("校验失败，明细行第" + (i + 1) + "金额不能等于零!")
+    }
+```
+
+### 实现文本域`textarea`文字添加删除
+
+```html
+<el-button @click.stop="addRemarks(formData, $event)" class="icon_selecting"></el-button>
+```
+
+```js
+addRemarks(text, event) {
+      let remark_text = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+      let target = event.target;
+      if (target.classList.contains("active")) {
+        // 再次点击删除
+        console.log('remark_text', remark_text);
+        this.formData.remark = this.formData.remark.replace(remark_text, '');
+        console.log(this.formData.remark);
+      } else {
+        if (this.formData.remark == '' || this.formData.remark == null) {
+          this.formData.remark = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        } else {
+          this.formData.remark = this.formData.remark + '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        }
+      }
+      target.classList.toggle("active");
+    },
+```
+
+### 前端打印方法
+方法一：直接调用打印页面弹窗
+
+```js
+printClick() {
+// 获取原有页面的html内容
+ let oldStr = window.document.body.innerHTML;
+ // 根据id获取打印的html内容
+ let newStr = document.getElementById('test').innerHTML;
+ // html页面内容赋值
+ window.document.body.innerHTML = newStr;
+ // 调用打印弹窗
+ window.print();
+ // 页面内容还原
+ //window.document.body.innerHTML = oldStr;
+ // 打印完成后重新加载页面
+ window.location.reload()
+ }
+```
+
+方法二：把打印内容嵌入到页面，调用打印弹窗
+
+```js
+printClick() {
+  const printContentHtml = document.getElementById('test').innerHTML
+  const iframe = document.createElement('iframe')
+  iframe.setAttribute('style', 'position:absolute;width:0px;height:0px;left:-500px;top:-500px;')
+  document.body.appendChild(iframe)
+  iframe.contentDocument.write(printContentHtml)
+  iframe.contentDocument.close()
+  iframe.contentWindow.print()
+  document.body.removeChild(iframe)
+ }
+```
+
+方法三：打开新页面打印
+
+```js
+printClick() {
+   const printContentHtml = window.document.body.innerHTML;
+   const printPage = window.open()
+   printPage.document.write(printContentHtml)
+   printPage.document.close()
+   printPage.print()
+   printPage.close()
+ }
+```
+
+### WebSocket的简单封装示例
+
+```js
+export class WebSocketClient {
+  constructor(url) {
+    this.url = url;
+    this.ws = null;
+    this.heartbeatTimer = null;
+    this.onopen = null;
+    this.onclose = null;
+    this.onmessage = null;
+    this.onerror = null;
+  }
+
+  connect() {
+    if (!this.ws) {
+      this.ws = new WebSocket(this.url);
+      this.ws.onopen = (event) => {
+        console.log('WebSocket连接已打开');
+        if (this.onopen) {
+          this.onopen(event);
+        }
+        this.startHeartbeat();
+      };
+      this.ws.onclose = (event) => {
+        console.log('WebSocket连接已关闭');
+        if (this.onclose) {
+          this.onclose(event);
+        }
+        this.stopHeartbeat();
+        this.reconnect();
+      };
+      this.ws.onmessage = (event) => {
+        console.log('WebSocket收到消息');
+        if (this.onmessage) {
+          this.onmessage(event);
+        }
+        if (event.data === 'pong') {
+          // 心跳响应，重置定时器
+          clearInterval(this.heartbeatTimer);
+          this.startHeartbeat();
+        }
+      };
+      this.ws.onerror = (event) => {
+        console.error('WebSocket发生错误');
+        if (this.onerror) {
+          this.onerror(event);
+        }
+      };
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  send(message) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      console.log('WebSocket发送消息');
+      this.ws.send(message);
+    } else {
+      console.error('WebSocket未连接');
+    }
+  }
+
+  startHeartbeat() {
+    // 每隔一段时间发送心跳消息
+    this.heartbeatTimer = setInterval(() => {
+      console.log('WebSocket发送心跳');
+      this.send('ping');
+    }, 30000);
+  }
+
+  stopHeartbeat() {
+    clearInterval(this.heartbeatTimer);
+  }
+
+  reconnect() {
+    setTimeout(() => {
+      console.log('WebSocket重新连接中...');
+      this.connect();
+    }, 5000);
+  }
+}
+```
+用法
+```js
+import { WebSocketClient } from '@/utils/request'
+
+const ws = new WebSocketClient('wss://www.example.com/websocket');
+ws.onopen = (event) => {
+  console.log('WebSocket连接已打开');
+};
+ws.onclose = (event) => {
+  console.log('WebSocket连接已关闭');
+};
+ws.onmessage = (event) => {
+  console.log('WebSocket收到消息：' + event.data);
+};
+ws.onerror = (event) => {
+  console.error('WebSocket发生错误');
+};
+ws.connect();
+ws.disconnect(); //关闭 WebSocket
+```
+
+### 浏览器遮挡事件
+```js
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    // 页面变为可见状态时执行的操作
+  } else if (document.visibilityState === 'hidden') {
+    // 页面变为不可见状态时执行的操作
+  }
+});
+```
+
+### 数字转大写数字
+
+```js
+// 数字转大写
+export function dealBigMoney(n) {
+  var fraction = ['角', '分'];
+  var digit = [
+    '零', '壹', '贰', '叁', '肆',
+    '伍', '陆', '柒', '捌', '玖'
+  ];
+  var unit = [
+    ['圆', '万', '亿'],
+    ['', '拾', '佰', '仟']
+  ];
+  var head = n < 0 ? '负' : '';
+  n = Math.abs(n);
+
+  var s = '';
+
+  for (var i = 0; i < fraction.length; i++) {
+    s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
+  }
+
+  s = s || '整';
+  n = Math.floor(n);
+
+  for (var i = 0; i < unit[0].length && n > 0; i++) {
+    var p = '';
+    for (var j = 0; j < unit[1].length && n > 0; j++) {
+      p = digit[n % 10] + unit[1][j] + p;
+      n = Math.floor(n / 10);
+    }
+    s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+  }
+  return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整');
+}
+```
+
+### 数组改为级联选择器
+
+```js
+export function deleteChildren(arr) {
+  let childs = arr
+  if (childs) {
+    for (let i = childs.length; i--; i > 0) {
+      if (childs[i].commodityName) {
+        childs[i].label = childs[i].commodityCode
+        // '*' + childs[i].commodityCategory + '*' +
+        childs[i].value = '*' + childs[i].commodityCategory + '*' + childs[i].commodityName
+        // delete childs[i].commodityName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].buyerName) {
+        childs[i].label = childs[i].buyerName
+        childs[i].value = childs[i].buyerName
+        deleteChildren(childs[i].childrenList)
+      }
+      if (childs[i].childrenList) {
+        if (childs[i].childrenList.length) {
+          childs[i].children = childs[i].childrenList
+          deleteChildren(childs[i].childrenList)
+        } else {
+          delete childs[i].childrenList
+        }
+      }
+    }
+  }
+  return arr
+}
+```
+
+### 电子发票的商品计算逻辑
+
+```js
+handleBlur(data) {
+      console.log(data);
+      var row = data
+      var hj = 0;
+      for (var i = 0; i < this.form.dynamicItem.length; i++) {
+        var je = this.form.dynamicItem[i].unitPrice
+        var sl = this.form.dynamicItem[i].quantity
+        var ze = this.form.dynamicItem[i].amount
+        var shui = this.form.dynamicItem[i].taxRate
+        var zez = this.form.dynamicItem[i].amountWithTax
+        // debugger
+        // if (je != "" && sl != "") {
+        //   hj += (Number(je).toFixed(2)) * Number(sl);
+        //   console.log(hj, 'hj');
+        // }
+        if (this.hs == true) {
+          if (je != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(zez).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && zez != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+          }
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (zez != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amountWithTax = ''
+                this.form.dynamicItem[i].amountWithTax = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                console.log(Number(zez));
+                this.form.dynamicItem[i].amountWithTax = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+        } else {
+          if (je != "" && sl != "") {
+            this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+            // this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+            if (ze != "") {
+              if (row == 'unitPrice') {
+                this.form.dynamicItem[i].amount = ''
+                this.form.dynamicItem[i].amount = (Number(je).toFixed(2)) * Number(sl);
+                this.form.dynamicItem[i].unitPrice = Number(je)
+              } else {
+                this.form.dynamicItem[i].amount = Number(zez)
+                this.form.dynamicItem[i].unitPrice = ''
+                this.form.dynamicItem[i].unitPrice = (Number(zez).toFixed(2)) / Number(sl);
+              }
+              // if (shui != '') {
+              //   this.form.dynamicItem[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+              // }
+            }
+          }
+          if (je != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].quantity = (Number(ze).toFixed(2)) / Number(je);
+          }
+          if (sl != "" && ze != "" && sl == "") {
+            this.form.dynamicItem[i].unitPrice = (Number(ze).toFixed(2)) / Number(sl);
+          }
+        }
+      }
+      console.log(total(this.form.dynamicItem));
+      taxCalculation(this.form.dynamicItem)
+      hj = total(this.form.dynamicItem)
+
+      if (hj == 0) {
+        this.dxhj = '零圆整'
+      } else {
+        this.dxhj = dealBigMoney(hj)
+      }
+      this.xxhj = hj.toFixed(2);
+    },
+```
+封装的方法
+```js
+export function total(arr) {
+  console.log(arr);
+  let hj = 0;
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+    hj += (Number(je).toFixed(2)) * Number(sl);
+  }
+  return hj
+}
+
+export function taxCalculation(arr) {
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    arr[i].taxAmount = ((Number(je).toFixed(2)) * Number(sl) / (1 + Number(shui)) * Number(shui)).toFixed(2);
+  }
+  return arr
+}
+```
+
+### 数组插入数据方法
+```js
+// 为0时就是不删除元素
+this.form.dynamicItem.splice(discountIndex, 0, this.discount)
+```
+
+### 日期格式化
+```js
+// 日期格式化
+export function parseTime(time, pattern) {
+  if (arguments.length === 0 || !time) {
+    return null
+  }
+  const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}'
+  let date
+  if (typeof time === 'object') {
+    date = time
+  } else {
+    if ((typeof time === 'string') && (/^[0-9]+$/.test(time))) {
+      time = parseInt(time)
+    } else if (typeof time === 'string') {
+      time = time.replace(new RegExp(/-/gm), '/').replace('T', ' ').replace(new RegExp(/\.[\d]{3}/gm), '');
+    }
+    if ((typeof time === 'number') && (time.toString().length === 10)) {
+      time = time * 1000
+    }
+    date = new Date(time)
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  }
+  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+    let value = formatObj[key]
+    // Note: getDay() returns 0 on Sunday
+    if (key === 'a') { return ['日', '一', '二', '三', '四', '五', '六'][value] }
+    if (result.length > 0 && value < 10) {
+      value = '0' + value
+    }
+    return value || 0
+  })
+  return time_str
+}
+// parseTime(new Date())
+```
+
+### 中断js执行
+```js
+if (Number(childs[i].amountWithTax) == 0) {
+      Message({ message: "校验失败，明细行第" + (i + 1) + "金额不能等于零!", type: 'error' })
+      throw Promise.reject("校验失败，明细行第" + (i + 1) + "金额不能等于零!")
+    }
+```
+
+### 实现文本域`textarea`文字添加删除
+
+```html
+<el-button @click.stop="addRemarks(formData, $event)" class="icon_selecting"></el-button>
+```
+
+```js
+addRemarks(text, event) {
+      let remark_text = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+      let target = event.target;
+      if (target.classList.contains("active")) {
+        // 再次点击删除
+        console.log('remark_text', remark_text);
+        this.formData.remark = this.formData.remark.replace(remark_text, '');
+        console.log(this.formData.remark);
+      } else {
+        if (this.formData.remark == '' || this.formData.remark == null) {
+          this.formData.remark = '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        } else {
+          this.formData.remark = this.formData.remark + '销方开户银行：' + text.yhmc + ';' + '销方银行账户: ' + text.yhzh + ';\n'
+        }
+      }
+      target.classList.toggle("active");
+    },
+```
+
+### 前端打印方法
+方法一：直接调用打印页面弹窗
+
+```js
+printClick() {
+// 获取原有页面的html内容
+ let oldStr = window.document.body.innerHTML;
+ // 根据id获取打印的html内容
+ let newStr = document.getElementById('test').innerHTML;
+ // html页面内容赋值
+ window.document.body.innerHTML = newStr;
+ // 调用打印弹窗
+ window.print();
+ // 页面内容还原
+ //window.document.body.innerHTML = oldStr;
+ // 打印完成后重新加载页面
+ window.location.reload()
+ }
+```
+
+方法二：把打印内容嵌入到页面，调用打印弹窗
+
+```js
+printClick() {
+  const printContentHtml = document.getElementById('test').innerHTML
+  const iframe = document.createElement('iframe')
+  iframe.setAttribute('style', 'position:absolute;width:0px;height:0px;left:-500px;top:-500px;')
+  document.body.appendChild(iframe)
+  iframe.contentDocument.write(printContentHtml)
+  iframe.contentDocument.close()
+  iframe.contentWindow.print()
+  document.body.removeChild(iframe)
+ }
+```
+
+方法三：打开新页面打印
+
+```js
+printClick() {
+   const printContentHtml = window.document.body.innerHTML;
+   const printPage = window.open()
+   printPage.document.write(printContentHtml)
+   printPage.document.close()
+   printPage.print()
+   printPage.close()
+ }
+```
+
+### WebSocket的简单封装示例
+
+```js
+export class WebSocketClient {
+  constructor(url) {
+    this.url = url;
+    this.ws = null;
+    this.heartbeatTimer = null;
+    this.onopen = null;
+    this.onclose = null;
+    this.onmessage = null;
+    this.onerror = null;
+  }
+
+  connect() {
+    if (!this.ws) {
+      this.ws = new WebSocket(this.url);
+      this.ws.onopen = (event) => {
+        console.log('WebSocket连接已打开');
+        if (this.onopen) {
+          this.onopen(event);
+        }
+        this.startHeartbeat();
+      };
+      this.ws.onclose = (event) => {
+        console.log('WebSocket连接已关闭');
+        if (this.onclose) {
+          this.onclose(event);
+        }
+        this.stopHeartbeat();
+        this.reconnect();
+      };
+      this.ws.onmessage = (event) => {
+        console.log('WebSocket收到消息');
+        if (this.onmessage) {
+          this.onmessage(event);
+        }
+        if (event.data === 'pong') {
+          // 心跳响应，重置定时器
+          clearInterval(this.heartbeatTimer);
+          this.startHeartbeat();
+        }
+      };
+      this.ws.onerror = (event) => {
+        console.error('WebSocket发生错误');
+        if (this.onerror) {
+          this.onerror(event);
+        }
+      };
+    }
+  }
+
+  disconnect() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+
+  send(message) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      console.log('WebSocket发送消息');
+      this.ws.send(message);
+    } else {
+      console.error('WebSocket未连接');
+    }
+  }
+
+  startHeartbeat() {
+    // 每隔一段时间发送心跳消息
+    this.heartbeatTimer = setInterval(() => {
+      console.log('WebSocket发送心跳');
+      this.send('ping');
+    }, 30000);
+  }
+
+  stopHeartbeat() {
+    clearInterval(this.heartbeatTimer);
+  }
+
+  reconnect() {
+    setTimeout(() => {
+      console.log('WebSocket重新连接中...');
+      this.connect();
+    }, 5000);
+  }
+}
+```
+用法
+```js
+import { WebSocketClient } from '@/utils/request'
+
+const ws = new WebSocketClient('wss://www.example.com/websocket');
+ws.onopen = (event) => {
+  console.log('WebSocket连接已打开');
+};
+ws.onclose = (event) => {
+  console.log('WebSocket连接已关闭');
+};
+ws.onmessage = (event) => {
+  console.log('WebSocket收到消息：' + event.data);
+};
+ws.onerror = (event) => {
+  console.error('WebSocket发生错误');
+};
+ws.connect();
+ws.disconnect(); //关闭 WebSocket
+```
+
+### 浏览器遮挡事件
+```js
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') {
+    // 页面变为可见状态时执行的操作
+  } else if (document.visibilityState === 'hidden') {
+    // 页面变为不可见状态时执行的操作
+  }
+});
+```
+
+### 数字转大写数字
+
+```js
+// 数字转大写
+export function dealBigMoney(n) {
+  var fraction = ['角', '分'];
+  var digit = [
+    '零', '壹', '贰', '叁', '肆',
+    '伍', '陆', '柒', '捌', '玖'
+  ];
+  var unit = [
+    ['圆', '万', '亿'],
+    ['', '拾', '佰', '仟']
+  ];
+  var head = n < 0 ? '负' : '';
+  n = Math.abs(n);
+
+  var s = '';
+
+  for (var i = 0; i < fraction.length; i++) {
+    s += (digit[Math.floor(n * 10 * Math.pow(10, i)) % 10] + fraction[i]).replace(/零./, '');
+  }
+
+  s = s || '整';
+  n = Math.floor(n);
+
+  for (var i = 0; i < unit[0].length && n > 0; i++) {
+    var p = '';
+    for (var j = 0; j < unit[1].length && n > 0; j++) {
+      p = digit[n % 10] + unit[1][j] + p;
+      n = Math.floor(n / 10);
+    }
+    s = p.replace(/(零.)*零$/, '').replace(/^$/, '零') + unit[0][i] + s;
+  }
+  return head + s.replace(/(零.)*零元/, '元').replace(/(零.)+/g, '零').replace(/^整$/, '零元整');
+}
 ```
 
 ### MQTT协议中的方法

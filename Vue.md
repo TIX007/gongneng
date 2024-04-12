@@ -128,6 +128,19 @@ this.$router.push({
 
 ```
 
+### watch监听router
+```js
+'$route': { // $route可以用引号，也可以不用引号
+      handler(to, from) {
+        console.log('路由变化了')
+        console.log('当前页面路由：' + to); //新路由信息
+        console.log('上一个路由：' + from); //老路由信息
+      },
+      deep: true, // 深度观察监听
+      immediate: true, // 第一次初始化渲染就可以监听到
+    },
+```
+
 ### vue 给data 数据的重新初始化
 
 初始化data中某个字段key数据
@@ -437,6 +450,47 @@ export default {
 </script>
 ```
 
+### 新增一行数据滚动条自动滚到底部
+```vue
+<template>
+    <div>
+        <div ref="scrollContainer" style="height: 200px; overflow-y: auto;">
+            <ul>
+                <li v-for="item in items" :key="item.id">{{ item.name }}</li>
+            </ul>
+        </div>
+        <button @click="addItem">新增一行数据</button>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            items: [
+                { id: 1, name: 'Item 1' },
+                { id: 2, name: 'Item 2' },
+                // 其他数据...
+            ]
+        };
+    },
+    methods: {
+        addItem() {
+            // 模拟新增一行数据
+            const newItem = { id: this.items.length + 1, name: 'New Item' };
+            this.items.push(newItem);
+
+            // 滚动到底部
+            this.$nextTick(() => {
+                this.$refs.scrollContainer.scrollTop = this.$refs.scrollContainer.scrollHeight;
+            });
+        }
+    }
+};
+</script>
+```
+
+
 ### 获取滚动条距离顶部的距离
 
 ```vue
@@ -449,6 +503,61 @@ mounted() {
 	      console.log(scrollTop,'距离顶部的距离')
 	    }
     }
+```
+
+### 吸顶效果
+```vue
+
+<template>
+  <div class="nav-sub ">
+          <active-btn :class="fixed == true ? 'fixed' : ''">
+            可添加文字</active-btn
+          >
+ </div>
+</template>
+
+<script>
+export default {
+  data () {
+    return { fixed: false }
+  },
+  mounted () {
+    window.addEventListener('scroll', this.fixedActiveBtn)
+  },
+  methods: {
+    fixedActiveBtn () {
+      var scrollTop =
+        window.pageYOffset ||
+        document.documentElement.scrollTop ||
+        document.body.scrollTop
+      scrollTop >= 120 ? (this.fixed = true) : (this.fixed = false)
+    }
+  }
+}
+</script>
+
+<style scoped>
+.nav-sub {
+  // position: relative;
+  height: 90px;
+  background-color: #fff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  // position: sticky;
+}
+.fixed {
+  position: fixed;
+  z-index: 21;
+  height: 60px;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-bottom: 1px solid #dadada;
+  background-image: -webkit-linear-gradient(#fff, #f1f1f1);
+  background-image: linear-gradient(#fff, #f1f1f1);
+}
+
+</style>
 ```
 
 ### 页面跳转路由时滚动条置顶
@@ -1683,6 +1792,76 @@ mounted() {
   };
 </script>
 ```
+**通过组件的$emit、$on方法；**
+父
+```vue
+<template>
+
+    <div>
+
+        <Button @click="handleClick">点击调用子组件方法</Button>
+
+        <Child ref="child"/>
+
+    </div>
+
+</template>    
+
+ 
+
+<script>
+
+import Child from './child';
+
+ 
+
+export default {
+
+    methods: {
+
+        handleClick() {
+
+               this.$refs.child.$emit("childmethod")    //子组件$on中的名字
+
+        },
+
+    },
+
+}
+
+</script>
+```
+
+子
+```vue
+<template>
+
+    <div>我是子组件</div>
+
+</template>
+
+<script>
+
+export default {
+
+    mounted() {
+
+        this.$nextTick(function() {
+
+            this.$on('childmethods', function() {
+
+                console.log('我是子组件方法');
+
+            });
+
+        });
+
+     },
+
+};
+
+</script>
+```
 
 项目关闭tab页返回上级
 
@@ -1823,6 +2002,7 @@ export default {
 ```
 
 ### 前端实现换行/n和＜br/＞的转换
+ this.$notify要想换行需要设置`dangerouslyUseHTMLString: true,`
 
 ```js
 // \n转换成<br/>
@@ -2359,6 +2539,44 @@ export function download(url, params, filename) {
 }
 ```
 
+### 文件流zip下载
+
+```js
+export function download2(url, params, filename) {
+  downloadLoadingInstance = Loading.service({ text: "正在下载数据，请稍候", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
+  return service.post(url, params, {
+    headers: { 'Content-Type': 'application/json' },
+    responseType: 'blob',
+  }).then(async (data) => {
+    console.log(data);
+    const isBlob = blobValidate(data);
+    if (isBlob) {
+      const blob = new Blob([data], { type: 'application/zip' })
+      saveAs(blob, filename)
+    } else {
+      const resText = await data.text();
+      const rspObj = JSON.parse(resText);
+      const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default']
+      Message.error(errMsg);
+    }
+    downloadLoadingInstance.close();
+  }).catch((r) => {
+    console.error(r)
+    Message.error('下载文件出现错误，请联系管理员！')
+    downloadLoadingInstance.close();
+  })
+}
+// 使用
+/** 导出zip文件按钮操作 */
+    downloadFile(type, ids) {
+      console.log(type, ids, 'type, ids');
+      download2('hsy/invoice/downLoad?type=' + type + '&ids=' + ids,
+        ids
+        , `invoice_${new Date().getTime()}.zip`)
+    }
+```
+
+
 ### vue中实现拖动调整左右两侧div的宽度
 
 ```vue
@@ -2471,4 +2689,2149 @@ export function download(url, params, filename) {
 }
 </style>
 ```
+
+### watch方法使用
+1、在vue中watch用来监听数据的变化，一旦发生变化可以执行一些其他操作 
+2、watch就是当值第一次绑定的时候，是不会执行监听函数的，只有值诞生改变才会执行。如果需要在第一次绑定的时候也执行函数，则需要用到immediate属性，比如当父组件向子组件动态传值时，子组件props首次获取到父组件传来的No认知时，也需要执行函数          
+3、handler方法：immediate表示在watch中首次绑定的时候，是否执行handler，值为TRUE则表示在watch中声明的时候，就立即执行handler方法，值为false，则和一般使用watch一样，在数据发生变化时才执行
+4、deep，当需要监听一个对象的变化时，普通的watch方法无法监听带对象内部属性的变化，只有data中的数据才能够坚挺到变化，此时需要deep属性进行深度监听，设置deep：true，当对象的属性较多是，每个属性的变化都会执行handler
+```js
+watch: {
+    'person.name': {
+        handler(newVal, oldVal) {
+            console.log(newVal, oldVal)
+        },
+        deep: true,
+        immediate: true
+    }，
+cascaderName(newVal, oldVal) {
+      console.log(newVal, oldVal)
+    }
+}
+```
+
+### 鼠标双击事件
+
+```js
+@dblclick.native.prevent="handleIconClick"
+@dblclick="handleIconClick"
+```
+
+### 接口数据给el-input赋值成功后不能编辑
+
+原因：在Vue实例创建时，obj.b并未声明，因此就没有被Vue转换为响应式的属性，自然就不会触发视图的更新
+
+解决：this.$set(val1,val1.val2,val3)
+```js
+this.$set(this.convenForm, 'orPrice', this.convenForm.orPrice);
+```
+**注：this.convenForm是对象，orPrice是对象里字段，最后一个是赋值**
+
+### 邮箱输入带@提示
+```vue
+<template>
+  <div>
+    <el-form class="mailbox" :rules="rules" ref="form" :model="form">
+      <el-form-item prop="inputEmail">
+        <el-input
+          v-model="form.inputEmail"
+          placeholder="请输入邮箱账号"
+          clearable
+          prefix-icon="el-icon-user"
+        ></el-input>
+	<div class="hintBox">
+        <div
+          @click="setInput(mail)"
+          class="hintItem"
+          v-for="mail in emails"
+          :key="mail"
+        >
+          {{ mail }}
+        </div>
+      </div>
+      </el-form-item>
+      
+    </el-form>
+  </div>
+</template>
+
+  <script>
+
+export default {
+
+  data() {
+
+    return {
+
+      form:{
+
+        inputEmail: "",
+
+      },
+
+      rules: {
+
+        inputEmail: [
+
+          { required: true, message: "请输入正确的邮箱", trigger: "blur" },
+
+        ],}
+
+    };
+
+  },
+
+  created() {},
+
+  computed: {
+
+    emails() {
+
+      // 如果inputEmail中没有任何东西，则不处理
+
+      if (!this.form.inputEmail) return [];
+
+      // 考虑到用户自己要输@符号，如果@符号首次出现的位置大于等于第零个位置时，则不处理
+
+      if (this.form.inputEmail.indexOf("@") > -1) return [];
+
+      return [
+
+       this.form.inputEmail + "@163.com",
+
+       this.form.inputEmail + "@126.com",
+
+       this.form.inputEmail + "@0355.net",
+
+       this.form.inputEmail + "@263.net",
+
+       this.form.inputEmail + "@3721.net",
+
+       this.form.inputEmail + "@qq.com",
+
+       this.form.inputEmail + "@yahoo.com",
+
+       this.form.inputEmail + "@gmail.com",
+
+       this.form.inputEmail + "@msn.com",
+
+       this.form.inputEmail + "@hotmail.com",
+
+       this.form.inputEmail + "@aol.com",
+
+       this.form.inputEmail + "@ask.com",
+
+       this.form.inputEmail + "@live.com",
+
+       this.form.inputEmail + "@yeah.net",
+
+      ];
+
+    },
+
+  },
+
+  methods: {
+
+    // 点击该邮箱后缀是补全文本框
+
+    setInput(mail) {
+
+     this.form.inputEmail = mail;
+
+      this.$emit("MailboxDelivery",this.form.inputEmail);
+
+    },
+
+  },
+
+};
+
+</script>
+
+  <style scoped>
+
+.hintBox {
+  max-height: 120px;
+  overflow-y: scroll;
+  overflow-x: auto;
+  position: absolute;
+  z-index: 999;
+  background-color: #fff;
+  list-style-type: disc;
+  margin-block-start: 1em;
+  margin-block-end: 1em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+}
+
+.hintItem {
+padding: 0 20px;
+margin: 0;
+line-height: 34px;
+cursor: pointer;
+color: #606266;
+font-size: 14px;
+list-style: none;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.el-form-item {
+    margin: 0;
+}
+
+</style>
+```
+
+### 电子发票商品计算及含税不含税逻辑
+```vue
+<template>
+<el-form :model="form" ref="form" border :inline="true" class="fieldStyleForm" style="width: 100%;">
+                <el-form-item label="行号" class="text_align50">
+                </el-form-item>
+                <el-form-item label="项目名称" class="text_align500">
+                </el-form-item>
+                <el-form-item label="规格型号" class="text_align120">
+                </el-form-item>
+                <el-form-item label="单位" class="text_align100">
+                </el-form-item>
+                <el-form-item label="数量" class="text_align100">
+                </el-form-item>
+                <el-form-item class="text_align100 ">
+                  <template slot="label">
+                    单价<span :class="hs ? 'redText' : ''">{{ hs ? '(含税)' : '(不含税)' }}</span>
+                  </template>
+                </el-form-item>
+                <el-form-item label="金额(含税)" v-show="hs" class="text_align100 tax">
+                  <template slot="label">
+                    金额<span class="redText">{{ '(含税)' }}</span>
+                  </template>
+                </el-form-item>
+                <el-form-item label="金额(不含税)" v-show="!hs" class="text_align100" style="width: 6%;">
+                </el-form-item>
+                <el-form-item label="税率" class="text_align100">
+                </el-form-item>
+                <el-form-item label="税额" class="text_align100" style="width: 80px;">
+                </el-form-item>
+                <el-form-item label="操作" class="text_align_right150">
+                </el-form-item>
+                <hr>
+
+                <div v-for="(item, index) in form.dynamicItem" :key="index">
+
+                  <el-form-item class="text_align50">
+                    <span class="text_align50">{{ index + 1 }}</span>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.goodsName'" class="text_align500">
+                    <!-- <el-input v-model="item.goodsName" class="text_align500"></el-input> -->
+                    <!-- <el-cascader v-model="item.goodsName" :options="restaurants" clearable class="text_align500"></el-cascader> -->
+                    <!-- <el-cascader ref="cascader" v-model="item.goodsName" :options="restaurants" clearable
+                      class="text_align500"></el-cascader> @change="getByName(item)"-->
+                    <!-- {{ item.commodityCategory }} -->
+                    <el-autocomplete v-model="item.goodsName" :fetch-suggestions="querySearchAsync"
+                      :trigger-on-focus="false" placeholder="请输入项目名称" @select="handleSelect"
+                      @focus="getByName(item, index)" @dblclick.native.prevent="handleIconClick" :disabled="item.disabled"
+                      class="text_align500">
+                      <!-- <i class="el-icon-edit el-input__icon" slot="suffix" @click="handleIconClick">
+                      </i> -->
+                      <template slot-scope="{ item }">
+                        <el-button v-if="item.is_add" type="primary" plain class="add_button" style=""
+                          @click="handleIconClick">
+                          添加
+                        </el-button>
+                      </template>
+                    </el-autocomplete>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.specification'" class="text_align120">
+                    <el-input v-model="item.specification" :disabled="item.disabled" class="text_align120"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.unit'" class="text_align100">
+                    <el-input v-model="item.unit" :disabled="item.disabled" class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.quantity'" class="text_align100">
+                    <el-input v-model="item.quantity" :disabled="item.disabled" @change="handleBlur(item, 'quantity')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.unitPrice'" class="text_align100">
+                    <el-input v-model="item.unitPrice" :disabled="item.disabled" @change="handleBlur(item, 'unitPrice')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.amountWithTax'" v-show="hs" class="text_align100">
+                    <el-input v-model="item.amountWithTax" :disabled="item.disabled" @change="handleBlur(item, 'amount')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.amount'" v-show="!hs" class="text_align100">
+                    <el-input v-model="item.amount" :disabled="item.disabled" @change="handleBlur(item, 'amount')"
+                      class="text_align100"></el-input>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.taxRate'" class="text_align100">
+                    <el-select v-model="item.taxRate" :disabled="item.disabled" @change="handleBlur(item)" clearable>
+                      <el-option v-for="dict in dict.type.sys_tax_rate" :key="dict.value" :label="dict.label"
+                        :value="dict.value" />
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :prop="'dynamicItem.' + index + '.taxAmount'" class="text_align70">
+                    <el-input v-model="item.taxAmount" class="text_align70" disabled="disabled"></el-input>
+                  </el-form-item>
+                  <el-form-item class="text_align_right150">
+                    <el-button type="text" @click="discount(item, index)" :disabled="item.disabled">折</el-button>
+                    <el-button type="text" @click="deleteItem(item, index)">删</el-button>
+                  </el-form-item>
+                  <hr>
+                </div>
+                <div style="border-style: dashed;border-width: 0.1px;margin-left: 58px; width: 30%;">
+                  <el-button type="text" class="background_color" @click="addItem(0)" icon="el-icon-plus"
+                    aria-label="+">新增</el-button>
+                </div>
+                <hr>
+                <div style="display: flex;">
+                  <div style="margin-left: 10%;">价税合计 (大写) ⊗ {{ this.dxhj }}</div>
+                  <div style="margin-left: 40%;">(小写) ￥ {{ this.xxhj }} </div>
+                </div>
+                <hr>
+              </el-form>
+</template>
+
+<script>
+import { Decimal } from 'decimal.js'
+export default {
+
+ methods: {
+handleBlur(item, row) {
+      console.log(item, '9999');
+      var hj = 0;
+      let amountWithTax = roundFixed(Number(Decimal(Number(item.unitPrice)).mul(Decimal(Number(item.quantity)))), 2)
+      let amount = roundFixed(Number(Decimal(Number(item.unitPrice)).mul(Decimal(Number(item.quantity)))), 2)
+      let unitPrice = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.quantity)))), 8)
+      let quantity = Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.unitPrice))))
+      let taxAmountWithTax = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.taxRate) + 1)).mul(Decimal(Number(item.taxRate)))), 2)
+      let taxAmount = Decimal(Number(item.amount)).mul(Decimal(Number(item.taxRate)))
+      // ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))
+      // debugger
+      if (this.hs == true) {
+        if (item.unitPrice != "" && item.quantity != "" && item.amountWithTax != '') {
+          if (row == 'unitPrice') {
+            item.amountWithTax = ''
+            item.amountWithTax = amountWithTax
+          } else if (row == 'amount') {
+            item.unitPrice = ''
+            item.unitPrice = unitPrice
+          } else {
+            item.amountWithTax = ''
+            item.amountWithTax = amountWithTax
+          }
+        }
+        if (item.unitPrice != "" && item.amountWithTax != '' && item.quantity == "") {
+          item.quantity = quantity
+
+        }
+        if (item.unitPrice == "" && item.amountWithTax != '' && item.quantity != "") {
+          item.unitPrice = unitPrice
+
+        }
+        if (item.unitPrice != "" && item.amountWithTax == '' && item.quantity != "") {
+          item.amountWithTax = amountWithTax
+
+        }
+
+      } else {
+        console.log(amount, 'amount');
+        if (item.unitPrice != "" && item.quantity != "" && item.amount != '') {
+          if (row == 'unitPrice') {
+            item.amount = ''
+            item.amount = amount
+          } else if (row == 'amount') {
+            item.unitPrice = ''
+            item.unitPrice = unitPrice
+          } else {
+            item.amount = ''
+            item.amount = amount
+          }
+        }
+        if (item.unitPrice != "" && item.amount != '' && item.quantity == "") {
+          item.quantity = quantity
+
+        }
+        if (item.unitPrice == "" && item.amount != '' && item.quantity != "") {
+          item.unitPrice = unitPrice
+
+        }
+        if (item.unitPrice != "" && item.amount == '' && item.quantity != "") {
+          item.amount = amount
+
+        }
+
+      }
+      taxCalculation(item, this.hs)
+      hj = total(this.form.dynamicItem, this.hs)
+
+      if (hj == 0) {
+        this.dxhj = '零圆整'
+      } else {
+        this.dxhj = dealBigMoney(hj)
+      }
+      this.xxhj = hj.toFixed(2);
+    },
+}
+
+// 含税不含税切换逻辑
+watch:{
+hs(newVal, oldVal) {
+      console.log(newVal, oldVal)
+      Decimal.set({ precision: 5, rounding: 4 })
+      console.log(Number(Decimal(5).div(Decimal(0.13))));
+      console.log(roundFixed(2.335, 2), (2.335.toFixed(2)));
+      if (newVal == false && this.form.dynamicItem[0].amountWithTax != '' && this.form.dynamicItem[0].amountWithTax != ''
+      ) {
+        for (var i = 0; i < this.form.dynamicItem.length; i++) {
+          this.form.dynamicItem[i].taxSign = '0'
+          var je = this.form.dynamicItem[i].unitPrice
+          var sl = this.form.dynamicItem[i].quantity
+          var ze = this.form.dynamicItem[i].amount
+          var shui = this.form.dynamicItem[i].taxRate
+          var zez = this.form.dynamicItem[i].amountWithTax
+          var se = this.form.dynamicItem[i].taxAmount
+          // let unit = Decimal(Number(je)).sub((Decimal(Number(je))).div(Decimal(Number(shui) + 1)).mul(Decimal(Number(shui))))
+          let unit = Decimal(Number(je)).sub(Decimal(Number(se)).div(Decimal(Number(sl))))
+          console.log(unit, Number(unit));
+          if (Number(unit) == -Infinity || Number(unit) == Infinity) {
+            this.form.dynamicItem[i].unitPrice = ''
+            this.form.dynamicItem[i].amount = roundFixed((Number(zez) - (Number(zez) / (1 + Number(shui)) * Number(shui))), 2)
+          } else {
+            this.form.dynamicItem[i].unitPrice = roundFixed(Number(unit), 8)
+            this.form.dynamicItem[i].amount = roundFixed((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui))), 2)
+          }
+
+          // .length > 8 ? ((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui)))).toFixed(8) : ((Number(zez) - ((Number(je)) * Number(sl) / (1 + Number(shui)) * Number(shui)))).toFixed(2);
+          // this.form.dynamicItem[i].amount = this.form.dynamicItem[i].unitPrice * Number(sl)
+        }
+      } else {
+        for (var i = 0; i < this.form.dynamicItem.length; i++) {
+          console.log('oldVal', oldVal);
+          this.form.dynamicItem[i].taxSign = '1'
+          var je = this.form.dynamicItem[i].unitPrice
+          var sl = this.form.dynamicItem[i].quantity
+          var ze = this.form.dynamicItem[i].amount
+          var shui = this.form.dynamicItem[i].taxRate
+          var zez = this.form.dynamicItem[i].amountWithTax
+          var se = this.form.dynamicItem[i].taxAmount
+          let unit = Decimal(Number(je)).add(Decimal(Number(se)).div(Decimal(Number(sl))))
+          if (Number(unit) == -Infinity || Number(unit) == Infinity) {
+            this.form.dynamicItem[i].unitPrice = ''
+            // this.form.dynamicItem[i].amountWithTax = roundFixed(this.form.dynamicItem[i].unitPrice * Number(sl), 2)
+          } else {
+            this.form.dynamicItem[i].unitPrice = roundFixed(Number(unit), 8)
+            this.form.dynamicItem[i].amountWithTax = roundFixed(this.form.dynamicItem[i].unitPrice * Number(sl), 2)
+          }
+          // this.form.dynamicItem[i].unitPrice = Number(Decimal(Number(je)).add((Decimal(Number(je))).mul(Decimal(Number(shui)))))
+
+        }
+      }
+    },
+}
+}
+</script>
+```
+```js
+import { Decimal } from 'decimal.js'
+export function total(arr, row) {
+  console.log(arr);
+  let hj = 0;
+  for (let i = 0; i < arr.length; i++) {
+    var je = arr[i].unitPrice
+    var sl = arr[i].quantity
+    var ze = arr[i].amount
+    var shui = arr[i].taxRate
+    var zez = arr[i].amountWithTax
+    var se = arr[i].taxAmount
+    if (row == true) {
+      hj += Number(zez);
+    } else {
+      hj += Number(ze) + Number(se);
+    }
+  }
+  return hj
+}
+
+export function taxCalculation(item, row) {
+  let taxAmountWithTax = roundFixed(Number(Decimal(Number(item.amountWithTax)).div(Decimal(Number(item.taxRate) + 1)).mul(Decimal(Number(item.taxRate)))), 2)
+  let taxAmount = Decimal(Number(item.amount)).mul(Decimal(Number(item.taxRate)))
+  if (row == true) {
+    item.taxAmount = taxAmountWithTax
+  } else {
+    item.taxAmount = taxAmount
+  }
+  return item
+}
+
+export function roundFixed(num, fixed) {//修改js四舍五入
+  var pos = num.toString().indexOf('.'),
+    decimal_places = num.toString().length - pos - 1,
+    _int = num * Math.pow(10, decimal_places),
+    divisor_1 = Math.pow(10, decimal_places - fixed),
+    divisor_2 = Math.pow(10, fixed);
+  return Math.round(_int / divisor_1) / divisor_2;
+}
+```
+
+### 生成二维码
+```vue
+<template>
+  <div class="about">
+    <h1>This is an about page11</h1>
+    <div class="qr">
+      <vue-qr :logoSrc="src2" :text="src" :size="200"></vue-qr>
+    </div>
+
+  </div>
+</template>
+<script>
+import VueQr from 'vue-qr'
+// npm install vue-qr --save
+export default {
+  components: { VueQr },
+  data() {
+    return {
+      // 中间图片
+      src2: require('@/assets/logo.png'),
+      src: ''
+    }
+  },
+  mounted() {
+    console.log(this);
+    let url = window.location.origin
+    this.src = url + '/'
+    // this.src = 'http://192.168.20.160:8081/'
+  },
+  methods: {
+
+  }
+}
+</script>
+<style lang="scss">
+.qr {
+  width: 200px;
+  height: 200px;
+}
+</style>
+```
+
+### 发票模版
+```vue
+<template>
+    <div>
+        <el-dialog :title="title" :visible.sync="open" width="80%" append-to-body>
+      <div class="invoice-box">
+        <br>
+        <div id="myComponent">
+          <div class="top">
+            <div class="title">
+              <h1>{{ forTitle(invoiceData.itype) }}</h1>
+            </div>
+            <div class="top-tips">
+              <div class="tips-box">发票代码：<span>{{ invoiceData.fpDm }}</span></div>
+              <div class="tips-box">发票号码：<span>{{ invoiceData.fpHm }}</span></div>
+              <div class="tips-box">开票日期：<span>{{ invoiceData.kprq }}</span></div>
+              <div class="tips-box"><span class="jym">校验码</span><i>：</i><span class="JYM">{{
+                invoiceData.jym
+              }}</span>
+              </div>
+            </div>
+            <img :src="qrCodeData" alt="二维码">
+            <div class="tips-box jqbh">
+              机器编号：<span>{{ invoiceData.jqbh }}</span>
+            </div>
+          </div>
+          <div class="center">
+            <div class="invoice-info">
+              <div class="gmf">
+                <div class="title">购买方</div>
+                <div class="info">
+                  <p>
+                    <span class="mc">名称</span>
+                    <i class="mc-i">：</i>
+                    <span class="parameter">{{ invoiceData.gmfMc }}</span>
+                  </p>
+                  <p>
+                    纳税人识别号：<span class="parameter">{{ invoiceData.gmfNsrsbh }}</span>
+                  </p>
+                  <p>
+                    <span class="dzdh">地址、电话</span>
+                    <i class="dzdh-i">：</i>
+                    <span class="parameter">{{ invoiceData.gmfDzdh }}</span>
+                  </p>
+                  <p>
+                    开户行及账号：<span class="parameter">{{ invoiceData.gmfYhzh }}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="password">
+                <div class="title">密码区</div>
+                <p>{{ invoiceData.fpMw }}</p>
+              </div>
+            </div>
+            <table cellspacing="0" cellpadding="0">
+              <thead>
+                <tr>
+                  <th class="spmc">货物或应税劳务、服务名称</th>
+                  <th class="ggxh">规格型号</th>
+                  <th class="dw">单位</th>
+                  <th class="sum">数量</th>
+                  <th class="dj">单价</th>
+                  <th class="je">金额</th>
+                  <th class="sl">税率</th>
+                  <th class="se">税额</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!--              <tr v-for="(item, index) in invCrestvInvoiceItemList" :key="index">-->
+                <tr v-for="(item, index) in invCrestvInvoiceItemList" :key="index">
+                  <td>{{ item.spmc }}</td>
+                  <td>{{ item.ggxh }}</td>
+                  <td>{{ item.dw }}</td>
+                  <td>{{ item.spsl }}</td>
+                  <td>{{ item.hsdj }}</td>
+                  <td>{{ item.hsje }}</td>
+                  <td>{{ item.sl }}</td>
+                  <td class="se">{{ item.se }}</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="hjh">
+                  <td class="hj"> 合　　计</td>
+                  <td />
+                  <td />
+                  <td />
+                  <td />
+                  <td style="text-align: right">{{ invoiceData.hjje }}</td>
+                  <td />
+                  <td class="se" style="text-align: right">{{ invoiceData.hjse }}</td>
+                </tr>
+                <tr class="hjh no-border">
+                  <td class="jshj">价税合计（大写）</td>
+                  <td colspan="7" class="no-border">
+                    <span class="uppercase">⊗{{ dealBigMoney(invoiceData.jshj) }}</span>
+                    <span class="lowercase">（小写）<i>￥{{ invoiceData.jshj }}</i></span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+            <div class="invoice-info xsf-box">
+              <div class="xsf">
+                <div class="title">销售方</div>
+                <div class="info">
+                  <p>
+                    <span class="mc">名称</span><i class="mc-i">：</i><span class="parameter">{{
+                      invoiceData.xsfMc
+                    }}</span>
+                  </p>
+                  <p>
+                    纳税人识别号：<span class="parameter">{{ invoiceData.xsfNsrsbh }}</span>
+                  </p>
+                  <p>
+                    <span class="dzdh">地址、电话</span><i class="dzdh-i">：</i><span class="parameter">{{
+                      invoiceData.xsfDzdh
+                    }}</span>
+                  </p>
+                  <p>
+                    开户行及账号：<span class="parameter">{{ invoiceData.xsfYhzh }}</span>
+                  </p>
+                </div>
+              </div>
+              <div class="password">
+                <div class="title bz">备注</div>
+                <p>{{ invoiceData.bz }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="yz">
+            <img :src="fpylyz" alt="fpylyz">
+          </div>
+          <div class="footer">
+            <span class="skr">收款人：<i class="parameter"> {{ invoiceData.skr }}</i></span>
+            <span class="fh">复核：<i class="parameter"> {{ invoiceData.fhr }}</i></span>
+            <span class="kpr">开票人：<i class="parameter">{{ invoiceData.kpr }}</i></span>
+            <span class="xsf">销售方（章）：</span>
+          </div>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="printComponent('myComponent')">打 印</el-button>
+        <el-button @click="cancel()">取 消</el-button>
+      </div>
+    </el-dialog>
+    </div>
+</template>
+
+<script>
+export default {
+
+	methods:{
+	// 表单重置
+    reset() {
+      this.form = {
+        id: null,
+        seqNumber: null,
+        udisksn: null,
+        itype: "0",
+        dataResources: null,
+        kplx: null,
+        zsfs: null,
+        xsfNsrsbh: null,
+        xsfMc: null,
+        xsfDzdh: null,
+        xsfYhzh: null,
+        gmfNsrsbh: null,
+        gmfMc: null,
+        gmfDzdh: null,
+        gmfYhzh: null,
+        fpHm: null,
+        fpDm: null,
+        jym: null,
+        kprq: null,
+        jqbh: null,
+        fpMw: null,
+        kpr: null,
+        skr: null,
+        fhr: null,
+        yfpDm: null,
+        yfpHm: null,
+        yfpYf: null,
+        jshj: null,
+        hjje: null,
+        hjse: null,
+        kce: null,
+        bz: null,
+        qdbz: null,
+        tspz: null,
+        fpmw: null,
+        ewm: null,
+        slxzyy: null,
+        yfplx: null,
+        ykprq: null,
+        tzdbh: null,
+        chyydm: null,
+        spflbbh: null,
+        previewUrl: null,
+        ofdUrl: null,
+        pdfUrl: null,
+        state: null,
+        zfr: null,
+        zfrq: null,
+        hzxxbbh: null,
+        hzsqdbh: null,
+        zfbz: null,
+        invoiceResult: null,
+        zfSeqnumber: null,
+        hcbz: null,
+        originalId: null,
+        importTime: null,
+        isRelevancy: null,
+        qfjg: null,
+        isQf: null
+      };
+      this.invCrestvInvoiceItemList = [];
+
+
+      this.standardform = {
+        id: null,
+        jsrq: null,
+        // gdh: null,
+        cph: null,
+        wxlx: null,
+        cz: null,
+        zje: null,
+        vin: null,
+        czbh: null,
+        drsj: null,
+        sfygl: null
+      };
+      this.resetForm("standardform");
+      this.resetForm("form");
+    },
+	/** 发票明细 */
+    queryItem(row) {
+      console.log(row);
+      this.reset();
+      const id = row.id || this.ids
+      getCrestv(id).then(response => {
+        this.invoiceData = response.data;
+        console.log('response.data', response.data);
+        let kprq = formatDate(this.invoiceData.kprq);
+        this.invoiceData.kprq = kprq;
+        this.invoiceData.state = this.invoiceData.state;
+        this.invCrestvInvoiceItemList = response.data.invCrestvInvoiceItemList;
+        const { ewm } = this.invoiceData;
+        QRCode.toDataURL(ewm)
+          .then(dataUrl => {
+            this.qrCodeData = dataUrl;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+        this.open = true;
+        this.title = "发票";
+      });
+    },
+
+	}
+}
+</script>
+
+<style lang="scss" scoped>
+.yz {
+  top: -65px;
+  position: relative;
+  right: 5px;
+  float: right;
+  transform: rotate(-31deg);
+}
+
+/* 发票详情展示 */
+.invoice-box {
+  border: 2px solid #902121;
+  width: 1100px;
+  font-size: 15px;
+  margin: 0 auto;
+  background: #fff;
+}
+
+
+.invoice-box code {
+  color: #000;
+  box-shadow: none;
+  background: none;
+  display: block;
+  border: 0;
+  font-size: 18px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+.top {
+  height: 155px;
+  position: relative;
+  border: none;
+  overflow: hidden;
+
+  .title {
+    width: 408px;
+    margin: 0 auto;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #983232;
+    position: relative;
+
+    .el-image {
+      position: absolute;
+      width: 140px;
+      left: 135px;
+      top: 0px;
+    }
+
+    h1 {
+      font-size: 32px;
+      text-align: center;
+      margin: 45px auto 0;
+      padding-bottom: 18px;
+      font-weight: 500;
+      color: #9e5210;
+      border-bottom: 1px solid #800000;
+      letter-spacing: 4px;
+    }
+  }
+}
+
+.invoice-box .top-tips {
+  position: absolute;
+  right: 40px;
+  top: 20px;
+  margin-left: 30px;
+  font-size: 16px;
+  color: #9e5210;
+}
+
+.invoice-box .tips-box {
+  height: 30px;
+  line-height: 30px;
+}
+
+.invoice-box .tips-box span {
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  color: #000;
+  margin-right: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.invoice-box .top-tips .jym {
+  color: #9e5210;
+  letter-spacing: 8px;
+  margin-right: 0;
+  font-size: 16px;
+  font-weight: 300;
+}
+
+.invoice-box .top-tips i {
+  margin-left: -8px;
+  font-style: normal;
+}
+
+.invoice-box .top img {
+  position: absolute;
+  width: 94px;
+  height: 94px;
+  left: 70px;
+  top: 15px;
+}
+
+.invoice-box .jqbh {
+  position: absolute;
+  left: 55px;
+  top: 115px;
+  font-size: 16px;
+  color: #9e5210;
+}
+
+.invoice-box .center {
+  width: 1045px;
+  /* min-height: 485px; */
+  margin: 0 auto;
+  border: 2px solid #902121;
+}
+
+.invoice-box .center .invoice-info {
+  height: 110px;
+  border-bottom: 2px solid #ba7575;
+  overflow: hidden;
+}
+
+.invoice-box .invoice-info div {
+  float: left;
+}
+
+.invoice-box .invoice-info .gmf,
+.invoice-box .invoice-info .xsf {
+  width: 600px;
+  height: 110px;
+  border-right: 2px solid #902121;
+}
+
+.invoice-box .invoice-info .title {
+  width: 35px;
+  height: 110px;
+  line-height: 30px;
+  padding-top: 10px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-align: center;
+  border-right: 2px solid #902121;
+  color: #9e5210;
+}
+
+.invoice-box .invoice-info .bz {
+  line-height: 48px;
+}
+
+.invoice-box .info p {
+  margin: 3px 0 3px 10px;
+  width: 550px;
+  overflow: hidden;
+  white-space: nowrap;
+  color: #9e5210;
+  font-size: 16px;
+  line-height: 23px;
+}
+
+.invoice-box i {
+  font-style: normal;
+}
+
+.invoice-box .info .mc {
+  letter-spacing: 64px;
+}
+
+.invoice-box .info .parameter {
+  font-size: 15px;
+  color: #000;
+}
+
+.invoice-box .mc-i {
+  margin-left: -64px;
+}
+
+.invoice-box .info .dzdh {
+  letter-spacing: 4px;
+}
+
+.invoice-box .dzdh-i {
+  margin-left: -4px;
+}
+
+.invoice-box .password {
+  width: 440px;
+}
+
+.invoice-box .password p {
+  float: left;
+  width: 400px;
+  padding: 10px 30px;
+  margin: 0;
+  font-size: 18px;
+  height: 110px;
+  overflow: hidden;
+  letter-spacing: 2px;
+}
+
+.invoice-box .center .xsf-box {
+  border-top: 2px solid #902121;
+  border-bottom: none;
+}
+
+.invoice-box table {
+  color: #9e5210;
+  border: none;
+}
+
+.invoice-box table th {
+  text-align: center;
+}
+
+.invoice-box table th,
+.invoice-box table td {
+  border-right: 2px solid #902121;
+}
+
+.invoice-box table .spmc {
+  width: 280px;
+}
+
+.invoice-box table .ggxh {
+  width: 80px;
+}
+
+.invoice-box table .dw {
+  width: 65px;
+}
+
+.invoice-box table .sum {
+  width: 120px;
+}
+
+.invoice-box table .dj {
+  width: 130px;
+}
+
+.invoice-box table .je {
+  width: 165px;
+}
+
+.invoice-box table .sl {
+  width: 45px;
+}
+
+.invoice-box table .se {
+  width: 160px;
+  border: none;
+}
+
+.invoice-box table tr {
+  height: 20px;
+}
+
+.invoice-box table td {
+  color: #000;
+}
+
+.invoice-box .hjh td {
+  border-bottom: 2px solid #902121;
+}
+
+.invoice-box .hjh .hj {
+  color: #9e5210;
+  text-align: center;
+}
+
+.invoice-box .hjh .jshj {
+  color: #9e5210;
+  text-align: center;
+  border-bottom: none;
+}
+
+.invoice-box .hjh span {
+  display: inline-block;
+  margin-left: 20px;
+  color: #9e5210;
+}
+
+.invoice-box .hjh i,
+.invoice-box .hjh .uppercase {
+  color: #000;
+}
+
+.invoice-box .hjh .lowercase {
+  margin-left: 380px;
+}
+
+.invoice-box table .no-border {
+  border: none;
+}
+
+.invoice-box tbody td {
+  text-align: right;
+  padding: 0 2px;
+  font-size: 14px;
+}
+
+.invoice-box tbody td:nth-child(1) {
+  text-align: left;
+  font-weight: bold;
+}
+
+.invoice-box .footer {
+  margin: 20px auto;
+  position: relative;
+  color: #9e5210;
+  height: 60px;
+  overflow: hidden;
+}
+
+.invoice-box .footer span {
+  position: absolute;
+}
+
+.invoice-box .footer .skr {
+  top: 0;
+  left: 60px;
+}
+
+.invoice-box .footer .fh {
+  top: 0;
+  left: 350px;
+}
+
+.invoice-box .footer .kpr {
+  top: 0;
+  left: 575px;
+}
+
+.invoice-box .footer .xsf {
+  top: 0;
+  left: 800px;
+}
+
+.invoice-box .footer i {
+  color: #000;
+}
+
+
+.inputys {
+  width: 100px;
+  // display: inline-block;
+  border: none;
+  outline: none;
+  background-color: white;
+}
+</style>
+
+### 实现电子印章
+
+```vue
+<template>
+    <div>
+        <canvas id="canvas" width="200" height="200"></canvas>
+    </div>
+</template>
+<script>
+import chapter from './config/chapter'
+export default {
+    mounted(){
+        chapter('XXX专用章','XXX科技股份有限公司')
+    }
+}
+</script>
+
+```
+
+```js
+let chapter = (text, companyName) => {
+  let canvas = document.getElementById("canvas");
+  let context = canvas.getContext("2d");
+
+  //let text = "XXX专用章";
+  //let companyName = "XXX科技股份有限公司";
+
+  // 绘制印章边框
+  let width = canvas.width / 2;
+  let height = canvas.height / 2;
+  context.lineWidth = 5;
+  context.strokeStyle = "#f00";
+  context.beginPath();
+  context.arc(width, height, 90, 0, Math.PI * 2); //宽、高、半径
+  context.stroke();
+
+  //画五角星
+  create5star(context, width, height, 25, "#f00", 0);
+
+  // 绘制印章名称
+  context.font = "20px 宋体";
+  context.textBaseline = "middle"; //设置文本的垂直对齐方式
+  context.textAlign = "center"; //设置文本的水平对对齐方式
+  context.lineWidth = 1;
+  context.strokeStyle = "#f00";
+  context.strokeText(text, width, height + 60);
+
+  // 绘制印章单位
+  context.translate(width, height); // 平移到此位置,
+  context.font = "23px 宋体";
+  let count = companyName.length; // 字数
+  let angle = (4 * Math.PI) / (3 * (count - 1)); // 字间角度
+  let chars = companyName.split("");
+  let c;
+  for (let i = 0; i < count; i++) {
+    c = chars[i]; // 需要绘制的字符
+    if (i == 0) {
+      context.rotate((5 * Math.PI) / 6);
+    } else {
+      context.rotate(angle);
+    }
+
+    context.save();
+    context.translate(70, 0); // 平移到此位置,此时字和x轴垂直，公司名称和最外圈的距离
+    context.rotate(Math.PI / 2); // 旋转90度,让字平行于x轴
+    context.strokeText(c, 0, 0); // 此点为字的中心点
+    context.restore();
+  }
+
+  //绘制五角星
+  function create5star(context, sx, sy, radius, color, rotato) {
+    context.save();
+    context.fillStyle = color;
+    context.translate(sx, sy); //移动坐标原点
+    context.rotate(Math.PI + rotato); //旋转
+    context.beginPath(); //创建路径
+    // let x = Math.sin(0);
+    // let y = Math.cos(0);
+    let dig = (Math.PI / 5) * 4;
+    for (let i = 0; i < 5; i++) {
+      //画五角星的五条边
+      let x = Math.sin(i * dig);
+      let y = Math.cos(i * dig);
+      context.lineTo(x * radius, y * radius);
+    }
+    context.closePath();
+    context.stroke();
+    context.fill();
+    context.restore();
+  }
+};
+
+export default chapter;
+
+```
+
+### 横向滚动公告
+```vue
+<template>
+    <div class="my-outbox">
+          <div class="my-inbox" ref='box'>
+                <div class="my-list" :style="note" v-for="(item, index) in sendVal" :key='index' ref='list'>
+                      <!--{{item.name}}刚刚购买了产品-->
+                      <span class="my-uname">{{ item.detail }}</span>
+                    </div>
+              </div>
+    </div>
+</template>
+
+<script>
+export default {
+    name: 'my-marquee-left',
+    props: {
+
+        sendVal: {
+            type: Array,
+            default: []
+        }
+    },
+    data() {
+        return {
+            note: {
+                // backgroundImage:
+                //     "url(" + require("@/assets/logo.png") + ")",
+                backgroundSize: "20px 20px",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "1%  50%"
+            },
+            // 定时器标识
+            nowTime: null,
+            // 每一个内容的宽度
+            disArr: []
+        }
+    },
+    mounted() {
+        // var that = this
+        var item = this.$refs.list
+        var len = this.sendVal.length
+        var arr = []
+        // 因为设置的margin值一样，所以取第一个就行。
+        var margin = this.getMargin(item[0])
+        for (var i = 0; i < len; i++) {
+            arr.push(item[i].clientWidth + margin) // 把宽度和 margin 加起来就是每一个元素需要移动的距离
+        }
+        this.disArr = arr
+        this.moveLeft()
+    },
+    beforeDestroy() {
+        // 页面关闭清除定时器
+        clearInterval(this.nowTime)
+        // 清除定时器标识
+        this.nowTime = null
+    },
+    methods: {
+        // 获取margin属性
+        getMargin(obj) {
+            var marg = window.getComputedStyle(obj, null)['margin-right']
+            marg = marg.replace('px', '')
+            return Number(marg) // 强制转化成数字
+        },
+        // 移动的方法
+        moveLeft() {
+            var that = this
+            var outbox = this.$refs.box
+            // 初始位置
+            var startDis = 0
+            //   console.log('that.disArr: ', that.disArr)
+            this.nowTime = setInterval(function () {
+                startDis -= 0.5
+                // console.log('初始化移动：', startDis)
+                if (Math.abs(startDis) > Math.abs(that.disArr[0])) {
+                    // 每次移动完一个元素的距离，就把这个元素的宽度
+                    that.disArr.push(that.disArr.shift())
+                    // 每次移动完一个元素的距离，就把列表数据的第一项放到最后一项
+                    // console.log('that.sendVal: ', that.sendVal)
+                    // console.log('that.sendVal: ', that.sendVal.shift())
+                    that.sendVal.push(that.sendVal.shift())
+                    startDis = 0
+                    // console.log('移动')
+                } else {
+                    // console.log('不来不来就不来...')
+                }
+                // 每次都让盒子移动指定的距离，在我自己做的项目中，这种字符串拼接的方法并没有生效
+                // outbox.style = 'transform: translateX3d(' + startDis + 'px)' 
+                // 后面换了es6的模板字符串就可以了
+                outbox.style = `transform: translateX(${startDis}px)`
+                // outbox.style = 'transform: translateX(\' + startDis + \' px)'
+                // outbox.style.marginLeft = 'startDis'
+                // console.log('这里:', startDis)
+            }, 1000 / 60)
+        }
+    }
+}
+</script>
+
+<style lang="scss" scoped>
+.my-outbox {
+    color: #D7BC8D;
+    overflow: hidden;
+    // color: #FFFFFF;
+    height: 35px;
+
+    /*background: #422b02;*/
+    .my-inbox {
+        white-space: nowrap;
+
+        .my-list {
+            margin-right: 100px;
+            display: inline-block;
+            font-size: 14px;
+            // height: 20px;
+            text-indent: 30px;
+            line-height: 40px;
+
+            .my-uname {
+                color: #FF8900;
+                // color: #FFFFFF;
+            }
+        }
+    }
+}
+</style>
+```
+
+使用`<marqueeLeft :sendVal="newsList"></marqueeLeft>`
+
+### HTML打印
+
+```js
+// @click="printComponent('myComponent')"  myComponent为需要打印的dive的id名称（<div id="myComponent" class="id-card-holder">）
+import html2canvas from 'html2canvas';
+import printJS from 'print-js';
+
+/** 打印 */
+printComponent(componentId) {
+// 将分辨率提高到特定的DPI 提高16倍
+html2canvas(document.querySelector(`#${componentId}`), { dpi: window.devicePixelRatio * 16, scale: 16 }).then(canvas => {
+printJS({
+  printable: canvas.toDataURL('image/png'),
+  type: 'image'
+});
+});
+},
+```
+
+### Vue输入框同时绑定了blur和其他事件，避免同时触发两次事件
+做的项目有个需求，弹窗里面有个表单，里面的输入框按回车和失焦都可以触发某一事件，如果同时绑定就会出现按回车之后，在关闭弹窗或点击其他位置都会触发blur的事件，解决方法：
+```html
+<el-input
+ @input="func()"
+ @blur="blur&&getTestInfoBlur()"
+></el-input
+```
+```js
+// An highlighted block
+export default {
+  data() {
+    return {
+      blur:true,
+      },
+  },
+  methods: {
+  //func函数是用来解决用户enter之后再输入内容blur失效的问题
+    func(){
+      this.blur=true;
+    },
+    //blur触发的事件
+    getTestInfoBlur(){
+      this.getTestInfo();
+    },
+    //enter触发的事件，触发之后把blur设置为false，避免重复触发
+     getTestInfoEnter(){
+      this.blur=false;
+      this.getTestInfo();
+    },
+    //你自己的代码
+    getTestInfo() {
+      ...
+    },
+};
+
+```
+
+### 缓存页面接口重复调用
+
+```js
+if (this.isRequesting) return;
+this.isRequesting = true;
+// 调用接口
+this.isRequesting = false;
+```
+
+### 扫码枪扫码自动请求事件
+
+```vue
+<template>
+    <div>
+     <el-dialog title="微信扫码新增信息" class="dialogBox" :show-close="false" :visible.sync="scanVisible" width="400px">
+      <el-descriptions :title="addData.buyerName" :column="1" :labelStyle="{ width: '60px' }">
+        <el-descriptions-item label="税号">{{ addData.buyerNsrsbh }}</el-descriptions-item>
+        <el-descriptions-item label="单位地址">{{ addData.address }}</el-descriptions-item>
+        <el-descriptions-item label="电话">{{ addData.companyTel }}</el-descriptions-item>
+        <el-descriptions-item label="开户银行">{{ addData.yhmc }}</el-descriptions-item>
+        <el-descriptions-item label="银行账户">{{ addData.yhzh }}</el-descriptions-item>
+      </el-descriptions>
+      <el-button type="primary" @click="submitAdd">确认</el-button>
+    </el-dialog>
+    </div>
+</template>
+<script>
+export default {
+  data() {
+   return{
+      formScan: {},
+      keyupLastTime: null,
+      realBarcode: '',
+      realBarcode1: '',
+      addData: {},
+    }
+  },
+methods: {
+// 扫码新增
+    handleKeyUp(e) {
+      let gap = 0;
+      clearTimeout
+      if (this.keyupLastTime) {
+        gap = new Date().getTime() - this.keyupLastTime;
+        if (gap > 50) {
+          gap = 0;
+          this.realBarcode = "";
+        }
+      }
+      this.keyupLastTime = new Date().getTime();
+      if (e.key != "Process" && gap < 50) {
+        if (e.key.trim().length == 1) {
+          // 输入单个字母或者数字
+          this.realBarcode += e.key;
+          if (this.realBarcode.length == 53) {
+            // this.realBarcode = this.realBarcode.replace(/\/cak/, '?cak');
+            console.log(this.realBarcode1);
+            this.formScan.scanEntry = this.realBarcode;
+            this.submitScan()
+          }
+          console.log(e);
+          console.log(this.realBarcode.length);
+          console.log('this.realBarcode**', this.realBarcode);
+        }
+      } else {
+        console.log(this.realBarcode1);
+        // this.formScan.scanEntry = this.realBarcode;
+        // this.submitScan()
+      }
+    },
+    scanAdd() {
+      this.formScan = {};
+      this.scanVisible = true;
+      let that = this;
+      document.onkeypress = function (e) {
+        that.handleKeyUp(e);
+      };
+    },
+    submitScan() {
+      let scanData = { scanText: this.formScan.scanEntry }
+      this.$modal.loading("正在获取数据，请稍候...");
+      scanTitle(scanData).then((res) => {
+        // console.log(res);
+        let { title, phone, taxNo, addr, bankType, bankNo } = res.data
+        this.addData = {
+          buyerName: title,
+          companyTel: phone,
+          buyerNsrsbh: taxNo,
+          address: addr,
+          yhmc: bankType,
+          yhzh: bankNo
+        }
+        this.$modal.msgSuccess("获取成功");
+        this.$modal.closeLoading()
+      }).catch(() => {
+        this.realBarcode = "";
+        let that = this;
+        document.onkeyup = function (e) {
+          that.handleKeyUp(e);
+        };
+        this.$modal.closeLoading()
+      });
+    },
+    submitAdd() {
+      addBuyer(this.addData).then(response => {
+        this.$modal.msgSuccess("新增成功");
+        this.$modal.closeLoading()
+        this.scanVisible = false;
+        this.getList();
+      }).catch(() => {
+        this.realBarcode = "";
+        this.$modal.closeLoading()
+      });
+    },
+ }
+
+}
+</script>
+```
+
+### 发票PDF预览
+```vue
+<template>
+  <el-dialog :title="title" :visible.sync="examineOpen" width="1000px" class="invoice-dialog" append-to-body>
+    <div :style="{ height: examineHeight }" v-loading="examineOpenOf">
+      <vue-office-pdf ref="examineOpenPDF" :src="examinePDF" @rendered="renderedHandler" @error="errorHandler" />
+    </div>
+  </el-dialog>
+</template>
+
+<script>
+import VueOfficePdf from '@vue-office/pdf'
+export default {
+  components: {
+    VueOfficePdf
+  },
+  data() {
+    return {
+      examineOpen: false,
+      examineOpenOf: true,
+      examinePDF: '',
+      examineHeight: '600px',
+    }
+  },
+  methods: {
+    /** 发票明细点击事件 */
+    handlePreview(row) {
+      const id = row.id || this.ids
+      queryDetailInfoById(id).then(response => {
+        this.invoiceData = response.data;
+        this.invoiceData.state = this.invoiceData.state;
+        this.examinePDF = this.invoiceData.qdPdfUrl;
+        this.invCrestvInvoiceItemList = response.data.invoiceItemList;
+        const { ewm, fpDm, fpHm, hjje, kprq } = this.invoiceData;
+        let ewms = '01,01,' + '' + ',' + fpHm + ',' + hjje + ',' + kprq + ',' + '' + ',' + '727C'
+        let kprqs = formatDate(this.invoiceData.kprq);
+        this.invoiceData.kprq = kprqs;
+        if (this.invoiceData.qdPdfUrl == '') {
+          this.open = true;
+          this.title = "发票预览";
+        } else {
+          this.examineOpenOf = true;
+          this.examineOpen = true;
+          this.title = "PDF预览";
+          if (!!this.$refs.examineOpenPDF) {
+            setTimeout(() => {
+              this.examineOpenOf = false;
+            }, 800);
+          }
+
+        }
+      });
+    },
+    renderedHandler() {
+      this.examineOpenOf = false;
+      console.log("渲染完成")
+      let ele = document.getElementsByClassName('vue-office-pdf-wrapper')
+      this.examineHeight = ele[0].childNodes[0].clientHeight + 3 + 'px';
+    },
+    errorHandler() {
+      console.log("渲染失败")
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.invoice-dialog :deep .vue-office-pdf-wrapper {
+  padding: 0 !important;
+  background: #fff !important;
+}
+</style>
+```
+
+### 网页打印小票解决方案
+
+1.先去网站下载控件[下载](https://www.lodop.net/download.html)
+
+2.在项目中执行`npm i lodop-print-designer`或者 `npm install kr-print-designer`
+并在main.js加入
+```js
+// import KrPrintDesigner from "kr-print-designer";
+// import "kr-print-designer/lib/kr-print-designer.css";
+
+// Vue.use(KrPrintDesigner);
+import LodopPrintDesigner from "lodop-print-designer";
+import "lodop-print-designer/lib/lodop-print-designer.css";
+
+Vue.use(LodopPrintDesigner);
+```
+
+3.定义一个jison样式
+```js
+export let printData = {
+    "title": "123",
+    "type": 1,
+    "width": 180,
+    "height": 500,
+    "pageWidth": 58,
+    "pageHeight": 140,
+    "tempItems": [
+        {
+            "type": "braid-txt",
+            "isEdit": 0,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 19,
+            "left": 0,
+            "top": 13,
+            "title": "公司名称",
+            "value": "{公司名称}",
+            "defaultValue": "某某公司",
+            "name": "companyName",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 10,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "ljlb357ae3k04e2b"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 171,
+            "height": 20,
+            "left": 12,
+            "top": 48,
+            "title": "出库单号",
+            "value": "{出库单号1111111111}",
+            "defaultValue": "CK-1234567890",
+            "name": "stockoutCode",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "bqath1ja3su0s1cm"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 168,
+            "height": 19,
+            "left": 12,
+            "top": 71,
+            "title": "出库时间",
+            "value": "{出库时间845848484}",
+            "defaultValue": "2020-08-27 12:00:00",
+            "name": "businessDate",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "kwoqo1jao95amhb5"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 141,
+            "height": 18,
+            "left": 12,
+            "top": 96,
+            "title": "合计金额",
+            "value": "{合计金额}",
+            "defaultValue": "123.00",
+            "name": "totalPrice",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": false,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "left",
+                "ItemType": 0
+            },
+            "uuid": "ek1ejq1k0jnbzhpg"
+        },
+        {
+            "type": "horizontal-line",
+            "isEdit": false,
+            "dragable": true,
+            "resizable": true,
+            "width": 177,
+            "height": 10,
+            "left": 2,
+            "top": 125,
+            "title": "横线",
+            "value": "横线",
+            "defaultValue": "——",
+            "name": "",
+            "style": {
+                "type": "solid",
+                "zIndex": 0,
+                "FontSize": 1,
+                "FontColor": "#000000",
+                "lineType": 0,
+                "ItemType": 0
+            },
+            "uuid": "uwu13b9oui5aio63"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 25,
+            "left": 0,
+            "top": 281,
+            "title": "自定义文本",
+            "value": "支付宝或微信扫码开票",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "c0p50209qqxg9wm2"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 179,
+            "height": 23,
+            "left": 0,
+            "top": 308,
+            "title": "自定义文本",
+            "value": "请于2023年前扫码开票",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "emyb5a59to709i8b"
+        },
+        {
+            "type": "braid-txt",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 177,
+            "height": 20,
+            "left": 1,
+            "top": 336,
+            "title": "自定义文本",
+            "value": "否则二维码将失效",
+            "defaultValue": "自定义文本",
+            "name": "",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "FontColor": "#000000",
+                "Bold": true,
+                "Italic": false,
+                "Underline": false,
+                "Alignment": "center",
+                "ItemType": 0
+            },
+            "uuid": "3qe7nbdyhgx1e9i2"
+        },
+        {
+            "type": "bar-code",
+            "isEdit": 1,
+            "dragable": true,
+            "resizable": true,
+            "width": 120,
+            "height": 120,
+            "left": 33,
+            "top": 142,
+            "title": "单号条码",
+            "value": "{单号}",
+            "defaultValue": "CK-1234567890",
+            "name": "stockoutCode",
+            "style": {
+                "zIndex": 0,
+                "FontSize": 9,
+                "ShowBarText": false,
+                "codeType": "QRCode",
+                "ItemType": 0
+            },
+            "lodopStyle": {
+                "QRCodeVersion": "1",
+                "QRCodeErrorLevel": "L"
+            },
+            "uuid": "11vm4wo9kqimha8j"
+        }
+    ]
+}
+```
+4.之后直接进行调用
+```js
+import { printData } from "@/utils/print";
+this.$lodop.previewTemp(printData)
+```
+#### 法二
+public内的html引入下面js文件
+```js
+//==本JS是加载Lodop插件或Web打印服务CLodop/Lodop7的综合示例，可直接使用，建议理解后融入自己程序==
+
+//用双端口加载主JS文件Lodop.js(或CLodopfuncs.js兼容老版本)以防其中某端口被占:
+var MainJS = "CLodopfuncs.js",
+  URL_WS1 = "ws://localhost:8000/" + MainJS,                //ws用8000/18000
+  URL_WS2 = "ws://localhost:18000/" + MainJS,
+  URL_HTTP1 = "http://localhost:8000/" + MainJS,              //http用8000/18000
+  URL_HTTP2 = "http://localhost:18000/" + MainJS,
+  URL_HTTP3 = "https://localhost.lodop.net:8443/" + MainJS;   //https用8000/8443
+
+var CreatedOKLodopObject, CLodopIsLocal, LoadJsState;
+
+//==判断是否需要CLodop(那些不支持插件的浏览器):==
+function needCLodop() {
+  try {
+    var ua = navigator.userAgent;
+    if (ua.match(/Windows\sPhone/i) ||
+      ua.match(/iPhone|iPod|iPad/i) ||
+      ua.match(/Android/i) ||
+      ua.match(/Edge\D?\d+/i))
+      return true;
+    var verTrident = ua.match(/Trident\D?\d+/i);
+    var verIE = ua.match(/MSIE\D?\d+/i);
+    var verOPR = ua.match(/OPR\D?\d+/i);
+    var verFF = ua.match(/Firefox\D?\d+/i);
+    var x64 = ua.match(/x64/i);
+    if ((!verTrident) && (!verIE) && (x64)) return true;
+    else if (verFF) {
+      verFF = verFF[0].match(/\d+/);
+      if ((verFF[0] >= 41) || (x64)) return true;
+    } else if (verOPR) {
+      verOPR = verOPR[0].match(/\d+/);
+      if (verOPR[0] >= 32) return true;
+    } else if ((!verTrident) && (!verIE)) {
+      var verChrome = ua.match(/Chrome\D?\d+/i);
+      if (verChrome) {
+        verChrome = verChrome[0].match(/\d+/);
+        if (verChrome[0] >= 41) return true;
+      }
+    }
+    return false;
+  } catch (err) {
+    return true;
+  }
+}
+
+//==检查加载成功与否，如没成功则用http(s)再试==
+//==低版本CLODOP6.561/Lodop7.043及前)用本方法==
+function checkOrTryHttp() {
+  if (window.getCLodop) {
+    LoadJsState = "complete";
+    return true;
+  }
+  if (LoadJsState == "loadingB" || LoadJsState == "complete") return;
+  LoadJsState = "loadingB";
+  var head = document.head || document.getElementsByTagName("head")[0] || document.documentElement;
+  var JS1 = document.createElement("script")
+    , JS2 = document.createElement("script")
+    , JS3 = document.createElement("script");
+  JS1.src = URL_HTTP1;
+  JS2.src = URL_HTTP2;
+  JS3.src = URL_HTTP3;
+  JS1.onload = JS2.onload = JS3.onload = JS2.onerror = JS3.onerror = function () { LoadJsState = "complete"; }
+  JS1.onerror = function (e) {
+    if (window.location.protocol !== 'https:')
+      head.insertBefore(JS2, head.firstChild); else
+      head.insertBefore(JS3, head.firstChild);
+  }
+  head.insertBefore(JS1, head.firstChild);
+}
+
+//==加载Lodop对象的主过程:==
+(function loadCLodop() {
+  if (!needCLodop()) return;
+  CLodopIsLocal = !!((URL_WS1 + URL_WS2).match(/\/\/localho|\/\/127.0.0./i));
+  LoadJsState = "loadingA";
+  if (!window.WebSocket && window.MozWebSocket) window.WebSocket = window.MozWebSocket;
+  //ws方式速度快(小于200ms)且可避免CORS错误,但要求Lodop版本足够新:
+  try {
+    var WSK1 = new WebSocket(URL_WS1);
+    WSK1.onopen = function (e) { setTimeout("checkOrTryHttp()", 200); }
+    WSK1.onmessage = function (e) { if (!window.getCLodop) eval(e.data); }
+    WSK1.onerror = function (e) {
+      var WSK2 = new WebSocket(URL_WS2);
+      WSK2.onopen = function (e) { setTimeout("checkOrTryHttp()", 200); }
+      WSK2.onmessage = function (e) { if (!window.getCLodop) eval(e.data); }
+      WSK2.onerror = function (e) { checkOrTryHttp(); }
+    }
+  } catch (e) {
+    checkOrTryHttp();
+  }
+})();
+
+
+//==获取LODOP对象主过程,判断是否安装、需否升级:==
+function getLodop(oOBJECT, oEMBED) {
+  var strFontTag = "<br><font color='#FF00FF'>打印控件";
+  var strLodopInstall = strFontTag + "未安装!点击这里<a href='install_lodop32.exe' target='_self'>执行安装</a>";
+  var strLodopUpdate = strFontTag + "需要升级!点击这里<a href='install_lodop32.exe' target='_self'>执行升级</a>";
+  var strLodop64Install = strFontTag + "未安装!点击这里<a href='install_lodop64.exe' target='_self'>执行安装</a>";
+  var strLodop64Update = strFontTag + "需要升级!点击这里<a href='install_lodop64.exe' target='_self'>执行升级</a>";
+  var strCLodopInstallA = "<br><font color='#FF00FF'>Web打印服务CLodop未安装启动，点击这里<a href='CLodop_Setup_for_Win32NT.exe' target='_self'>下载执行安装</a>";
+  var strCLodopInstallB = "<br>（若此前已安装过，可<a href='CLodop.protocol:setup' target='_self'>点这里直接再次启动</a>）";
+  var strCLodopUpdate = "<br><font color='#FF00FF'>Web打印服务CLodop需升级!点击这里<a href='CLodop_Setup_for_Win32NT.exe' target='_self'>执行升级</a>";
+  var strLodop7FontTag = "<br><font color='#FF00FF'>Web打印服务Lodop7";
+  var strLodop7HrefX86 = "点击这里<a href='Lodop7_Linux_X86_64.tar.gz' target='_self'>下载安装</a>(下载后解压，点击lodop文件开始执行)";
+  var strLodop7HrefARM = "点击这里<a href='Lodop7_Linux_ARM64.tar.gz'  target='_self'>下载安装</a>(下载后解压，点击lodop文件开始执行)";
+  var strLodop7Install_X86 = strLodop7FontTag + "未安装启动，" + strLodop7HrefX86;
+  var strLodop7Install_ARM = strLodop7FontTag + "未安装启动，" + strLodop7HrefARM;
+  var strLodop7Update_X86 = strLodop7FontTag + "需升级，" + strLodop7HrefX86;
+  var strLodop7Update_ARM = strLodop7FontTag + "需升级，" + strLodop7HrefARM;
+  var strInstallOK = "，成功后请刷新本页面或重启浏览器。</font>";
+  var LODOP;
+  try {
+    var isWinIE = (/MSIE/i.test(navigator.userAgent)) || (/Trident/i.test(navigator.userAgent));
+    var isWinIE64 = isWinIE && (/x64/i.test(navigator.userAgent));
+    var isLinuxX86 = (/Linux/i.test(navigator.platform)) && (/x86/i.test(navigator.platform));
+    var isLinuxARM = (/Linux/i.test(navigator.platform)) && (/aarch/i.test(navigator.platform));
+
+    if (needCLodop() || isLinuxX86 || isLinuxARM) {
+      try {
+        LODOP = window.getCLodop();
+      } catch (err) { }
+      if (!LODOP && LoadJsState !== "complete") {
+        if (!LoadJsState)
+          alert("未曾加载Lodop主JS文件，请先调用loadCLodop过程."); else
+          alert("网页还没下载完毕，请稍等一下再操作.");
+        return;
+      }
+      var strAlertMessage;
+      if (!LODOP) {
+        if (isLinuxX86)
+          strAlertMessage = strLodop7Install_X86;
+        else if (isLinuxARM)
+          strAlertMessage = strLodop7Install_ARM;
+        else
+          strAlertMessage = strCLodopInstallA + (CLodopIsLocal ? strCLodopInstallB : "");
+        document.body.innerHTML = strAlertMessage + strInstallOK + document.body.innerHTML;
+        return;
+      } else {
+        if (isLinuxX86 && LODOP.CVERSION < "7.0.7.5")
+          strAlertMessage = strLodop7Update_X86;
+        else if (isLinuxARM && LODOP.CVERSION < "7.0.7.5")
+          strAlertMessage = strLodop7Update_ARM;
+        else if (CLODOP.CVERSION < "6.5.7.9")
+          strAlertMessage = strCLodopUpdate;
+
+        if (strAlertMessage)
+          document.body.innerHTML = strAlertMessage + strInstallOK + document.body.innerHTML;
+      }
+    } else {
+      //==如果页面有Lodop插件就直接使用,否则新建:==
+      if (oOBJECT || oEMBED) {
+        if (isWinIE)
+          LODOP = oOBJECT;
+        else
+          LODOP = oEMBED;
+      } else if (!CreatedOKLodopObject) {
+        LODOP = document.createElement("object");
+        LODOP.setAttribute("width", 0);
+        LODOP.setAttribute("height", 0);
+        LODOP.setAttribute("style", "position:absolute;left:0px;top:-100px;width:0px;height:0px;");
+        if (isWinIE)
+          LODOP.setAttribute("classid", "clsid:2105C259-1E0C-4534-8141-A753534CB4CA");
+        else
+          LODOP.setAttribute("type", "application/x-print-lodop");
+        document.documentElement.appendChild(LODOP);
+        CreatedOKLodopObject = LODOP;
+      } else
+        LODOP = CreatedOKLodopObject;
+      //==Lodop插件未安装时提示下载地址:==
+      if ((!LODOP) || (!LODOP.VERSION)) {
+        document.body.innerHTML = (isWinIE64 ? strLodop64Install : strLodopInstall) + strInstallOK + document.body.innerHTML;
+        return LODOP;
+      }
+      if (LODOP.VERSION < "6.2.2.6") {
+        document.body.innerHTML = (isWinIE64 ? strLodop64Update : strLodopUpdate) + strInstallOK + document.body.innerHTML;
+      }
+    }
+    //===如下空白位置适合调用统一功能(如注册语句、语言选择等):=======================
+    LODOP.SET_LICENSES("", "EE0887D00FCC7D29375A695F728489A6", "C94CEE276DB2187AE6B65D56B3FC2848", "");
+
+    //===============================================================================
+    return LODOP;
+  } catch (err) {
+    alert("getLodop出错:" + err);
+  }
+}
+
+```
+vue文件中直接调用
+``` js
+/** 打印 */
+    printComponent() {
+
+      var strStyleCSS = "<link href='/css/myComponent.css' type='text/css' rel='stylesheet'>";
+      var strFormHtml = strStyleCSS + "<body>" + document.getElementById("myComponent").innerHTML + "</body>";
+      var LODOP = getLodop();
+      LODOP.SET_PRINT_STYLEA("FontSize", 12);//打印区域的字体大小
+      LODOP.SET_PRINT_PAGESIZE(5, 560, 1250, "");//打印区域的整体尺寸
+      LODOP.ADD_PRINT_HTM(5, 5, 500, 1350, strFormHtml);
+      LODOP.PRINT();
+      // LODOP.PREVIEW()
+    },
+```
+#### PDF打印
+写出共用方法，并全局注册
+```js
+function demoGetBASE64(dataArray) {
+  var digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  var strData = "";
+  for (var i = 0, ii = dataArray.length; i < ii; i += 3) {
+    if (isNaN(dataArray[i])) break;
+    var b1 = dataArray[i] & 0xFF, b2 = dataArray[i + 1] & 0xFF, b3 = dataArray[i + 2] & 0xFF;
+    var d1 = b1 >> 2, d2 = ((b1 & 3) << 4) | (b2 >> 4);
+    var d3 = i + 1 < ii ? ((b2 & 0xF) << 2) | (b3 >> 6) : 64;
+    var d4 = i + 2 < ii ? (b3 & 0x3F) : 64;
+    strData += digits.substring(d1, d1 + 1) + digits.substring(d2, d2 + 1) + digits.substring(d3, d3 + 1) + digits.substring(d4, d4 + 1);
+  }
+  return strData;
+}
+
+export function demoDownloadPDF(url) {
+  if (!(/^https?:/i.test(url))) return;
+  if (window.XMLHttpRequest) var xhr = new XMLHttpRequest(); else var xhr = new ActiveXObject("MSXML2.XMLHTTP");
+  xhr.open('GET', url, false); //同步方式
+  if (xhr.overrideMimeType)
+    try {
+      xhr.responseType = 'arraybuffer';
+      var arrybuffer = true;
+    } catch (err) {
+      xhr.overrideMimeType('text/plain; charset=x-user-defined');
+    }
+  xhr.send(null);
+  var data = xhr.response || xhr.responseBody;
+  if (typeof Uint8Array !== 'undefined') {
+    if (arrybuffer) var dataArray = new Uint8Array(data); else {
+      var dataArray = new Uint8Array(data.length);
+      for (var i = 0; i < dataArray.length; i++) { dataArray[i] = data.charCodeAt(i); }
+    }
+  } else
+    var dataArray = VBS_BinaryToArray(data).toArray(); //兼容IE低版本
+  return demoGetBASE64(dataArray);
+}
+```
+之后直接使用
+```js
+printLodop() {
+      var strURL = 'https://localhost.lodop.net:8443/CLodopDemos/PDFDemo.pdf';
+      LODOP = getLodop();
+      LODOP.PRINT_INIT("测试PDF打印功能");
+      LODOP.ADD_PRINT_PDF(0, 0, "100%", "100%", this.demoDownloadPDF(strURL));
+      // LODOP.PREVIEW();
+      LODOP.PRINT();
+    },
+```
+
+
+
 
