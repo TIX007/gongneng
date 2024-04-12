@@ -1529,3 +1529,37 @@ Disconnect。等待MQTT客户端完成所做的工作，并与服务器断开TCP
 Subscribe。等待完成订阅。
 UnSubscribe。等待服务器取消客户端的一个或多个topics订阅。
 Publish。MQTT客户端发送消息请求，发送完成后返回应用程序线程。
+
+### js迭代器
+  使用场景如多个弹框广告或者提示
+``` js
+
+ const infos = {
+        friends: ['kobe', 'james', 'curry'],
+        [Symbol.iterator]: function () {
+          let index = 0
+          const infosIterator = {
+            next: () => {
+              // done: Boolean
+              // value: 具体值/undefined
+              if (index < this.friends.length) {
+                return {
+                  done: false,
+                  value: this.friends[index++],
+                }
+              } else {
+                return { done: true }
+              }
+            },
+          }
+          return infosIterator
+        },
+      }
+
+      const iterator = infos[Symbol.iterator]()
+      console.log(iterator.next())
+      console.log(iterator.next())
+      console.log(iterator.next())
+      console.log(iterator.next())
+
+```
