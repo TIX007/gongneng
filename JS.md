@@ -535,3 +535,9 @@ download('/doc/download', { id: row.id }, row.fileName)
 window.location.href = "/app/doc/downloadApp?id="+ row.id
 ```
 
+### MQTT协议中的方法
+Connect。等待与服务器建立连接。
+Disconnect。等待MQTT客户端完成所做的工作，并与服务器断开TCP/IP会话。
+Subscribe。等待完成订阅。
+UnSubscribe。等待服务器取消客户端的一个或多个topics订阅。
+Publish。MQTT客户端发送消息请求，发送完成后返回应用程序线程。
