@@ -1563,3 +1563,12 @@ Publish。MQTT客户端发送消息请求，发送完成后返回应用程序线
       console.log(iterator.next())
 
 ```
+
+### url参数转对象
+
+```js
+const queryString = "?name=jimmy&age=18&height=1.88";
+const queryParams = new URLSearchParams(queryString) // URLSearchParams 
+const paramObj = Object.fromEntries(queryParams);
+console.log(paramObj); // { name: 'jimmy', age: '18', height: '1.88' }
+```
