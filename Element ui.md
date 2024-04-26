@@ -1199,6 +1199,8 @@ clickitemdataType (e) { // e为radio的label值
 ### 表单加星号
 只需加个`class="is-required"`即可
 
+或者直接<el-form-item required></el-form-item>
+
 ### 给表头加必填星号
 ### 1.在需要加必填星号的el-table-column上添加render-header属性。
 
@@ -1208,6 +1210,8 @@ clickitemdataType (e) { // e为radio的label值
     ...
   </template>
 </el-table-column>
+
+// 或者直接在<el-form-item required></el-form-item> 加上required即可
 ```
 
 ### 2.addRedStar函数。除了加红\*外也可以有别的控制表头内容的操作，可按需编写。
