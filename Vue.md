@@ -30,6 +30,11 @@ module.exports = defineConfig({
 
 ```
 
+### 多个或者if判断简写
+``` js
+v-if="['1', '2', '7'].includes(scope.row.jtgjlx)"
+```
+
 ### 路由跳转传参页面刷新获取参数更新页面
 
 [(4条消息) vue之this.$router.push页面刷新问题_凶呆呆的博客-CSDN博客_vuerouterpush刷新](https://blog.csdn.net/weixin_47800450/article/details/112167359?spm=1001.2101.3001.6661.1&utm_medium=distribute.pc_relevant_t0.none-task-blog-2~default~CTRLIST~Rate-1.pc_relevant_antiscanv2&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-2~default~CTRLIST~Rate-1.pc_relevant_antiscanv2&utm_relevant_index=1)
