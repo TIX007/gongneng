@@ -23,6 +23,12 @@
 }
 ```
 
+### 关闭el-autocomplete的下拉框
+```js
+this.$refs.autocompletes[0].activated = false;
+```
+
+
 ### 弹出框
 
 ```vue
