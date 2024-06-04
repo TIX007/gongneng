@@ -1574,7 +1574,7 @@ console.log(paramObj); // { name: 'jimmy', age: '18', height: '1.88' }
 ```
 
 ### 跨域解决方案--jsonp
-```
+```js
 axios({
         type: "GET",
         dataType: "jsonp",
