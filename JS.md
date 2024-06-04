@@ -1572,3 +1572,36 @@ const queryParams = new URLSearchParams(queryString) // URLSearchParams
 const paramObj = Object.fromEntries(queryParams);
 console.log(paramObj); // { name: 'jimmy', age: '18', height: '1.88' }
 ```
+
+### 跨域解决方案--jsonp
+```
+axios({
+        type: "GET",
+        dataType: "jsonp",
+        contentType: 'application/json; charset=utf-8',
+        async: false,//非异步
+        url: this.ServiceUrl,
+      }).then((response) => {
+        let jsonData = response.data
+        var data = JSON.parse(jsonData.match(/\((.*?)\)/)[1]);
+        let { StartScanResult } = data;
+        let cers = StartScanResult.split('#%')
+        var names =
+          "clzzqymc,clpp,clmc,clxh,vin,fdjh,pzxlh,csys,hgzbh,fzrq,zsqdrq,sjscrq"
+            .split(',');
+        if (cers.length != 12) {
+          this.$message.warning("长度错误，" + cers.length)
+          return false;
+        } else {
+          let newdata = mergeArraysToObject(names, cers)
+          console.log(newdata, 'newdata***');
+          this.formData.hgzh = newdata.hgzbh;
+          this.formData.fdjhm = newdata.fdjh;
+          this.formData.cjh = newdata.vin;
+          this.formData.cpxh = newdata.clpp + newdata.clxh;
+          this.formData.cldw = newdata.zzl;
+          this.formData.xcrs = newdata.edzk;
+        }
+      }).catch((error) => {
+      });
+```
