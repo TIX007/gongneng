@@ -1606,6 +1606,33 @@ axios({
       });
 ```
 
+### 跨域解决方案
+```js
+// 自动添加的是callback,如需增加别的就在?后面加如'jsoncallback'的东西
+// ServiceUrl: "http://127.0.0.1:40004/ScanWcfGetServer/StartScan?jsoncallback=JSON.stringify&type=0&key=PER4-54LD-WXQI-DK87&_=1717470797295",
+jsonp(this.ServiceUrl, { param: 'jsoncallback' }, (err, data) => {
+        let { StartScanResult } = data;
+        let cers = StartScanResult.split('#%')
+        var names =
+"QX,hgzbh,fzrq,clzzqymc,cllx_d,cllx,clpp,clxh,csys,byzd1,byzd2,byzd3,vin,byzd4,fdjh,fdjxh,ylzl,pfbz,pl,gl,zxxs,lj_q,lj_h,lts,ltgg,gbthps,zj,zh,zs,wkcc_c,wkcc_k,wkcc_g,hxnbcc_c,hxnbcc_k,hxnbcc_g,zzl,hdzzl,zbzl,zzllyxs,zqyzzl,edzk,bgcazzdyxzzl,jsszcrs,zxzgs"
+            .split(',');
+        if (!(cers.length == 32 || cers.length == 44)) {
+          this.$message.warning("特种车辆合格证或零件不支持，" + cers.length)
+          return false;
+        } else {
+          let newdata = mergeArraysToObject(names, cers)
+          console.log(newdata, 'newdata***');
+          this.formData.hgzh = newdata.hgzbh;
+          this.formData.fdjhm = newdata.fdjh;
+          this.formData.cjh = newdata.vin;
+          this.formData.cpxh = newdata.clpp + newdata.clxh;
+          this.formData.cldw = newdata.zzl / 1000;
+          this.formData.xcrs = newdata.edzk;
+          this.cjhQuery(this.formData.cjh);
+        }
+      })
+```
+
 ### 机动车统一销售发票打印
 ```js
 export function printJdcfp(T, _) {
