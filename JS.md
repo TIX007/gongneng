@@ -1608,6 +1608,7 @@ axios({
 
 ### 跨域解决方案
 ```js
+// npm i jsonp
 // 自动添加的是callback,如需增加别的就在?后面加如'jsoncallback'的东西
 // ServiceUrl: "http://127.0.0.1:40004/ScanWcfGetServer/StartScan?jsoncallback=JSON.stringify&type=0&key=PER4-54LD-WXQI-DK87&_=1717470797295",
 jsonp(this.ServiceUrl, { param: 'jsoncallback' }, (err, data) => {
