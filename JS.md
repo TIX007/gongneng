@@ -549,6 +549,34 @@ export {renderSize, convertEnum, copy, convertDict}
 
 ```
 
+### 文件流下载
+```js
+export function download2(url, params, filename) {
+  downloadLoadingInstance = Loading.service({ text: "正在下载数据，请稍候", spinner: "el-icon-loading", background: "rgba(0, 0, 0, 0.7)", })
+  return service.post(url, params, {
+    headers: { 'Content-Type': 'application/json' },
+    responseType: 'blob',
+  }).then(async (data) => {
+    console.log(data);
+    const isBlob = blobValidate(data);
+    if (isBlob) {
+      const blob = new Blob([data], { type: 'application/zip' })
+      saveAs(blob, filename)
+    } else {
+      const resText = await data.text();
+      const rspObj = JSON.parse(resText);
+      const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default']
+      Message.error(errMsg);
+    }
+    downloadLoadingInstance.close();
+  }).catch((r) => {
+    console.error(r)
+    Message.error('下载文件出现错误，请联系管理员！')
+    downloadLoadingInstance.close();
+  })
+}
+```
+
 ### 文件流下载预览方法支持移动端
 
 > 注意移动端文件流下载时请求方式必须是get请求否则会出现安卓端在线预览乱码现象
