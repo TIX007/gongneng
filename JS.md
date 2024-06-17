@@ -366,6 +366,8 @@ console.log(a) //  ['a', 'b', 'c', 'd']
 
 ```js
 ['iphoneX', 'iphone11', 'iphone12'].includes(x)
+
+['1', '2', '7'].includes(scope.row.jtgjlx)
 ```
 
 ### Promise
