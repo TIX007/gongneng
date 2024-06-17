@@ -325,3 +325,19 @@ background:linear-gradient(to top right,rgba(255,249,245,.55) 0,rgba(255,249,245
 }
 ```
 
+###  设置打印纸张及缩放比例
+```css
+@media print {
+    html, body {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        padding: 0;
+        transform: scale(0.9); // 90%
+    }
+    #printableArea {
+        page-break-after: always;
+    }
+}
+```
+
