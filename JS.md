@@ -21,6 +21,13 @@ if (!!data) {
 }
 ```
 
+### 空字符串转null
+```js
+let itemList = JSON.stringify(this.contrastFrom)
+let result = itemList.replace(/""/g, "null");
+let obj = JSON.parse(result)
+```
+
 ### 将斜杠改为问号
 ```js
 const url = 'https://w.url.cn/s/Ackphg4/cak=krNIw5qjllJUl1ldnrze8a';
