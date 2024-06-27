@@ -1422,3 +1422,16 @@ handleSelectionChange(rows) {
 
 ```
 
+### 移动端适配消息提示与弹框
+
+```css
+@media (max-width: 720px) {
+	.el-message-box {
+		width: 320px !important;
+	}
+  .el-message {
+      min-width: 300px !important;
+  }
+}
+```
+
