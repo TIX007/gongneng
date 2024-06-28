@@ -4837,6 +4837,145 @@ printLodop() {
     },
 ```
 
+### 拍照扫描条形码 用Quagga.js
+```vue
+<template>
+  <div class="mt46 input-cells">
+    <div class="flex a-center f-fl">
+      <div>车架号</div>
+      <input v-model="queryParams.vin" class="cell-input ml5 mr10" type="text" placeholder="请输入或扫描拍照" />
+    </div>
+    <div class="flex l-center a-left">
+      <div class="qr-item mr5 ml5">
+        <img src="#" width="10" height="10" alt="">
+        <i class="el-icon-camera" style="font-size: 24px;"><span style="font-size: 14px;">拍照</span></i>
+        <input v-if="isUploadBarCode" class="qr-item-input" @change="toQR" type="file" accept="image/*" capture="camera">
+      </div>
+    </div>
+  </div>
+</template>
+
+<script type="text/ecmascript-6">
+
+import Quagga from 'quagga'
+export default {
+  name: 'One',
+  data() {
+    return {
+      queryParams: {
+        vin: null
+      },
+      isUploadBarCode: true, // 控制销毁
+    }
+  },
+  mounted() {
+  },
+  methods: {
+    // 图片 识别 条形码
+    toQR(e) {
+      const that = this
+      const file0 = e.target.files[0]
+      this.isUploadBarCode = false
+      Quagga.decodeSingle({
+        inputStream: {
+          name: 'image',
+          type: 'ImageStream',
+          size: 800,
+          singleChannel: false,
+        },
+        locator: {
+          patchSize: 'medium',
+          halfSample: true
+        },
+        numOfWorkers: 4,
+        decoder: { // ean_reader 这里指定ean条形码，就是国际13位的条形码   code39    code_128
+          readers: [{
+            format: "code_128_reader",
+            config: {}
+          }]
+        },
+        locate: true,
+        src: URL.createObjectURL(file0)
+      }, (result) => {
+        console.log('Quagga()-result', result)
+        // let code = result.codeResult.code
+        if (result && result.codeResult) {
+          that.queryParams.vin = result.codeResult.code
+          // 执行 页面请求刷新
+        } else {
+          that.queryParams.vin = null
+          console.warn('识别失败，请手动输入')
+        }
+        this.isUploadBarCode = true
+      })
+    },
+  }
+}
+</script>
+
+<style scoped>
+
+.input-label {
+  margin-left: 0;
+  font-size: .14rem;
+  width: .9rem;
+}
+
+.input-cells>input {
+  font-size: .14rem;
+  text-align: right;
+}
+
+.input-cells>img {
+  width: .06rem;
+  height: .1rem;
+  margin-right: .03rem;
+}
+
+.qr-item {
+  width: 4.5rem;
+  height: 100%;
+  background-size: 120%;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dae7f6;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr-item-input {
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  background-size: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.flex {
+  display: flex;
+}
+
+.a-center {
+  align-items: center;
+}
+
+.f-fl {
+  float: left;
+}
+
+.ml5 {
+  margin-left: .05rem;
+}
+
+.mr10 {
+  margin-right: .1rem;
+}
+</style>
+```
 
 
 
