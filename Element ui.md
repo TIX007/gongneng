@@ -1435,3 +1435,8 @@ handleSelectionChange(rows) {
 }
 ```
 
+### el-upload组件在安卓中无法调用手机相机
+```html
+<el-upload accept="image/*,video/*" />
+```
+
