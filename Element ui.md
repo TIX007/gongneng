@@ -1440,3 +1440,12 @@ handleSelectionChange(rows) {
 <el-upload accept="image/*,video/*" />
 ```
 
+### el-table单击行内选中选择项
+```js
+//  @row-click="handleRowClick"
+// 选择项
+    handleRowClick(row) {
+      this.$refs.table.toggleRowSelection(row);
+}
+```
+
