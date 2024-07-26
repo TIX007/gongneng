@@ -1207,6 +1207,11 @@ clickitemdataType (e) { // e为radio的label值
 
 或者直接<el-form-item required></el-form-item>
 
+### 表单从新校验
+```js
+this.$refs['formDeclare'].validate();
+```
+
 ### 给表头加必填星号
 ### 1.在需要加必填星号的el-table-column上添加render-header属性。
 
