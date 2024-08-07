@@ -4977,5 +4977,32 @@ export default {
 </style>
 ```
 
+### win消息通知
+
+```js
+showNotification() {
+      // 检查浏览器是否支持Notification API
+      if (!("Notification" in window)) {
+        alert("此浏览器不支持通知");
+        return;
+      }
+ 
+      // 请求用户权限
+      Notification.requestPermission()
+        .then(permission => {
+          if (permission === "granted") {
+            // 如果用户授权，则创建通知
+            const notification = new Notification("通知标题", {
+              body: "通知内容",
+              icon: "notification-icon.png" // 通知的图标（可选）
+            });
+          }
+        })
+        .catch(err => {
+          console.error("请求通知权限出错:", err);
+        });
+    }
+```
+
 
 
