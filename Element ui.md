@@ -1460,5 +1460,11 @@ handleSelectionChange(rows) {
   width: auto !important;
   min-width: 450px;
 }
+
+@media screen and (max-width: 600px) {
+  .el-autocomplete-suggestion {
+  width: 100% !important;
+}
+}
 ```
 
