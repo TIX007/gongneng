@@ -5004,5 +5004,75 @@ showNotification() {
     }
 ```
 
+### 图片压缩方法
+
+```js
+compressImg(file) {
+      let disposeFile = file;
+      if (!disposeFile) {
+        return null;
+      }
+      if (Object.prototype.toString.call(file) === "[object Blob]") {
+        disposeFile = new File([file], file.name, { type: file.type });
+      }
+      const read = new FileReader(),
+        _that = this;
+      const fileSize = parseFloat(
+        parseInt(disposeFile["size"]) / 1024 / 1024
+      ).toFixed(2);
+      read.readAsDataURL(disposeFile);
+      return new Promise((resolve, reject) => {
+        try {
+          read.onload = (e) => {
+            const img = new Image();//项目中尽量避免出现有两个Image构造函数
+            img.src = e.target.result;
+            img.onload = function () {
+              let w = Math.floor(this.width / 2),//压缩后的图片宽度是原来的一半
+                h = Math.floor(this.height / 2);//压缩后的图片高度是原来的一半
+              const canvas = document.createElement("canvas");
+              const ctx = canvas.getContext("2d");
+              let base64;
+              canvas.setAttribute("width", w);
+              canvas.setAttribute("height", h);
+              ctx.drawImage(this, 0, 0, w, h);
+              console.log(w, h);
+              if (fileSize < 1) {
+                // 如果图片小于一兆 那么不执行压缩操作
+                base64 = canvas.toDataURL(disposeFile["type"], 1);
+              } else if (fileSize > 1 && fileSize < 2) {
+                // 如果图片大于1M并且小于2M 那么压缩0.7
+                base64 = canvas.toDataURL(disposeFile["type"], 0.7);
+              } else {
+                // 如果图片超过2m 那么压缩0.75
+                base64 = canvas.toDataURL(disposeFile["type"], 0.75);
+              }
+              resolve(_that.dataURLtoFile(base64, disposeFile.name));
+            };
+          };
+        } catch (error) {
+          reject(disposeFile);
+        }
+      });
+    },
+    dataURLtoFile(dataurl, fileName) {
+      var arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], fileName, {
+        type: mime,
+      });
+    },
+```
+使用方法
+```js
+this.compressImg(file).then((res) => {
+          console.log(res);//压缩成功后返回该压缩文件
+        });
+```
 
 
