@@ -5075,4 +5075,37 @@ this.compressImg(file).then((res) => {
         });
 ```
 
+### 通过js动态设置输入边框颜色
+```scss
+// 先在variables.scss中设置变量
+$border-color:var(--borderColorYp,#c0c4cc);
+// 然后在element-ui.scss中使用变量
+.el-input__inner{
+  border-color: $border-color;
+}
+```
+最后在vue中设置颜色选择及保存方法
+```vue
+<template>
+<div class="drawer-item">
+            <span>输入框颜色</span>
+            <el-color-picker v-model="borderColorYp" style="float: right;height: 26px;margin: -3px 8px 0 0;"
+              @change="themeChange2" />
+          </div>
+</template>
+
+<script>
+export default {
+ methods: {
+   themeChange2(val) {
+      console.log(val, '**val');
+      document.getElementsByTagName('body')[0].style.setProperty('--borderColorYp', val);
+      this.$store.dispatch('settings/changeSetting', {
+        key: 'borderColorYp',
+        value: val
+      })
+    },
+ }
+}
+</script>
 
