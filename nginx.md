@@ -35,3 +35,66 @@ location /{
 
 ```
 
+### 负载均衡配置
+```nginx
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+    client_max_body_size 30m;
+
+    upstream backend {
+    		server 192.168.10.12:8010;
+    		server 192.168.10.19:8010;
+	}  //负载均衡配置
+
+    server {
+        listen       8000;
+        server_name  www.shhuyou.com.cn;
+		charset utf-8;
+
+		location / {
+			root   /usr/share/nginx/html/dist;
+			try_files $uri $uri/ /index.html;
+			index  index.html index.htm;
+		}
+
+		location /wx/ {
+			proxy_pass http://backend/wx/;
+			proxy_set_header        Host 127.0.0.1;
+			proxy_set_header        X-Real-IP $remote_addr;
+			proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+		}
+  
+		location /prod-api/ {
+		    proxy_set_header Host $http_host;
+		    proxy_set_header X-Real-IP $remote_addr;
+		    proxy_set_header REMOTE-HOST $remote_addr;
+		    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+		    proxy_pass http://backend/;
+		    proxy_connect_timeout    600;
+		    proxy_read_timeout       600;
+		    proxy_send_timeout       600;
+		}
+		
+		location /websocket/ {  # websocket 请求所在的地址
+		    proxy_pass http://192.168.10.12:8011;  # 后端 websocket 服务所在的地址
+		    proxy_http_version 1.1;
+		    proxy_set_header Upgrade $http_upgrade;
+		    proxy_set_header Connection "Upgrade";
+		    proxy_set_header X-Real-IP $remote_addr;
+	 	    proxy_connect_timeout 600s;
+		    proxy_read_timeout 600s;
+		    proxy_send_timeout 60s;
+		}
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+    }	
+}
+```
+
+
