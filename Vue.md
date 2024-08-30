@@ -5109,3 +5109,292 @@ export default {
 }
 </script>
 
+
+### 小票打印样式
+```vue
+<template>
+    <div class="receipt">
+        <h3>小票预览</h3>
+        <div id="ticketPrint" class="small-ticket-print-area">
+            <div class="small-ticket-content">
+                <div class="small-ticket-header">
+                    <div class="small-ticket-logo">
+                        <!-- <img
+                src="https://pimage.cqcb.com/d/file/vision/ai/2021-02-02/deae860249af083d8f1d04fe76c73d68.jpg"
+                class="smll-ticket-logo-img"
+              > -->
+
+                        <img v-if="cardData.xpLogo" :src="cardData.xpLogo" class="avatar">
+                    </div>
+                    <div class="small-ticket-merchantName">{{ cardData.sfTsy }}</div>
+                </div>
+                <div class="small-ticket-dotted-line" />
+                <div class="small-ticket-dotted-line" />
+                <div class="small-ticket-totalAmount">
+                    <span>订单号码：</span>
+                    <span>{{ orderData.id }}</span>
+                </div>
+                <div class="small-ticket-dissipate">
+                    受理时间：{{ orderData.create_time }}
+                </div>
+                <div class="small-ticket-totalAmount">
+                    <span>服务类型：</span>
+                    <span>{{orderData.ywmc}}</span>
+                </div>
+                <div class="small-ticket-totalAmount">
+                    <span>服务项目：</span>
+                    <span>{{orderData.fwxm}}</span>
+                </div>
+                <div class="small-ticket-totalAmount">
+                    <span>车牌信息：</span>
+                    <span>{{orderData.cphm}}</span>
+                </div>
+                <div class="small-ticket-totalAmount">
+                    <span>渠道代码：</span>
+                    <span>{{ orderData.qd_dm }}</span>
+                </div>
+                <div class="small-ticket-dotted-line" />
+                <div class="small-ticket-totalAmount">
+                    <span>费用总计：</span>
+                    <span>{{orderData.sjje}}元</span>
+                </div>
+                <div class="small-ticket-dotted-line" />
+                <div class="small-ticket-totalAmount">
+                    <span>注：</span>
+                    <div class="tips">
+                        <span v-for="(i,index) in cardData.xpWbxx" :key="index">{{ i }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import printJS from '@/utils/printJs'
+export default {
+    name: 'ShoppingReceipt',
+    props: {
+        cardData: {
+            type: Object,
+            required: true,
+            default: () => {
+                return {}
+            }
+        },
+        orderData: {
+            type: Object,
+            required: true,
+            default: () => {
+                return {}
+            }
+        }
+    },
+    data() {
+        return {
+
+        }
+    },
+    mounted() {
+
+    },
+    methods: {
+        printPreview() {
+            printJS({
+                printable: 'ticketPrint',
+                type: 'html',
+                targetStyles: ['*'],
+                maxWidth: 500
+            })
+        },
+    }
+}
+</script>
+
+<style lang="scss" scoped>
+.qrCode {
+    width: 120px;
+    height: 120px;
+}
+
+.receipt {
+    background: #fff;
+    border: 1px solid #ced4db;
+    height: fit-content;
+    width: 238px;    
+    overflow: hidden;
+    font-family: PingFangSC-Regular, PingFang SC, Microsoft YaHei, 微软雅黑,
+        sans-serif;
+
+    h3 {
+        margin: 0;
+        font-size: 14px;
+        padding: 5px 8px;
+        line-height: 22px;
+        background: #f5f8fa;
+        border-bottom: 1px solid #ced4db;
+        font-weight: 400;
+    }
+
+    .small-ticket-print-area {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        background: #fff;
+        border: 1px solid #ced4db;
+        height: fit-content;
+        width: 238px;
+        font-size: 12px;
+        line-height: 20px;
+        font-family: PingFangSC-Regular, PingFang SC, Microsoft YaHei, 微软雅黑,
+            sans-serif;
+
+        .small-ticket-content {
+            padding: 10px 10px 15px;;
+            position: relative;
+
+            .small-ticket-header {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                .small-ticket-logo {
+                    height: 32px;
+                    // padding: 44px 8px;
+                    margin: 10px 0;
+
+                    img {
+                        height: 32px;
+                    }
+                }
+
+                .small-ticket-merchantName {
+                    font-size: 16px;
+                    line-height: 24px;
+                    color: #000;
+                    font-weight: 500;
+                    word-wrap: break-word;
+                    word-break: break-all;
+                    overflow: hidden;
+                }
+            }
+
+            .small-ticket-dotted-line {
+                width: 100%;
+                height: 0;
+                border-bottom: 1px dotted #919fb5;
+                margin: 1.5px 0;
+            }
+
+            .small-ticket-detail,
+            .small-ticket-totalAmount {
+                display: flex;
+                justify-content: flex-start;
+                color: #000;
+                font-weight: 400;
+                margin: 5px 0;
+
+            }
+
+            .small-ticket-businessHours,
+            .small-ticket-ewm-tips {
+                color: #000;
+                text-align: center;
+            }
+
+            .small-ticket-expiryDate {
+                color: #000;
+                font-weight: 500;
+                text-align: center;
+            }
+
+            .small-ticket-needInvoice {
+                color: #000;
+                font-weight: 400;
+                text-align: center;
+                line-height: 20px;
+            }
+
+            .small-ticket-ewm {
+                padding: 4px 0;
+                display: flex;
+                justify-content: center;
+                position: relative;
+
+                .small-ticket-ewm-text {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 14px;
+                    color: #000;
+                    line-height: 22px;
+                    font-weight: 400;
+                }
+            }
+
+            .small-ticket-ewm-tips {
+                color: #000;
+                font-weight: 500;
+                text-align: center;
+            }
+
+            .small-ticket-adContent,
+            .small-ticket-businessAddress,
+            .small-ticket-merchantTelephone,
+            .small-ticket-receipt-remark {
+                color: #000;
+                font-weight: 400;
+                word-wrap: break-word;
+                word-break: break-all;
+                overflow: hidden;
+                text-align: center;
+            }
+
+            .small-ticket-needInvoice {
+                color: #000;
+                font-weight: 400;
+                text-align: center;
+            }
+        }
+    }
+
+    .small-ticket-adContent,
+    .small-ticket-businessAddress,
+    .small-ticket-businessHours,
+    .small-ticket-columns,
+    .small-ticket-detail,
+    .small-ticket-dissipate,
+    .small-ticket-ewm-tips,
+    .small-ticket-expiryDate,
+    .small-ticket-merchantTelephone,
+    .small-ticket-needInvoice,
+    .small-ticket-receipt-remark,
+    .small-ticket-serialNo,
+    .small-ticket-totalAmount {
+        font-size: 12px;
+        line-height: 20px;
+    }
+
+    .small-ticket-dissipate,
+    .small-ticket-serialNo {
+        color: #000;
+        font-weight: 400;
+    }
+    .tips span{
+        display: block;
+    }
+}
+</style>
+```
+使用
+```vue
+<ShoppingReceipt ref="xp" :cardData="cardData" :orderData="printData" />
+
+this.printData = {}
+ this.$refs.xp.printPreview()
+
+```
+
+
