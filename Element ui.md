@@ -1468,3 +1468,45 @@ handleSelectionChange(rows) {
 }
 ```
 
+### el-upload图片上传为Base64
+
+```html
+<el-form-item label="logo" class="logo">
+    <el-upload class="avatar-uploader" drag action :show-file-list="false" :before-upload="beforeAvatarUpload" 
+    :http-request="submitUpload">
+	<img v-if="cardData.xpLogo" :src="cardData.xpLogo" class="avatar">
+	<i v-else class="el-icon-plus avatar-uploader-icon"></i>
+	<i v-show="cardData.xpLogo" class="el-icon-close close-img" title="删除图片" @click.stop="closeImg"/>
+    </el-upload>
+</el-form-item>
+```
+
+```js
+submitUpload(param) {
+    const {file} = param
+    if(file){
+	const reader = new FileReader()
+	reader.readAsDataURL(file);
+	reader.onload = ()=>{
+	    console.log(reader.result)
+	    this.cardData.xpLogo = reader.result
+	}
+    }
+},
+beforeAvatarUpload(file) {
+    const isPng= file.type === 'image/png';
+    const isLt2M = file.size / 1024 / 1024 < 2;
+
+    if (!isPng) {
+	this.$message.error('上传头像图片只能是 JPG 格式!');
+    }
+    if (!isLt2M) {
+	this.$message.error('上传头像图片大小不能超过 2MB!');
+    }
+    return isPng&& isLt2M;
+}
+closeImg(){
+    this.cardData.xpLogo = '';
+    this.submitForm()
+},
+```
