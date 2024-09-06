@@ -1420,110 +1420,96 @@ printClick() {
 ### WebSocket的简单封装示例
 
 ```js
-export class WebSocketClient {
-  constructor(url) {
-    this.url = url;
-    this.ws = null;
-    this.heartbeatTimer = null;
-    this.onopen = null;
-    this.onclose = null;
-    this.onmessage = null;
-    this.onerror = null;
-  }
+class ReconnectingWebSocket {
+    constructor(url, protocols, options = {}) {
+        this.url = url;
+        this.protocols = protocols;
+        this.options = options;
+        this.reconnectInterval = options.reconnectInterval || 1000; // 默认重连间隔
+        this.maxReconnectAttempts = options.maxReconnectAttempts || Infinity; // 最大重连次数
+        this.heartbeatInterval = options.heartbeatInterval || 30000; // 心跳间隔
+        this.reconnectAttempts = 0;
+        this.heartbeatTimer = null;
 
-  connect() {
-    if (!this.ws) {
-      this.ws = new WebSocket(this.url);
-      this.ws.onopen = (event) => {
-        console.log('WebSocket连接已打开');
-        if (this.onopen) {
-          this.onopen(event);
-        }
-        this.startHeartbeat();
-      };
-      this.ws.onclose = (event) => {
-        console.log('WebSocket连接已关闭');
-        if (this.onclose) {
-          this.onclose(event);
-        }
-        this.stopHeartbeat();
-        this.reconnect();
-      };
-      this.ws.onmessage = (event) => {
-        console.log('WebSocket收到消息');
-        if (this.onmessage) {
-          this.onmessage(event);
-        }
-        if (event.data === 'pong') {
-          // 心跳响应，重置定时器
-          clearInterval(this.heartbeatTimer);
-          this.startHeartbeat();
-        }
-      };
-      this.ws.onerror = (event) => {
-        console.error('WebSocket发生错误');
-        if (this.onerror) {
-          this.onerror(event);
-        }
-      };
+        this.connect();
     }
-  }
 
-  disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
+    connect() {
+        this.socket = new WebSocket(this.url, this.protocols);
+
+        this.socket.onopen = () => {
+            console.log("WebSocket连接已打开");
+            this.reconnectAttempts = 0; // 重置重连次数
+            this.startHeartbeat(); // 开始心跳检测
+        };
+
+        this.socket.onmessage = (event) => {
+            console.log("收到消息:", event.data);
+            if (this.options.onMessage) {
+                this.options.onMessage(event.data);
+            }
+        };
+
+        this.socket.onclose = () => {
+            console.log("WebSocket连接已关闭，尝试重连...");
+            this.stopHeartbeat(); // 停止心跳检测
+            this.reconnect();
+        };
+
+        this.socket.onerror = (error) => {
+            console.error("WebSocket发生错误:", error);
+        };
     }
-  }
 
-  send(message) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('WebSocket发送消息');
-      this.ws.send(message);
-    } else {
-      console.error('WebSocket未连接');
+    reconnect() {
+        if (this.reconnectAttempts < this.maxReconnectAttempts) {
+            setTimeout(() => {
+                this.reconnectAttempts++;
+                this.connect();
+            }, this.reconnectInterval);
+        } else {
+            console.log("达到最大重连次数，停止重连");
+        }
     }
-  }
 
-  startHeartbeat() {
-    // 每隔一段时间发送心跳消息
-    this.heartbeatTimer = setInterval(() => {
-      console.log('WebSocket发送心跳');
-      this.send('ping');
-    }, 30000);
-  }
+    startHeartbeat() {
+        this.heartbeatTimer = setInterval(() => {
+            if (this.socket.readyState === WebSocket.OPEN) {
+                this.socket.send(JSON.stringify({ type: 'heartbeat' }));
+                console.log("发送心跳");
+            }
+        }, this.heartbeatInterval);
+    }
 
-  stopHeartbeat() {
-    clearInterval(this.heartbeatTimer);
-  }
+    stopHeartbeat() {
+        clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = null;
+    }
 
-  reconnect() {
-    setTimeout(() => {
-      console.log('WebSocket重新连接中...');
-      this.connect();
-    }, 5000);
-  }
+    send(data) {
+        if (this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(data);
+        } else {
+            console.error("WebSocket未打开，无法发送数据");
+        }
+    }
+
+    close() {
+        this.stopHeartbeat(); // 停止心跳检测
+        this.socket.close();
+    }
 }
-```
-用法
-```js
-import { WebSocketClient } from '@/utils/request'
 
-const ws = new WebSocketClient('wss://www.example.com/websocket');
-ws.onopen = (event) => {
-  console.log('WebSocket连接已打开');
-};
-ws.onclose = (event) => {
-  console.log('WebSocket连接已关闭');
-};
-ws.onmessage = (event) => {
-  console.log('WebSocket收到消息：' + event.data);
-};
-ws.onerror = (event) => {
-  console.error('WebSocket发生错误');
-};
-ws.connect();
-ws.disconnect(); //关闭 WebSocket
+// 使用示例
+const ws = new ReconnectingWebSocket("ws://your-websocket-url", null, {
+    reconnectInterval: 2000,
+    maxReconnectAttempts: 5,
+    heartbeatInterval: 30000,
+    onMessage: (data) => {
+        console.log("处理消息:", data);
+    }
+});
+
 ```
 
 ### 浏览器遮挡事件
