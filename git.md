@@ -389,3 +389,48 @@ $ git push -u origin master -f
 	postBuffer = 1048576000
 ```
 
+### git设置代理通常用于在公司内网或需要通过代理服务器访问外网的情况下。
+
+1. **命令行一次性设置代理**：  
+  使用 `git config` 命令可以临时[设置](https://so.csdn.net/so/search?q=%E8%AE%BE%E7%BD%AE&spm=1001.2101.3001.7020)代理，这将只影响当前的仓库。
+  
+  ```bash
+  git config --global http.proxy http://proxyuser:proxypwd@proxy.server.com:8080
+  git config --global https.proxy https://proxyuser:proxypwd@proxy.server.com:8080
+  ```
+  
+  替换 `proxyuser` 和 `proxypwd` 为你的代理用户名和密码，`proxy.server.com` 和 `8080` 分别为你的[代理服务器](https://so.csdn.net/so/search?q=%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8&spm=1001.2101.3001.7020)地址和端口。
+  
+2. **为当前仓库设置代理**：  
+  如果你只想为当前仓库设置代理，可以去掉 `--global` 选项：
+  
+  ```bash
+  git config http.proxy http://proxyuser:proxypwd@proxy.server.com:8080
+  git config https.proxy https://proxyuser:proxypwd@proxy.server.com:8080
+  ```
+  
+3. **取消代理设置**：  
+  如果需要取消代理设置，可以使用以下命令：
+  
+  ```bash
+  git config --global --unset http.proxy
+  git config --global --unset https.proxy
+  ```
+  
+4. **使用环境变量设置代理**：  
+  你也可以通过设置环境变量来让 Git 使用代理，这通常在 shell 配置文件中设置，如 `.bashrc` 或 `.zshrc`：
+  
+  ```bash
+  export http_proxy=http://proxyuser:proxypwd@proxy.server.com:8080
+  export https_proxy=https://proxyuser:proxypwd@proxy.server.com:8080
+  ```
+  
+5. **使用代理工具**：  
+  有些情况下，你可能需要使用代理工具，如 `cURL` 或 `socks5`，Git 也支持通过这些工具来设置代理：
+  
+  ```bash
+  git config --global http.proxy 'socks5://proxyuser:proxypwd@proxy.server.com:1080'
+  git config --global https.proxy 'socks5://proxyuser:proxypwd@proxy.server.com:1080'
+  ```
+请注意，如果你的代理服务器不需要认证，可以省略用户名和密码部分。另外，确保你的代理服务器地址和端口号是正确的。如果你不确定如何设置，可以咨询你的网络管理员。
+
