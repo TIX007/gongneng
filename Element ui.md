@@ -60,6 +60,41 @@ dialog-visible初始化data数据，type标题，close关闭回调函数，succe
 }
 ```
 
+### 输入框输入小写自动转大写
+1、element-UI中
+
+```vue
+<el-input :value="form.trailerNo" @input="(e) => { form.trailerNo = e.toUpperCase().replace(/^\s+|\s+$/g, '') }" clearable placeholder="请输入" />
+```
+
+2、Vant中
+
+```vue
+<van-field
+  v-model="info.carNo"
+  clearable
+  placeholder="请输入车牌号"
+  :formatter="formatterCarNumber"
+  :rules="[
+   {
+      required: true,
+      pattern: carNoReg,
+      message: '请正确输入车牌号',
+   },
+   ]"
+/>
+
+<script>
+  methods: {
+    // 车牌号转大写
+    formatterCarNumber(value) {
+      value = value.toUpperCase()
+      return value
+    },
+  }
+</script>
+```
+
 ### 表单校验数字类型限制
 
 v-model后加上.number
