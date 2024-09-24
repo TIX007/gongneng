@@ -20,6 +20,51 @@ module.exports = defineConfig({
 在.env.development中将VUE_APP_DEV_REQUEST_DOMAIN_PREFIX = 'http://172.16.10.44:5080'
 ```
 
+### vuex数据持久化配置
+```
+npm i vuex-persistedstate
+```
+
+```js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import app from './modules/app'
+import dict from './modules/dict'
+import user from './modules/user'
+import tagsView from './modules/tagsView'
+import permission from './modules/permission'
+import settings from './modules/settings'
+import workFlow from './modules/workFlow'
+import getters from './getters'
+import createPersistedState from 'vuex-persistedstate'
+
+Vue.use(Vuex)
+
+const store = new Vuex.Store({
+  modules: {
+    app,
+    dict,
+    user,
+    tagsView,
+    permission,
+    settings,
+    workFlow,
+  },
+  getters,
+  plugins: [createPersistedState({
+    storage: window.sessionStorage,
+    reducer: state => ({
+      app: state.app,
+      dict: state.dict,
+      user: state.user,
+      settings: state.settings
+    })
+  })]
+})
+
+export default store
+```
+
 ### 动态绑定class跟style
 
 ```vue
