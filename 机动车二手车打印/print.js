@@ -56,8 +56,8 @@ export function printJdcfp(T, _) {
     LODOP.SET_PRINT_STYLEA(0, "FontSize", 11);
   T.zbmx[0].spmc = T.zyspmc
   var O = "87" == T.fplxdm || "03" == T.fplxdm ? T.zbmx[0].spmc.split("*")[2].length : T.cllx.length;
-  O < 13 ? (LODOP.ADD_PRINT_TEXT(280, 187, 165, 21, "87" == T.fplxdm || "03" == T.fplxdm ? T.zbmx[0].spmc.split("*")[2] : T.cllx),
-    LODOP.SET_PRINT_STYLEA(0, "FontSize", 10)) : O >= 13 && (LODOP.ADD_PRINT_TEXT(277, 187, 160, 21, "87" == T.fplxdm || "03" == T.fplxdm ? T.zbmx[0].spmc.split("*")[2] : T.cllx),
+  O < 12 ? (LODOP.ADD_PRINT_TEXT(280, 185, 165, 21, "87" == T.fplxdm || "03" == T.fplxdm ? T.zbmx[0].spmc.split("*")[2] : T.cllx),
+    LODOP.SET_PRINT_STYLEA(0, "FontSize", 10)) : O >= 12 && (LODOP.ADD_PRINT_TEXT(274, 185, 160, 21, "87" == T.fplxdm || "03" == T.fplxdm ? T.zbmx[0].spmc.split("*")[2] : T.cllx),
       LODOP.SET_PRINT_STYLEA(0, "FontSize", 10),
       LODOP.SET_PRINT_STYLEA(0, "LineSpacing", -5));
   var L = "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cpxh.length : T.cpxh.length;
@@ -109,10 +109,10 @@ export function printJdcfp(T, _) {
     LODOP.SET_PRINT_STYLEA(0, "LineSpacing", -6),
     LODOP.SET_PRINT_STYLEA(0, "FontSize", 11);
   var N = "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwdzdh.split(" ")[0].length : T.dz.length;
-  N < 22 ? (LODOP.ADD_PRINT_TEXT(490, 185, 305, 25, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwdzdh.split(" ")[0] : T.dz),
-    LODOP.SET_PRINT_STYLEA(0, "FontSize", 10)) : N >= 22 && (LODOP.ADD_PRINT_TEXT(494, 187, 285, 25, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwdzdh.split(" ")[0] : T.dz),
+  N < 24 ? (LODOP.ADD_PRINT_TEXT(490, 185, 305, 25, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwdzdh.split(" ")[0] : T.dz),
+    LODOP.SET_PRINT_STYLEA(0, "FontSize", 10)) : N >= 24 && (LODOP.ADD_PRINT_TEXT(488, 187, 285, 25, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwdzdh.split(" ")[0] : T.dz),
       LODOP.SET_PRINT_STYLEA(0, "LineSpacing", -5),
-      LODOP.SET_PRINT_STYLEA(0, "FontSize", 8));
+      LODOP.SET_PRINT_STYLEA(0, "FontSize", 9));
   var I, n, R = "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwyhzh.split(" ")[0].length : T.khyh.length;
   R < 23 ? (LODOP.ADD_PRINT_TEXT(492, 550, 280, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwyhzh.split(" ")[0] : T.khyh),
     LODOP.SET_PRINT_STYLEA(0, "FontSize", 9)) : R >= 23 && (LODOP.ADD_PRINT_TEXT(483, 550, 280, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.xhdwyhzh.split(" ")[0] : T.khyh),
@@ -162,8 +162,8 @@ export function printJdcfp(T, _) {
     LODOP.SET_PRINT_STYLEA(0, "LetterSpacing", -1);
   if (T.tdys[0].cldw == null) T.tdys[0].cldw = '';
   var r, Y = "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cldw.length : T.dw.length;
-  Y >= 5 ? (LODOP.ADD_PRINT_TEXT(572, 672, 60, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cldw : T.dw),
-    LODOP.SET_PRINT_STYLEA(0, "FontSize", 7)) : (LODOP.ADD_PRINT_TEXT(572, 672, 44, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cldw : T.dw),
+  Y >= 5 ? (LODOP.ADD_PRINT_TEXT(565, 672, 38, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cldw : T.dw), LODOP.SET_PRINT_STYLEA(0, "LineSpacing", -6),
+    LODOP.SET_PRINT_STYLEA(0, "FontSize", 10)) : (LODOP.ADD_PRINT_TEXT(572, 672, 44, 20, "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].cldw : T.dw),
       LODOP.SET_PRINT_STYLEA(0, "FontSize", 10),
       LODOP.SET_PRINT_STYLEA(0, "LineSpacing", -6)),
     LODOP.ADD_PRINT_TEXT(572, 784, 50, 25, "87" == T.fplxdm || "03" == T.fplxdm ? T.tdys[0].xcrs : T.xcrs),
@@ -621,6 +621,6 @@ export let FPdata = {
   zkbz: null,
   zlqqz: null,
   zsfs: "0",
-  zyspmc: "*机动车*电动正三轮摩托车",
+  zyspmc: "*机动车*危险品罐箱骨架运输半挂车",
   zzfphm: "00345854"
 }
