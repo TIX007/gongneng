@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>动画天气卡片</title>
+	<style>
+		/* fallback */
+		@font-face {
+			font-family: 'Material Symbols Rounded';
+			font-style: normal;
+			font-weight: 300;
+			src: url(https://fonts.gstatic.com/s/materialsymbolsrounded/v211/syl0-zNym6YjUruM-QrEh7-nyTnjDwKNJ_190FjpZIvDmUSVOK7BDB_Qb9vUSzq3wzLK-P0J-V_Zs-QtQth3-jOcbTCVpeRL2w5rwZu2rNmlXxc.woff2) format('woff2');
+		}
+
+		.material-symbols-rounded {
+			font-family: 'Material Symbols Rounded';
+			font-weight: normal;
+			font-style: normal;
+			font-size: 24px;
+			line-height: 1;
+			letter-spacing: normal;
+			text-transform: none;
+			display: inline-block;
+			white-space: nowrap;
+			word-wrap: normal;
+			direction: ltr;
+			-webkit-font-smoothing: antialiased;
+		}
+
+		body {
+			background: #f5f5f5;
+			font-family: "Plus Jakarta Sans", sans-serif;
+			font-weight: 300;
+		}
+
+		header {
+			padding: 16px;
+			text-align: center;
+		}
+
+		h1,
+		h2,
+		h3,
+		h4,
+		h5 {
+			font-weight: 700;
+		}
+
+		.card {
+			position: relative;
+			overflow: hidden;
+			/* Ensure vertical scrolling */
+			height: 566px;
+			width: 350px;
+			margin: auto;
+			border: none;
+			border-radius: 32px;
+		}
+
+		.sun,
+		.moon {
+			position: absolute;
+
+			left: 50%;
+			width: 80px;
+			height: 80px;
+			border-radius: 50%;
+			transform-origin: 0px 220px;
+			transition: all 1s;
+			transform: rotate(-90deg);
+			/* Initial rotation of -90 degrees */
+		}
+
+		.sun {
+			bottom: 300px;
+			background: #fceabb;
+			box-shadow: 0px 0px 40px 15px #fceabb;
+			opacity: 1;
+		}
+
+		.moon {
+			bottom: 250px;
+			background: url("https://drive.google.com/thumbnail?id=1nbYvuzW1fU3iiXoxKeMSb4TvP7rkryuy&sz=w1000");
+			background-size: contain;
+			box-shadow: 0px 0px 20px 5px #ffffff;
+			opacity: 0;
+		}
+
+		@keyframes rise-set {
+			0% {
+				transform: rotate(-90deg);
+			}
+
+			100% {
+				transform: rotate(90deg);
+			}
+		}
+
+		.hours-container {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			overflow-x: scroll;
+			white-space: nowrap;
+			/* backdrop-filter: blur(20px); */
+		}
+
+		.hours {
+			display: flex;
+			padding: 8px;
+		}
+
+		.hours-container {
+			scroll-behavior: smooth;
+		}
+
+		.hour {
+			padding: 5px 10px;
+			cursor: pointer;
+			margin: 2px;
+			transition: background-color 0.3s ease;
+			border-radius: 16px;
+			height: 107px;
+			min-width: 80px;
+			text-align: center;
+		}
+
+		.hour:hover {
+			background-color: rgba(255, 255, 255, 0.3);
+		}
+
+		.active {
+			background-color: rgba(255, 255, 255, 0.7);
+		}
+
+		.last {
+			min-width: 150px;
+		}
+
+		.background {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background-image: linear-gradient(0deg, #fefefe 0%, #00a4e4 74%);
+			z-index: 0;
+			transition: all 2s linear;
+		}
+
+		.backgroundNight {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			background-image: linear-gradient(0deg, #4c5177 0%, #051428 74%);
+			z-index: -1;
+			transition: all 2s linear;
+		}
+
+		.card,
+		.card-body {
+			background: transparent !important;
+			padding: 0;
+		}
+
+		.rain {
+			width: 100%;
+			height: 100%;
+			opacity: 0;
+		}
+
+		.drop {
+			background: -webkit-gradient(linear,
+					0% 0%,
+					0% 100%,
+					to(rgba(255, 255, 255, 0.6)),
+					from(rgba(255, 255, 255, 0)));
+			background: -moz-linear-gradient(top,
+					rgba(255, 255, 255, 0.6) 0%,
+					rgba(255, 255, 255, 0) 100%);
+			width: 1px;
+			height: 30px;
+			position: absolute;
+			bottom: 0px;
+			-webkit-animation: fall 0.3s linear infinite;
+			-moz-animation: fall 0.3s linear infinite;
+		}
+
+		/* animate the drops*/
+		@-webkit-keyframes fall {
+			to {
+				margin-top: 500px;
+			}
+		}
+
+		@-moz-keyframes fall {
+			to {
+				margin-top: 500px;
+			}
+		}
+
+		.temperature {
+			position: absolute;
+			z-index: 2;
+			right: 24px;
+			top: 24px;
+			text-align: right;
+			font-size: 40px;
+			font-weight: 600;
+		}
+
+		.weatherType {
+			position: absolute;
+			z-index: 2;
+			right: 24px;
+			top: 72px;
+			text-align: right;
+			font-size: 16px;
+			line-height: 34px;
+			text-transform: capitalize;
+		}
+
+		.currentDay {
+			position: absolute;
+			z-index: 2;
+			left: 8px;
+			bottom: 144px;
+			text-align: left;
+			font-size: 16px;
+			line-height: 34px;
+		}
+
+		.hour span {
+			position: relative;
+			display: flex;
+			text-align: center;
+			color: black;
+		}
+
+		.hour .timeSpan {
+			font-size: 14px;
+			font-weight: 300;
+		}
+
+		.hour .tempSpan {
+			font-size: 14px;
+			font-weight: 700;
+		}
+
+		.hour:last-child::after {
+			width: 300px;
+			height: 1px;
+			content: "";
+		}
+
+		.hour .material-symbols-rounded {
+			font-size: 32px;
+			line-height: 40px;
+		}
+
+		.hour[data-weather="晴"] .material-symbols-rounded::after {
+			content: "sunny";
+		}
+
+		.hour[data-weather="夜间多云"] .material-symbols-rounded::after {
+			content: "clear_night";
+		}
+
+		.hour[data-weather="局部多云"] .material-symbols-rounded::after {
+			content: "partly_cloudy_day";
+		}
+
+		.hour[data-weather="夜间局部多云"] .material-symbols-rounded::after {
+			content: "partly_cloudy_night";
+		}
+
+		.hour[data-weather="多云"] .material-symbols-rounded::after {
+			content: "cloud";
+		}
+
+		.hour[data-weather="foggy"] .material-symbols-rounded::after {
+			content: "foggy";
+		}
+
+		.hour[data-weather="多雨"] .material-symbols-rounded::after {
+			content: "rainy";
+		}
+
+		.hour[data-weather="雪"] .material-symbols-rounded::after {
+			content: "ac_unit";
+		}
+
+		.hour[data-weather="暴雨"] .material-symbols-rounded::after {
+			content: "thunderstorm";
+		}
+
+		.card {
+			color: black;
+			box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
+				rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+			border: none;
+		}
+
+		.credit {
+			box-shadow: none;
+			border-radius: 0;
+		}
+
+		a {
+			color: black;
+		}
+
+		#cloud {
+			position: absolute;
+			z-index: 0;
+			width: 100%;
+			height: 100%;
+			background-image: url("");
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: 50% 50%;
+			filter: brightness(200%) drop-shadow(0 0 10px rgba(255, 255, 255, 01));
+			top: 0;
+			transition: all 2s;
+		}
+
+		#snow {
+			opacity: 0;
+			top: 0;
+			position: absolute;
+			pointer-events: none;
+			z-index: 0;
+			width: 100%;
+			height: 100%;
+			transition: all 2s;
+		}
+
+		#rain {
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			top: 0;
+			transition: all 2s;
+		}
+
+		#lightning {
+			position: absolute;
+			top: -200px;
+			left: 0;
+			width: 100%;
+			height: 150%;
+			background: radial-gradient(closest-side,
+					rgba(255, 255, 255, 1),
+					rgba(255, 255, 255, 0.5));
+			opacity: 0;
+			pointer-events: none;
+			animation: lightningFlash var(--lightning-duration) linear infinite;
+		}
+
+		@keyframes lightningFlash {
+
+			0%,
+			100% {
+				opacity: 0;
+			}
+
+			24% {
+				opacity: 0;
+			}
+
+			25% {
+				opacity: 1;
+			}
+
+			26% {
+				opacity: 0;
+			}
+
+			28% {
+				opacity: 1;
+			}
+
+			29% {
+				opacity: 0;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
+		<h1>动画天气卡片</h1>
+	</header>
+	<div class="container mt-5">
+		<div class="card">
+			<div class="card-body">
+				<div class="backgroundNight"></div>
+				<div class="background"></div>
+				<div class="temperature cardInfo"><span id="temperature">21</span>°C</div>
+				<div class="weatherType cardInfo"><span id="weatherType">晴</span></div>
+				<div class="currentDay cardInfo"><span id="currentDay">今天</span></div>
+				<div id="thunderstorm">
+					<div id="lightning"></div>
+				</div>
+				<div class="sun"></div>
+				<div class="moon"></div>
+				<div id="cloud"> </div>
+				<canvas id="rain"></canvas>
+				<div id="snow"> </div>
+				<div class="hours-container">
+					<div class="hours">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="container mt-5">
+		<div class="card credit">
+			<div class="card-body">
+			</div>
+		</div>
+	</div>
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.js"></script>
+	<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			const hoursData = [
+				{ day: "tod", hour: 0, weather: "夜间多云", temp: 11, time: "00:00" },
+				{
+					day: "tod",
+					hour: 1,
+					weather: "夜间局部多云",
+					temp: 10,
+					time: "01:00"
+				},
+				{ day: "tod", hour: 2, weather: "多雨", temp: 9, time: "02:00" },
+				{ day: "tod", hour: 3, weather: "多云", temp: 8, time: "03:00" },
+				{
+					day: "tod",
+					hour: 4,
+					weather: "夜间局部多云",
+					temp: 7,
+					time: "04:00"
+				},
+				{ day: "tod", hour: 5, weather: "夜间多云", temp: 7, time: "05:00" },
+				{ day: "tod", hour: 6, weather: "晴", temp: 12, time: "06:00" },
+				{ day: "tod", hour: 7, weather: "晴", temp: 12, time: "07:00" },
+				{ day: "tod", hour: 8, weather: "晴", temp: 13, time: "08:00" },
+				{ day: "tod", hour: 9, weather: "局部多云", temp: 14, time: "09:00" },
+				{ day: "tod", hour: 10, weather: "多云", temp: 16, time: "10:00" },
+				{ day: "tod", hour: 11, weather: "多雨", temp: 17, time: "11:00" },
+				{ day: "tod", hour: 12, weather: "多雨", temp: 19, time: "12:00" },
+				{ day: "tod", hour: 13, weather: "多雨", temp: 20, time: "13:00" },
+				{ day: "tod", hour: 14, weather: "局部多云", temp: 20, time: "14:00" },
+				{ day: "tod", hour: 15, weather: "局部多云", temp: 20, time: "15:00" },
+				{ day: "tod", hour: 16, weather: "局部多云", temp: 19, time: "16:00" },
+				{ day: "tod", hour: 17, weather: "多云", temp: 20, time: "17:00" },
+				{ day: "tod", hour: 18, weather: "多云", temp: 19, time: "18:00" },
+				{ day: "tod", hour: 19, weather: "多云", temp: 18, time: "19:00" },
+				{ day: "tod", hour: 20, weather: "多雨", temp: 17, time: "20:00" },
+				{ day: "tod", hour: 21, weather: "多雨", temp: 15, time: "21:00" },
+				{ day: "tod", hour: 22, weather: "多雨", temp: 12, time: "22:00" },
+				{ day: "tod", hour: 23, weather: "多雨", temp: 10, time: "23:00" },
+
+				{ day: "tom", hour: 0, weather: "暴雨", temp: 8, time: "00:00" },
+				{ day: "tom", hour: 1, weather: "暴雨", temp: 6, time: "01:00" },
+				{ day: "tom", hour: 2, weather: "暴雨", temp: 4, time: "02:00" },
+				{ day: "tom", hour: 3, weather: "暴雨", temp: 3, time: "03:00" },
+				{ day: "tom", hour: 4, weather: "暴雨", temp: 2, time: "04:00" },
+				{ day: "tom", hour: 5, weather: "多云", temp: 2, time: "05:00" },
+				{ day: "tom", hour: 6, weather: "多云", temp: 0, time: "06:00" },
+				{ day: "tom", hour: 7, weather: "多云", temp: -1, time: "07:00" },
+				{ day: "tom", hour: 8, weather: "局部多云", temp: -1, time: "08:00" },
+				{ day: "tom", hour: 9, weather: "局部多云", temp: -1, time: "09:00" },
+				{ day: "tom", hour: 10, weather: "雪", temp: 0, time: "10:00" },
+				{ day: "tom", hour: 11, weather: "雪", temp: 1, time: "11:00" },
+				{ day: "tom", hour: 12, weather: "雪", temp: 1, time: "12:00" },
+				{ day: "tom", hour: 13, weather: "局部多云", temp: 3, time: "13:00" },
+				{ day: "tom", hour: 14, weather: "局部多云", temp: 5, time: "14:00" },
+				{ day: "tom", hour: 15, weather: "多云", temp: 7, time: "15:00" },
+				{ day: "tom", hour: 16, weather: "多云", temp: 9, time: "16:00" },
+				{ day: "tom", hour: 17, weather: "多雨", temp: 9, time: "17:00" },
+				{ day: "tom", hour: 18, weather: "多雨", temp: 10, time: "18:00" },
+				{ day: "tom", hour: 19, weather: "多云", temp: 10, time: "19:00" },
+				{ day: "tom", hour: 20, weather: "多云", temp: 9, time: "20:00" },
+				{ day: "tom", hour: 21, weather: "多雨", temp: 8, time: "21:00" },
+				{ day: "tom", hour: 22, weather: "多雨", temp: 7, time: "22:00" },
+				{ day: "tom", hour: 23, weather: "多雨", temp: 5, time: "23:00" },
+				{ day: "tom", hour: 0, weather: "多雨", temp: 3, time: "00:00" }
+			];
+
+			// 迭代数据并动态创建HTML
+			hoursData.forEach((data) => {
+				const hourDiv = $("<div>", {
+					class: "hour d-flex flex-column align-items-center",
+					"data-day": data.day,
+					"data-hour": data.hour,
+					"data-weather": data.weather,
+					"data-temp": data.temp
+				});
+
+				const timeSpan = $("<span class='timeSpan'>").text(data.time);
+				const iconSpan = $("<span>", { class: "material-symbols-rounded" });
+				const tempSpan = $("<span class='tempSpan'>").text(data.temp + "°C");
+
+				hourDiv.append(timeSpan, iconSpan, tempSpan);
+				$(".hours").append(hourDiv);
+			});
+			const background = $(".background");
+			const backgroundNight = $(".backgroundNight");
+			const sun = $(".sun");
+			const moon = $(".moon");
+			const hoursContainer = $(".hours-container");
+			const hours = $(".hour");
+			const rain = $("#rain");
+			const cloud = $("#cloud");
+			const snow = $("#snow");
+			const thunderstorm = $("#thunderstorm");
+			const temperatureDisplay = $("#temperature");
+			const weatherTypeDisplay = $("#weatherType");
+			const currentDay = $("#currentDay");
+			const initialHour = 11;
+
+			function toggleSunMoon(hour) {
+				if (hour >= 6 && hour <= 21) {
+					const rotation = -90 + (hour - 7) * (180 / 15);
+					sun.css("transform", "rotate(" + rotation + "deg)");
+					sun.css("opacity", "1");
+					moon.css("opacity", "0");
+					background.css("opacity", "1");
+					backgroundNight.css("opacity", "0");
+					$(".hour").css("filter", "invert(0%)");
+					$(".cardInfo").css("filter", "invert(0%)");
+					moon.css("transition", "all 0s");
+					setTimeout(function () {
+						sun.css("transition", "all 1s");
+					}, 10);
+					cloud.css(
+						"filter",
+						"brightness(200%) drop-shadow(0 0 10px rgba(255, 255, 255, 1))"
+					);
+					cloud.css("mix-blend-mode", "normal");
+					rain.css("mix-blend-mode", "normal");
+				} else {
+					moon.css("opacity", "1");
+					sun.css("opacity", "0");
+					const adjustedHour = hour < 7 ? hour + 24 : hour;
+					const rotation = -90 + (adjustedHour - 6) * (180 / 8);
+					moon.css("transform", "rotate(" + rotation + "deg)");
+					background.css("opacity", "0");
+					backgroundNight.css("opacity", "1");
+					$(".hour").css("filter", "invert(100%)");
+					$(".cardInfo").css("filter", "invert(100%)");
+					sun.css("transition", "all 0s");
+					setTimeout(function () {
+						moon.css("transition", "all 1s");
+					}, 10);
+					cloud.css(
+						"filter",
+						"brightness(0%) drop-shadow(0 0 10px rgba(255, 255, 255, 1))"
+					);
+					cloud.css("mix-blend-mode", "multiply");
+					rain.css("mix-blend-mode", "soft-light");
+				}
+			}
+
+			// 处理滚动和滚轮事件的函数
+			function handleScrollEvent() {
+				const sl = hoursContainer.scrollLeft();
+				const hourIndex = Math.round(sl / hours.outerWidth());
+				const currentHour = hours.eq(hourIndex);
+
+				toggleSunMoon(parseInt(currentHour.data("hour")));
+				highlightHour(hourIndex);
+				updateWeatherAndTemperature(currentHour);
+			}
+
+			// 功能突出显示选定的小时
+			function highlightHour(index) {
+				hours.removeClass("active"); // 从所有小时中删除活动课
+				hours.eq(index).addClass("active"); // 将活动课添加到选定的小时
+			}
+
+			function updateWeatherAndTemperature(currentHour) {
+				const temperature = currentHour.data("temp");
+				const weather = currentHour.data("weather");
+				const day = currentHour.data("day");
+
+				temperatureDisplay.text(temperature);
+				weatherTypeDisplay.text(weather.replace(/-/g, " "));
+
+				// 将元素重置为默认状态
+				rain.css("opacity", "0");
+				snow.css("opacity", "0");
+				cloud.css("opacity", "0");
+				thunderstorm.css("opacity", "0");
+				background.css("filter", "none");
+				sun.css("filter", "none");
+				moon.css("filter", "none");
+
+				// 处理天气能见度和背景过滤器
+				if (weather === "多雨") {
+					rain.css("opacity", "1");
+					cloud.css("opacity", "0.8");
+					background.css("filter", "grayscale(0.5) brightness(0.5)");
+					moon.css("filter", "brightness(0.8)");
+				} else if (weather === "雪") {
+					snow.css("opacity", "1");
+					cloud.css("opacity", "0");
+					background.css("filter", "grayscale(0.5) opacity(0.4)");
+					sun.css("filter", "grayscale(0.9)");
+				} else if (weather === "多云") {
+					cloud.css("opacity", "0.9");
+					background.css("filter", "grayscale(0.5) brightness(0.5)");
+					moon.css("filter", "brightness(0.8)");
+				} else if (weather === "暴雨") {
+					cloud.css("opacity", "0.8");
+					thunderstorm.css("opacity", "1");
+					background.css("filter", "grayscale(1) brightness(0.1)");
+					sun.css("filter", "grayscale(0.9)");
+				} else if (weather === "局部多云" || weather === "夜间局部多云") {
+					cloud.css("opacity", "0.5");
+				}
+
+				// 处理日期文本更新
+				if (day === "tom") {
+					currentDay.text("明天");
+				} else {
+					currentDay.text("今天");
+				}
+			}
+
+			// 第一个小时的初始设置
+			function init() {
+				toggleSunMoon(initialHour); // 将太阳/月亮切换到初始位置(07:00)
+				highlightHour(initialHour); // 最初突出显示第一个小时
+				updateWeatherAndTemperature(hours.eq(2));
+			}
+
+			// 生成液滴的功能
+			function createRain() {
+				const nbDrop = 800;
+				for (let i = 1; i <= nbDrop; i++) {
+					const dropLeft = randRange(0, 1600);
+					const dropTop = randRange(-1000, 1400);
+
+					rain.append('<div class="drop" id="drop' + i + '"></div>');
+					$("#drop" + i).css({ left: dropLeft, top: dropTop });
+				}
+			}
+
+			// 函数生成一个随机数范围
+			function randRange(minNum, maxNum) {
+				return Math.floor(Math.random() * (maxNum - minNum + 1)) + minNum;
+			}
+
+			// 事件监听器
+			hoursContainer.on("scroll", handleScrollEvent);
+			hoursContainer.on("wheel", function (event) {
+				event.preventDefault(); // 防止默认滚动行为
+				hoursContainer.scrollLeft(
+					hoursContainer.scrollLeft() + event.originalEvent.deltaY
+				);
+				handleScrollEvent();
+			});
+			hours.on("click", function () {
+				const hour = parseInt($(this).data("hour"));
+				toggleSunMoon(hour);
+				highlightHour(hours.index(this));
+				updateWeatherAndTemperature($(this));
+			});
+
+			// 让它下雨
+			createRain();
+			init();
+			hoursContainer.scrollLeft(81 * initialHour);
+		});
+
+		function setRandomLightningDuration() {
+			const lightning = document.getElementById("暴雨");
+			const minDuration = 1; // 最短持续时间(秒)
+			const maxDuration = 4; // 最大持续时间(秒)
+			const randomDuration =
+				Math.random() * (maxDuration - minDuration) + minDuration;
+			thunderstorm.style.setProperty("--lightning-duration", `${randomDuration}s`);
+		}
+
+		// 设置初始随机持续时间
+		setRandomLightningDuration();
+
+		// 定期更改持续时间
+		setInterval(setRandomLightningDuration, 5000); // 每5秒改变一次
+
+		particlesJS("cloud", {
+			particles: {
+				number: { value: 5, density: { enable: true, value_area: 100 } },
+				color: { value: "#ffffff" },
+				shape: {
+					type: "image",
+					stroke: { width: 2, color: "#00ffff" },
+					polygon: { nb_sides: 5 },
+					image: {
+						src: "https://i.ibb.co/vzP35N4/fluffyvloud.png",
+						width: 100,
+						height: 100
+					}
+				},
+				opacity: {
+					value: 1,
+					random: true,
+					anim: {
+						enable: true,
+						speed: 10,
+						opacity_min: 0.0081,
+						sync: false
+					}
+				},
+				size: {
+					value: 800,
+					random: false,
+					anim: { enable: true, speed: 10, size_min: 2, sync: false }
+				},
+				line_linked: {
+					enable: false,
+					distance: 0,
+					color: "#ffffff",
+					opacity: 0.4,
+					width: 1
+				},
+				move: {
+					enable: true,
+					speed: 6,
+					direction: "left",
+					random: true,
+					straight: true,
+					out_mode: "out",
+					bounce: false,
+					attract: { enable: false, rotateX: 60, rotateY: 120 }
+				}
+			},
+			interactivity: {
+				detect_on: "canvas",
+				events: {
+					onhover: { enable: false, mode: "bubble" },
+					onclick: { enable: false, mode: "push" },
+					resize: true
+				},
+				modes: {
+					grab: { distance: 0, line_linked: { opacity: 1 } },
+					bubble: {
+						distance: 0,
+						size: 2,
+						duration: 2,
+						opacity: 8,
+						speed: 3
+					},
+					repulse: { distance: 200, duration: 0.4 },
+					push: { particles_nb: 4 },
+					remove: { particles_nb: 2 }
+				}
+			},
+			retina_detect: true
+		});
+
+		// 调整粒子的初始位置
+		function adjustInitialPositions() {
+			const particlesArray = window.pJSDom[0].pJS.particles.array;
+			particlesArray.forEach((p) => {
+				p.x = Math.random() * window.innerWidth;
+				p.y = Math.random() * window.innerHeight;
+			});
+		}
+
+		// 等待粒子初始化，然后调整位置
+		setTimeout(adjustInitialPositions, 1000);
+
+		particlesJS("snow", {
+			particles: {
+				number: {
+					value: 2000,
+					density: {
+						enable: true,
+						value_area: 800
+					}
+				},
+				color: {
+					value: "#fff"
+				},
+				shape: {
+					type: "circle",
+					stroke: {
+						width: 0,
+						color: "#000000"
+					},
+					polygon: {
+						nb_sides: 5
+					}
+				},
+				opacity: {
+					value: 1,
+					random: false,
+					anim: {
+						enable: false,
+						speed: 1,
+						opacity_min: 0.1,
+						sync: false
+					}
+				},
+				size: {
+					value: 2,
+					random: true,
+					anim: {
+						enable: false
+					}
+				},
+				line_linked: {
+					enable: false
+				},
+				move: {
+					enable: true,
+					speed: 3,
+					direction: "bottom",
+					random: false,
+					straight: false,
+					out_mode: "out",
+					bounce: false,
+					attract: {
+						enable: false,
+						rotateX: 600,
+						rotateY: 1200
+					}
+				}
+			},
+			retina_detect: true
+		});
+
+		var canvas = $("#rain")[0];
+
+		if (canvas.getContext) {
+			var ctx = canvas.getContext("2d");
+			var w = canvas.width;
+			var h = canvas.height;
+			ctx.strokeStyle = "rgba(255,255,255,0.5)";
+			ctx.lineWidth = 1;
+			ctx.lineCap = "round";
+
+			var init = [];
+			var maxParts = 300;
+			for (var a = 0; a < maxParts; a++) {
+				init.push({
+					x: Math.random() * w,
+					y: Math.random() * h,
+					l: Math.random() * 1,
+					xs: -4 + Math.random() * 4 + 2,
+					ys: Math.random() * 10 + 10
+				});
+			}
+
+			var particles = [];
+			for (var b = 0; b < maxParts; b++) {
+				particles[b] = init[b];
+			}
+
+			function draw() {
+				ctx.clearRect(0, 0, w, h);
+				for (var c = 0; c < particles.length; c++) {
+					var p = particles[c];
+					ctx.beginPath();
+					ctx.moveTo(p.x, p.y);
+					ctx.lineTo(p.x + p.l * p.xs, p.y + p.l * p.ys);
+					ctx.stroke();
+				}
+				move();
+			}
+
+			function move() {
+				for (var b = 0; b < particles.length; b++) {
+					var p = particles[b];
+					p.x += p.xs;
+					p.y += p.ys;
+					if (p.x > w || p.y > h) {
+						p.x = Math.random() * w;
+						p.y = -20;
+					}
+				}
+			}
+
+			setInterval(draw, 3);
+		}
+
+	</script>
+</body>
+
+</html>
