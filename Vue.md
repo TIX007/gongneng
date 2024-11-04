@@ -1,3 +1,37 @@
+
+### Vue.directive()方法创建全局自定义指令
+
+```js
+Vue.directive('myfocus', {
+    // bind表示这个自定义指令一绑定到dom上，就开始自动执行
+    bind(el,binding) {
+      console.log('bind');
+    },
+    // 表示dom插入到页面上的时候自动执行
+    // 这些函数都有两个参数，一个是el(使用自定义指令的元素), 一个是binding(记录自定义指令信息的对象)
+    inserted(el, binding) {
+      console.log('inserted');
+      console.log(el);
+      console.log(binding);
+      el.focus()
+    },
+    // 表示自定义指令后面的值更新的时候，自动执行
+    update() {
+      console.log('update');
+    }
+  })
+ 
+  // 创建一个自定义指令v-mycolor设置字体颜色
+  Vue.directive('mycolor', {
+    inserted(el, binding) {
+      // binding.value获取到的是传递到自定义指令中属性的值
+      el.style.color = binding.value
+    }
+  })
+
+```
+
+
 ### vue服务器配置
 
 ```vue
