@@ -2660,6 +2660,22 @@ export function download2(url, params, filename) {
     }
 ```
 
+### 文件流打印
+
+```js
+// 在pdfMerger中加上请求头 headers: { 'Content-Type': 'application/json' }, responseType: 'blob',
+pdfMerger(this.ids).then((result) => {
+console.log(result);
+const blob = new Blob([result], { type: 'application/pdf' })
+const pdfFile = window.URL.createObjectURL(blob)
+// 跳转页面预览
+window.open(pdfFile, '_blank', 'width=770,height=650')
+//关闭
+loading.close();
+}).catch((err) => {
+loading.close();
+})
+```
 
 ### vue中实现拖动调整左右两侧div的宽度
 
