@@ -285,6 +285,28 @@ rules: {
 
 ```
 
+### 级联选择器单选不带选择框
+``` scss
+.el-cascader-panel {
+  .el-radio {
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  .el-radio__input {
+    visibility: hidden;
+  }
+
+  .el-cascader-node__postfix {
+    top: 10px;
+  }
+}
+```
+
 ### 表格懒加载
 
 ```html
