@@ -1,3 +1,13 @@
+
+### 全局设置默认值
+```js
+// 对话框禁止点空白关闭
+Element.Dialog.props.closeOnClickModal.default = false;
+// 日期选择器禁止输入
+Element.DatePicker.mixins[0].props.editable.default = false;
+```
+
+
 ### ElementUI组件下拉框绑定点击事件无效的解决方案
 
 ```vue
