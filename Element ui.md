@@ -1577,3 +1577,92 @@ closeImg(){
     this.submitForm()
 },
 ```
+
+### 步骤图与表单标题联动，点步骤图跳转相应表单标题反之亦然
+```vue
+<template>
+    <div class="container">
+        <el-steps :active="activeStep" finish-status="success">
+            <el-step title="卖方信息" @click.native="scrollTo('sellerInfo')" />
+            <el-step title="买方信息" @click.native="scrollTo('buyerInfo')" />
+            <el-step title="行驶证信息" @click.native="scrollTo('vehicleInfo')" />
+            <el-step title="二手车附件" @click.native="scrollTo('attachments')" />
+        </el-steps>
+
+        <div class="form-container" @scroll="handleScroll">
+            <h2 id="sellerInfo">卖方信息</h2>
+            <div class="form-item">
+
+            </div>
+
+            <h2 id="buyerInfo">买方信息</h2>
+            <div class="form-item">
+
+            </div>
+
+            <h2 id="vehicleInfo">行驶证信息</h2>
+
+            <div class="form-item">
+
+            </div>
+            <h2 id="attachments">二手车附件</h2>
+
+        </div>
+    </div>
+</template>
+
+<script>
+export default {
+    data() {
+        return {
+            activeStep: 0,
+        };
+    },
+    methods: {
+        scrollTo(section) {
+            const element = document.getElementById(section);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        },
+        // 监听滚动事件，根据滚动位置更新 activeStep
+        handleScroll() {
+            const sections = ['sellerInfo', 'buyerInfo', 'vehicleInfo', 'attachments'];
+            console.log(this.$el.querySelector('.form-container'), '********');
+
+            const scrollTop = this.$el.querySelector('.form-container').scrollTop;
+            console.log(scrollTop, 'scrollTop');
+
+            sections.forEach((section, index) => {
+                const element = document.getElementById(section);
+                const offsetTop = element.offsetTop;
+                const offsetHeight = element.offsetHeight;
+                console.log(offsetTop, section, 'offsetTop');
+                console.log(offsetHeight, section, 'offsetHeight');
+
+                if (scrollTop >= offsetTop && scrollTop < offsetTop + offsetHeight) {
+                    this.activeStep = index + 1;
+                }
+            });
+        },
+    },
+};
+</script>
+
+<style>
+.container {
+    display: flex;
+}
+
+.form-container {
+    height: 400px;
+    /* 根据需要调整高度 */
+    overflow-y: auto;
+    margin-left: 20px;
+}
+
+.form-item {
+    height: 800px;
+}
+</style>
+```
