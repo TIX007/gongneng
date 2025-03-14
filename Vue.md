@@ -5665,5 +5665,23 @@ export function fileParse(file, type = "base64") {
 };
 ```
 
+### 本地启动代理问题
+
+```js
+proxy: {
+      '/api': {
+        target: process.env.VUE_APP_API_URL,
+        changeOrigin: true,
+        headers: {
+          host: '***',
+          origin: process.env.VUE_APP_API_URL
+        },
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
+```
+
 
 
