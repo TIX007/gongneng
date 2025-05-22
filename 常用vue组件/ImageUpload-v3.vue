@@ -15,12 +15,12 @@
             <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
               <el-icon><zoom-in /></el-icon>
             </span>
-            <span class="el-upload-list__item-edit" @click="handleEditFile(file)">
+            <span class="el-upload-list__item-edit" v-if="props.compressSupport" @click="handleEditFile(file)">
               <el-icon>
                 <edit />
               </el-icon>
             </span>
-            <span class="el-upload-list__item-delete" @click="handleDelete(file)">
+            <span class="el-upload-list__item-delete" v-if="props.compressSupport" @click="handleDelete(file)">
               <el-icon>
                 <delete />
               </el-icon>
