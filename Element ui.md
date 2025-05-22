@@ -1666,3 +1666,31 @@ export default {
 }
 </style>
 ```
+
+### element-plus表单校验不通过自动滚动到第一个错误出现的位置
+```js
+
+if (valid) {
+      buttonLoading.value = true;
+      try {
+        await updateInfo(form);
+        proxy?.$modal.msgSuccess("修改成功");
+        imageUploadRefs.value[0].executePendingDeletions();
+        router.push('/vehicleManage/info');
+      } catch (error) {
+        console.error(error);
+      } finally {
+        buttonLoading.value = false;
+      }
+    } else {
+      proxy?.$modal.msgError("表单内容验证规则不通过，请检查修改");
+      await nextTick();
+      const isError = document.getElementsByClassName('is-error');
+      if (isError[0]) {
+        isError[0].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }
+```
