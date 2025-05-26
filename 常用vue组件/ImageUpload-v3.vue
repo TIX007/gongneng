@@ -15,12 +15,17 @@
             <span class="el-upload-list__item-preview" @click="handlePictureCardPreview(file)">
               <el-icon><zoom-in /></el-icon>
             </span>
-            <span class="el-upload-list__item-edit" v-if="props.compressSupport" @click="handleEditFile(file)">
+            <span class="el-upload-list__item-edit" v-if="props.disabled" @click="handleDownloadFile(file)">
+              <el-icon>
+                <Download />
+              </el-icon>
+            </span>
+            <span class="el-upload-list__item-edit" v-if="!props.disabled" @click="handleEditFile(file)">
               <el-icon>
                 <edit />
               </el-icon>
             </span>
-            <span class="el-upload-list__item-delete" v-if="props.compressSupport" @click="handleDelete(file)">
+            <span class="el-upload-list__item-delete" v-if="!props.disabled" @click="handleDelete(file)">
               <el-icon>
                 <delete />
               </el-icon>
@@ -72,6 +77,10 @@ const props = defineProps({
   },
   // 是否支持压缩，默认否
   compressSupport: {
+    type: Boolean,
+    default: false
+  },
+  disabled: {
     type: Boolean,
     default: false
   },
@@ -194,9 +203,17 @@ const handleUploadSuccess = (res: any, file: UploadFile) => {
   }
 };
 
+// 下载图片
+const handleDownloadFile = (file: UploadFile) => {
+  const a = document.createElement('a');
+  a.href = file.url;
+  a.download = file.name;
+  a.click();
+}
+
 // 修改更换图片
 const handleEditFile = async (file: UploadFile) => {
-  const findex = fileList.value.findIndex(f => f.name === file.name);
+  const findex = fileList.value.findIndex((f) => f.name === file.name);
 
   if (findex > -1) {
     // 打开文件选择对话框
@@ -269,8 +286,6 @@ const handleEditFile = async (file: UploadFile) => {
     input.click();
   }
 };
-
-
 
 // 删除图片
 const handleDelete = (file: UploadFile): boolean => {
