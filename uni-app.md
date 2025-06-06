@@ -1181,3 +1181,36 @@ getprice(arr){
 </style>
 ```
 
+### 腾讯逆地理解析
+
+```js
+// 腾讯位置服务key 值
+export const key = "6XNBZ-JVPCD-AA24S-HOA4D-RGCD2-FNFCN";
+
+// 假设`key`已经在外部正确定义
+export function fetchAddress(latitude, longitude) {
+    var url = `https://apis.map.qq.com/ws/geocoder/v1/?location=${latitude},${longitude}&key=${key}`;
+    let result;
+    // 使用Promise来处理异步操作，以便更好地返回结果
+    return new Promise((resolve, reject) => {
+        uni.request({
+            url,
+            success(res) {
+                console.log(res, '腾讯地址');
+                var data = res.data;
+                if (data.status != 0) {
+                    result = '地址解析失败';
+                    resolve(result);
+                } else {
+                    result = res.data.result.address + res.data.result.formatted_addresses?.recommend;
+                    resolve(result);
+                }
+            },
+            fail(err) {
+                reject(err);
+            }
+        });
+    });
+}
+```
+
