@@ -571,4 +571,11 @@ const fetchAddressList = async () => {
 </style>
 ```
 
+#### 使用
+```vue
+<el-form-item label="按顺序途径的配货提货地" prop="pairPickupAddr">
+  <CountrySelectSort v-model="formDistribution.pairPickupAddr" :AddressList="AddressList" />
+</el-form-item>
+```
+
 
