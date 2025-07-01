@@ -1694,3 +1694,39 @@ if (valid) {
       }
     }
 ```
+
+### 全局改变表格边框颜色
+```scss
+.el-table .el-table__row {
+    background: #f0f2f5;
+}
+
+.el-table thead.is-group th.el-table__cell {
+    background: #f4f4f4;
+}
+.el-table thead.has-gutter th.el-table__cell {
+    background: #f4f4f4;
+}
+/**改变边框颜色*/
+.el-table--border,
+.el-table--group {
+    border: 1px solid #dddddd !important;
+}
+/**改变表格内竖线颜色*/
+.el-table--border td,
+.el-table--border th,
+.el-table__body-wrapper .el-table--border.is-scrolling-left ~ .el-table__fixed {
+    border-right: 1px solid #dddddd !important;
+    color: #dddddd;
+}
+/**改变合并单元格中横线颜色 */
+.el-table--border th.el-table__cell {
+    border-bottom: 1px solid #dddddd;
+    color: #000000;
+}
+/**改变表格内常规行线颜色*/
+.el-table td,
+.el-table th.is-leaf {
+    border-bottom: 1px solid #dddddd !important;
+}
+```
