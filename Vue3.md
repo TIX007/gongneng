@@ -264,7 +264,7 @@ export default defineConfig({
 <template>
   <div class="country-select-sort">
     <el-select v-model="selectedAddressIds" multiple filterable remote reserve-keyword clearable placeholder="请输入地址关键词"
-      style="width: 90%" @change="handleSelectChange">
+      style="width: 100%" @change="handleSelectChange">
       <!-- 表头 -->
       <template #header>
         <div class="option-table-header">
@@ -381,6 +381,7 @@ const targetIndex = ref<number>(-1);
 
 // 初始化：将字符串转换为对象数组
 watch(() => props.modelValue, (newVal) => {
+  console.log('props.modelValue changed:', newVal);
   try {
     if (typeof newVal === 'string' && newVal.trim() !== '') {
       selectedAddresses.value = JSON.parse(newVal);
@@ -395,13 +396,14 @@ watch(() => props.modelValue, (newVal) => {
 
 // 对象数组变化时更新字符串v-model
 watch(() => selectedAddresses.value, (newVal) => {
+  console.log('selectedAddresses changed:', newVal);
   try {
     const strValue = JSON.stringify(newVal);
     emit('update:modelValue', strValue);
   } catch (error) {
     console.error('序列化地址列表失败', error);
   }
-});
+}, { deep: true });
 
 // 选择变化处理
 const handleSelectChange = (values: string[]) => {
@@ -442,6 +444,11 @@ const handleDragEnd = () => {
 onMounted(() => {
   if (!props.AddressList || props.AddressList.length === 0) {
     fetchAddressList();
+  }
+  if (typeof props.modelValue === 'string' && props.modelValue.trim() !== '') {
+    selectedAddresses.value = JSON.parse(props.modelValue);
+  } else {
+    selectedAddresses.value = [];
   }
 });
 
