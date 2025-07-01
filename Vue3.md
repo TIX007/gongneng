@@ -257,3 +257,318 @@ export default defineConfig({
 
 
 虽然说 Vue3 会根据文
+
+### 创建选择器与tag标签联动可拖拽排序组件
+
+```vue
+<template>
+  <div class="country-select-sort">
+    <el-select v-model="selectedAddressIds" multiple filterable remote reserve-keyword clearable placeholder="请输入地址关键词"
+      style="width: 90%" @change="handleSelectChange">
+      <!-- 表头 -->
+      <template #header>
+        <div class="option-table-header">
+          <span class="option-col" style="width: 120px;">国家名称</span>
+          <span class="option-col" style="width: 180px;">所属省份/州名称</span>
+          <span class="option-col" style="width: 180px;">城市名称</span>
+          <span class="option-col" style="width: 280px;">详细地址</span>
+        </div>
+      </template>
+
+      <!-- 数据行 -->
+      <el-option v-for="item in AddressList" :key="item.id"
+        :label="`${item.countryName} / ${item.provinceName || ''} / ${item.cityName || ''} / ${item.detail || ''}`"
+        :value="item.id">
+        <div class="option-table-row">
+          <span class="option-col" style="width: 120px;">{{ item.countryName }}</span>
+          <span class="option-col" style="width: 180px;">{{ item.provinceName }}</span>
+          <span class="option-col" style="width: 180px;">{{ item.cityName }}</span>
+          <span class="option-col" style="width: 280px;">{{ item.detail }}</span>
+        </div>
+      </el-option>
+    </el-select>
+
+    <div class="tag-list">
+      <transition-group name="tag-list" tag="div" class="tag-list-container">
+        <el-tag v-for="(address, index) in selectedAddresses" :key="index" size="large" draggable="true"
+          @dragstart="handleDragStart(index)" @dragover.prevent @dragenter.prevent="handleDragEnter(index)"
+          @drop="handleDrop(index)" @dragend="handleDragEnd"
+          :class="{ 'dragging': draggedIndex === index, 'drag-over': targetIndex === index }" class="draggable-tag">
+          <span class="tag-content">
+            {{ address.countryName || address.pickupCountryName || '未知地址' }}
+            {{ address.provinceName || address.pickupProvince ? ` - ${address.provinceName || address.pickupProvince}` :
+              ''
+            }}
+            {{ address.cityName || address.pickupCity ? ` - ${address.cityName || address.pickupCity}` : '' }}
+          </span>
+          <el-icon class="drag-handle">
+            <Rank />
+          </el-icon>
+        </el-tag>
+      </transition-group>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, watch, computed, onMounted } from 'vue';
+import { Rank } from '@element-plus/icons-vue';
+import { listCountry } from '@/api/manage/country';
+
+// 定义props接收v-model字符串
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: '[]'
+  },
+  AddressList: {
+    type: Array,
+    default: () => []
+  }
+});
+
+// 定义emit用于更新v-model字符串
+const emit = defineEmits(['update:modelValue']);
+
+// 内部维护的对象数组状态（由字符串转换而来）
+const selectedAddresses = ref<any[]>([]);
+
+// 计算属性：用于el-select的地址ID数组
+const selectedAddressIds = computed({
+  get() {
+    return selectedAddresses.value.map(address => address.id);
+  },
+  set(ids: string[]) {
+    // 根据ID从AddressList中获取完整地址对象
+    const newAddresses = ids.map(id => {
+      // 尝试从AddressList中获取
+      const addressFromList = props.AddressList.find(item => item.id === id);
+      if (addressFromList) {
+        // 从AddressList中找到的对象，提取需要的属性
+        return {
+          id: addressFromList.id,
+          pickupCity: addressFromList.cityName,
+          pickupDetail: addressFromList.detail,
+          pickupCountry: addressFromList.countryCode, // 假设countryCode对应pickupCountry
+          pickupProvince: addressFromList.provinceName,
+          pickupCountryName: addressFromList.countryName
+        };
+      }
+
+      // 如果没找到，尝试从已选中列表中获取（拖拽排序场景）
+      const existingAddress = selectedAddresses.value.find(address => address.id === id);
+      if (existingAddress) {
+        return existingAddress;
+      }
+
+      // 都没找到，创建一个新的临时对象
+      return {
+        id: `temp_${Date.now()}_${id}`,
+        pickupCity: '',
+        pickupDetail: '',
+        pickupCountry: '',
+        pickupProvince: '',
+        pickupCountryName: '未知地址'
+      };
+    });
+
+    selectedAddresses.value = newAddresses;
+  }
+});
+
+const draggedIndex = ref<number>(-1);
+const targetIndex = ref<number>(-1);
+
+// 初始化：将字符串转换为对象数组
+watch(() => props.modelValue, (newVal) => {
+  try {
+    if (typeof newVal === 'string' && newVal.trim() !== '') {
+      selectedAddresses.value = JSON.parse(newVal);
+    } else {
+      selectedAddresses.value = [];
+    }
+  } catch (error) {
+    console.error('解析地址列表失败', error);
+    selectedAddresses.value = [];
+  }
+});
+
+// 对象数组变化时更新字符串v-model
+watch(() => selectedAddresses.value, (newVal) => {
+  try {
+    const strValue = JSON.stringify(newVal);
+    emit('update:modelValue', strValue);
+  } catch (error) {
+    console.error('序列化地址列表失败', error);
+  }
+});
+
+// 选择变化处理
+const handleSelectChange = (values: string[]) => {
+  selectedAddressIds.value = values;
+};
+
+// 拖拽相关处理函数
+const handleDragStart = (index: number) => {
+  draggedIndex.value = index;
+  event.dataTransfer?.setData('text/plain', index.toString());
+};
+
+const handleDragEnter = (index: number) => {
+  if (index !== draggedIndex.value) {
+    targetIndex.value = index;
+  }
+};
+
+const handleDrop = (index: number) => {
+  if (index !== draggedIndex.value) {
+    // 获取被拖拽的地址对象
+    const draggedAddress = selectedAddresses.value[draggedIndex.value];
+
+    // 从原位置移除
+    selectedAddresses.value.splice(draggedIndex.value, 1);
+
+    // 插入到新位置
+    selectedAddresses.value.splice(index, 0, draggedAddress);
+  }
+};
+
+const handleDragEnd = () => {
+  draggedIndex.value = -1;
+  targetIndex.value = -1;
+};
+
+// 组件挂载时获取地址列表（如果未提供）
+onMounted(() => {
+  if (!props.AddressList || props.AddressList.length === 0) {
+    fetchAddressList();
+  }
+});
+
+// 获取地址列表的方法
+const fetchAddressList = async () => {
+  const queryParams = {
+    pageNum: 1,
+    pageSize: 100, // 获取更多地址选项
+  };
+  try {
+    // 注意：这里假设使用listCountry获取地址列表，实际可能需要使用专门的地址API
+    const res = await listCountry(queryParams);
+    if (res.rows && res.rows.length > 0) {
+      // 通知父组件更新地址列表
+      emit('update:AddressList', res.rows);
+    }
+  } catch (error) {
+    console.error('获取地址列表失败', error);
+  }
+};
+</script>
+
+<style scoped>
+.country-select-sort {
+  width: 100%;
+}
+
+.tag-list {
+  margin: 10px 0;
+  min-height: 40px;
+  padding: 10px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+
+.tag-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.draggable-tag {
+  cursor: move;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s;
+  margin: 4px;
+  position: relative;
+}
+
+.draggable-tag.dragging {
+  opacity: 0.5;
+  transform: scale(1.05);
+  background-color: #f0f9eb;
+  z-index: 1000;
+}
+
+.draggable-tag.drag-over {
+  border: 2px dashed #409eff;
+  background-color: #ecf5ff;
+}
+
+.tag-content {
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.drag-handle {
+  cursor: move;
+  color: #909399;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.drag-handle:hover {
+  color: #409eff;
+}
+
+.el-tag {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-list-enter-active,
+.tag-list-leave-active {
+  transition: all 0.3s;
+}
+
+.tag-list-enter,
+.tag-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.tag-list-move {
+  transition: transform 0.3s;
+}
+
+.tag-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option-table-header {
+  font-weight: bold;
+  background: #f5f7fa;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.option-table-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+}
+
+.option-col {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
+```
+
+
