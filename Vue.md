@@ -5683,5 +5683,104 @@ proxy: {
     }
 ```
 
+### 记录天地图第二次渲染后或标记点后地图无法拖拽
+
+```vue
+<div id="container">
+  <div id="mapContainerTD"></div>
+</div>
+```
+
+```js
+ initTiandituMap() {
+      console.log('TMap', this.newMap);
+      if (this.newMap) {
+        this.newMap.destroy && this.newMap.destroy();
+        this.newMap = undefined;
+        this.mapInitialized = false;
+        // 天地图第二次渲染后或标记点后地图无法拖拽
+        const container = document.getElementById('container');
+        const cahildrenEl = document.getElementById('mapContainerTD');
+        if (cahildrenEl) container.removeChild(cahildrenEl);
+        const newCahildrenEl = document.createElement('div');
+        newCahildrenEl.id = 'mapContainerTD';
+        newCahildrenEl.style.height = '100%';
+        newCahildrenEl.style.width = '100%';
+        container.appendChild(newCahildrenEl);
+      }
+      const map = new T.Map('mapContainerTD');
+      const point = new T.LngLat(this.blng, this.blat);
+      map.centerAndZoom(point, this.zoom);
+
+      // 启用鼠标滚轮缩放功能
+      map.enableScrollWheelZoom();
+      map.enableDrag();
+
+      const markerContent = `
+        <div class="custom-content-marker">
+          <img src="/truck.png" ${['1', '2', '3', '4'].includes(this.state) ? 'style="filter: grayscale(100%);"' : ''}/>
+        </div>`;
+      const marker = new T.Marker(point, {
+        icon: new T.Icon({
+          iconUrl: '/truck.png',
+          iconSize: new T.Point(23, 34),
+          iconAnchor: new T.Point(10, 34)
+        })
+      });
+      map.addOverLay(marker);
+      this.markers.push(marker);
+
+      const label = new T.Label({
+        position: point,
+        text: `<dev class="info-window" > <b class="justify-text">地点： ${this.addr.length > 25 ? this.addr.slice(0, 25) + '...' : this.addr} </b>  <b class="justify-text" >状态：<span style="color: ${this.getColorByState(this.state)}" > ${this.getstate()} </span>  </b>  <b class="justify-text">监控： <span id="buttonContainer"  >点击查看</span> </b> </dev>`,
+        offset: new T.Point(this.addr.length > 20 ? -130 : -80, -72)
+      });
+      // label.setStyle({
+      //   padding: '10px',
+      //   background: 'white',
+      //   borderRadius: '4px',
+      //   boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+      //   minWidth: '120px',
+      //   borderColor: '#ddd'
+      // });
+      map.addOverLay(label);
+
+      const polylinePoints = this.lineArr.map(item => new T.LngLat(item[0], item[1]));
+      console.log(polylinePoints, 'polylinePoints');
+
+      const polyline = new T.Polyline(polylinePoints, {
+        strokeColor: "#045DAF",
+        strokeWeight: 6,
+        strokeOpacity: 1,
+        strokeStyle: "solid"
+      });
+      map.addOverLay(polyline);
+
+      // 获取最佳可视
+      console.log(map.getViewport(polylinePoints), 'map.getViewport(this.zoom, point)');
+      let viewMode = map.getViewport(polylinePoints);
+      map.centerAndZoom(viewMode.center, viewMode.zoom);
+
+      setTimeout(() => {
+        const buttonContainer = document.getElementById('buttonContainer');
+        console.log('buttonContainer', buttonContainer);
+        buttonContainer.addEventListener('click', this.playVideo)
+
+        const customContentMarker = document.getElementsByClassName('tdt-marker-pane')[0];
+        console.log('customContentMarker', customContentMarker);
+        customContentMarker.addEventListener('click', () => {
+          // 关闭之前打开的信息窗 BMap_Marker BMapLabel
+          const element = document.getElementsByClassName('tdt-label')[0];
+          if (element.style.display == 'none') {
+            element.style.display = 'block';
+          } else {
+            element.style.display = 'none';
+          }
+        })
+      }, 1000);
+
+      this.newMap = map;
+    },
+```
 
 
