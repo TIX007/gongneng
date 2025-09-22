@@ -97,4 +97,23 @@ http {
 }
 ```
 
+### 文件上传大小及压缩加速
+
+```nginx
+    # 允许上传的最大文件大小，根据需求调整
+    client_max_body_size 100M;
+    
+    # 缓冲区设置，优化大文件上传性能
+    client_body_buffer_size 10M;
+    sendfile on;                  # 启用高效文件传输
+    tcp_nopush on;                # 减少网络包数量
+    tcp_nodelay on;               # 低延迟传输
+    keepalive_timeout 65;         # 长连接超时时间
+    
+    # 网络传输优化
+    gzip on;                      # 启用压缩
+    gzip_comp_level 3;            # 压缩级别（1-9，平衡CPU和带宽）
+    gzip_min_length 1024;
+```
+
 
