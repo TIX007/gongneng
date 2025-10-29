@@ -5783,4 +5783,194 @@ proxy: {
     },
 ```
 
+### 水印函数
+``` js
+
+// 水印工具函数
+export const watermarkUtils = {
+	// 格式化日期时间
+	formatDateTime(date = new Date()) {
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		const hours = String(date.getHours()).padStart(2, '0');
+		const minutes = String(date.getMinutes()).padStart(2, '0');
+		const seconds = String(date.getSeconds()).padStart(2, '0');
+
+		return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+	},
+
+	// 生成防伪号（前4位为ZZHY，后8位为随机字母数字组合）
+	generateAntiFakeCode() {
+		const prefix = 'ZZHY'; // 固定前缀
+		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+		let randomPart = '';
+
+		// 生成8位随机字符
+		for (let i = 0; i < 8; i++) {
+			randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+		}
+
+		return prefix + randomPart;
+	},
+
+	// 添加水印到图片
+	async addWatermarkToImage(imagePath) {
+		try {
+			const dateTime = this.formatDateTime();
+			const antiFakeCode = this.generateAntiFakeCode();
+
+			// 获取图片信息
+			const imageInfo = await new Promise((resolve, reject) => {
+				uni.getImageInfo({
+					src: imagePath,
+					success: resolve,
+					fail: reject
+				});
+			});
+
+			console.log('原图尺寸:', imageInfo.width, 'x', imageInfo.height);
+			console.log('防伪号:', antiFakeCode);
+
+			// 创建画布上下文
+			const ctx = uni.createCanvasContext('watermarkCanvas');
+
+			// 使用原图尺寸，不进行任何缩放
+			const canvasWidth = imageInfo.width;
+			const canvasHeight = imageInfo.height;
+
+			// 绘制原始图片（保持原尺寸）
+			ctx.drawImage(imagePath, 0, 0, canvasWidth, canvasHeight);
+
+			// 根据图片尺寸动态调整水印大小和位置
+			const fontSize = Math.max(20, Math.min(30, canvasWidth / 30));
+			const smallFontSize = Math.max(16, Math.min(24, canvasWidth / 35));
+			const textPadding = Math.max(20, Math.min(50, canvasWidth / 40));
+			const lineSpacing = fontSize * 0.8;
+
+			// 设置水印样式
+			ctx.setFontSize(fontSize);
+			ctx.setFillStyle('rgba(255, 255, 255, 0.8)');
+			ctx.setShadow(2, 2, 4, 'rgba(0, 0, 0, 0.5)');
+
+			// 水印内容
+			const watermarkText = `时间: ${dateTime}`;
+			const antiFakeText = `防伪号: ${antiFakeCode}`;
+
+			// 测量文本宽度
+			const textWidth1 = ctx.measureText(watermarkText).width;
+			ctx.setFontSize(smallFontSize);
+			const textWidth2 = ctx.measureText(antiFakeText).width;
+
+			// 取最大宽度作为背景宽度
+			const maxTextWidth = Math.max(textWidth1, textWidth2);
+			const bgWidth = maxTextWidth + 30;
+			const bgHeight = fontSize + smallFontSize + lineSpacing + 15;
+
+			// 水印位置（右下角，保持边距）
+			const textX = canvasWidth - bgWidth - textPadding;
+			const textY1 = canvasHeight - textPadding - lineSpacing;
+			const textY2 = canvasHeight - textPadding;
+
+			// 绘制水印背景
+			ctx.setFillStyle('rgba(0, 0, 0, 0.4)');
+			ctx.fillRect(textX - 15, textY1 - fontSize - 10, bgWidth, bgHeight);
+
+			// 绘制时间水印文字
+			ctx.setFontSize(fontSize);
+			ctx.setFillStyle('rgba(255, 255, 255, 0.9)');
+			ctx.fillText(watermarkText, textX, textY1);
+
+			// 绘制防伪号水印文字
+			ctx.setFontSize(smallFontSize);
+			ctx.setFillStyle('rgba(255, 255, 255, 0.9)');
+			ctx.fillText(antiFakeText, textX, textY2);
+
+			// 生成带水印的图片
+			return new Promise((resolve, reject) => {
+				ctx.draw(false, () => {
+					setTimeout(() => {
+						uni.canvasToTempFilePath({
+							canvasId: 'watermarkCanvas',
+							width: canvasWidth,
+							height: canvasHeight,
+							destWidth: canvasWidth, // 保持原图宽度
+							destHeight: canvasHeight, // 保持原图高度
+							success: (res) => {
+								console.log('水印图片生成成功，尺寸:', canvasWidth,
+									'x', canvasHeight);
+								console.log('防伪号已生成:', antiFakeCode);
+								resolve({
+									tempFilePath: res.tempFilePath,
+									antiFakeCode: antiFakeCode
+								});
+							},
+							fail: (err) => {
+								console.error('生成水印图片失败:', err);
+								reject(err);
+							}
+						});
+					}, 300);
+				});
+			});
+
+		} catch (error) {
+			console.error('添加水印失败:', error);
+			// 如果水印添加失败，返回原图
+			return imagePath;
+		}
+	}
+};
+```
+使用
+``` js
+uploadFilePromise(url, i) {
+			const { baseUrl, clientId } = config;
+			return new Promise((resolve, reject) => {
+				// 先添加水印
+				watermarkUtils.addWatermarkToImage(url).then((ImageData) => {
+					// 压缩图片
+				uni.compressImage({
+				  src: ImageData.tempFilePath,
+				  quality: 0,
+				  compressedWidth:940,
+				  success: res1 => {
+				    console.log(res1.tempFilePath)
+					uni.uploadFile({
+						url: baseUrl + '/resource/oss/upload?code='+ImageData.antiFakeCode,
+						filePath: res1.tempFilePath,
+						name: 'file',
+						header: {
+							'Content-Type': 'application/json; charset=UTF-8',
+							Authorization: 'Bearer ' + getToken(),
+							clientid: clientId
+						},
+						success: (res) => {
+							const resData = JSON.parse(res.data);
+							if (resData.code === 200) {
+								setTimeout(() => {
+									resolve(resData.data);
+								}, 1000);
+							} else {
+								reject(new Error('上传失败'));
+							}
+						},
+						fail: (err) => {
+							reject(new Error('上传失败'));
+						}
+					});
+				  }
+				})
+				}).catch((error) => {
+					console.error('添加水印失败，使用原图上传:', error);
+					// 如果水印添加失败，使用原图上传
+					uni.showToast({
+						icon: 'error',
+						title: '水印添加失败,请重试'
+					});
+				});
+			});
+		},
+```
+
 
