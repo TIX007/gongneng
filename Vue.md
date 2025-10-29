@@ -5923,6 +5923,12 @@ export const watermarkUtils = {
 };
 ```
 使用
+添加隐藏画布
+``` html
+<!-- 水印画布（隐藏但保留尺寸，支持动态尺寸） -->
+		<canvas canvas-id="watermarkCanvas" style="position: absolute; left: -9999px; width: 2000px; height: 2000px; opacity: 0;"></canvas>
+```
+添加js
 ``` js
 uploadFilePromise(url, i) {
 			const { baseUrl, clientId } = config;
