@@ -585,4 +585,22 @@ const fetchAddressList = async () => {
 </el-form-item>
 ```
 
+### 表单校验不通过滚到不通过项
+```js
+shipmentTaskFormRef.value?.validate(async (valid: boolean) => {
+if (valid) {
+
+ else {
+      proxy?.$modal.msgError('表单内容验证规则不通过，请检查修改');
+      await nextTick();
+      const isError = document.getElementsByClassName('is-error');
+      if (isError[0]) {
+        isError[0].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center'
+        });
+      }
+    }
+```
+
 
