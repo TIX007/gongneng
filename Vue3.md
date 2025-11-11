@@ -603,4 +603,44 @@ if (valid) {
     }
 ```
 
+### 计算是否在打卡范围内
+
+```js
+// 计算经纬度差（度）对应的实际距离（米）
+export function convertDegreeDiffToMeters(dx, dy, circleLat) {
+  // 常量：纬度每度对应的米数（近似值）
+  const METERS_PER_DEGREE_LAT = 111319;
+  
+  // 1. 纬度差（dy）转换为米（直接乘以固定系数）
+  const dyMeters = dy * METERS_PER_DEGREE_LAT;
+  
+  // 2. 经度差（dx）转换为米（需根据纬度调整）
+  // - 将纬度（圆心纬度，单位：度）转换为弧度
+  const latRad = circleLat * (Math.PI / 180);
+  // - 计算该纬度下，经度每度对应的米数
+  const metersPerDegreeLon = METERS_PER_DEGREE_LAT * Math.cos(latRad);
+  // - 经度差转换为米
+  const dxMeters = dx * metersPerDegreeLon;
+  
+  return { dxMeters, dyMeters };
+}
+
+// - point位置经纬数组，circle中心点经纬数组，r打卡半径
+export function pointInsideCircle(point, circle, r) {
+	if (r === 0) return false;
+	var dx = circle[0] - point[0];
+	var dy = circle[1] - point[1];
+	const { dxMeters, dyMeters } = convertDegreeDiffToMeters(dx, dy, circle[1]);
+	const distance = Math.sqrt(dxMeters * dxMeters + dyMeters * dyMeters);
+	const distanceFixed = Number(distance.toFixed(5)); 
+	const isInside = r > 0 ? distanceFixed <= r : distanceFixed === 0;
+
+	// 返回包含判断结果和距离的对象
+	return {
+		isInside: isInside,
+		distance: distanceFixed
+	};
+}
+```
+
 
