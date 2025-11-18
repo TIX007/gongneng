@@ -116,4 +116,33 @@ http {
     gzip_min_length 1024;
 ```
 
+### SSE配置
+
+```nginx
+location /prod-api/ {
+        proxy_read_timeout 300s;  
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header REMOTE-HOST $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # proxy_pass http://8.130.97.148:8001/;
+        proxy_pass https://adb.vehicle.hongyizz.com/;
+        # proxy_pass https://sse.vehicle.hongyizz.com/;
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+    
+    location /resource/sse {
+        send_timeout 600;
+        keepalive_timeout 65;
+        add_header 'Access-Control-Allow-Origin' '*';
+        proxy_pass http://8.130.97.148:8001/resource/sse;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header REMOTE-HOST $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+```
+
 
